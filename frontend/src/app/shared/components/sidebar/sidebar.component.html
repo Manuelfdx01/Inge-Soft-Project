@@ -1,0 +1,29 @@
+<aside class="sidebar" [style.background]="sidebarColor">
+  <div class="brand">
+    <div class="brand-icon">🌱</div>
+    <div class="brand-name">GOMI</div>
+  </div>
+
+  <nav class="nav">
+    <div
+      *ngFor="let item of navItems"
+      class="nav-item"
+      [routerLink]="item.route"
+      routerLinkActive="active">
+      <span class="nav-icon">{{ item.icon }}</span>
+      <span>{{ item.label }}</span>
+      <span class="nav-badge" *ngIf="item.badge && item.badge > 0">
+        {{ item.badge }}
+      </span>
+    </div>
+  </nav>
+
+  <div class="user-card">
+    <div class="avatar">{{ initials }}</div>
+    <div class="user-info">
+      <div class="user-name">{{ user?.username }}</div>
+      <div class="user-role">{{ user?.role | titlecase }} · {{ user?.points }} pts</div>
+    </div>
+    <button class="logout-btn" (click)="logout()" title="Cerrar sesión">✕</button>
+  </div>
+</aside>
