@@ -1,0 +1,37 @@
+<div class="login-wrapper">
+  <div class="login-card">
+    <div class="brand">
+      <span class="brand-icon">🌱</span>
+      <span class="brand-name">GOMI</span>
+    </div>
+    <h2>Iniciar sesión</h2>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="field">
+        <label>Usuario</label>
+        <input type="text" formControlName="username" placeholder="tu_usuario" />
+        <span class="error" *ngIf="form.get('username')?.invalid && form.get('username')?.touched">
+          El usuario es requerido
+        </span>
+      </div>
+
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" formControlName="password" placeholder="••••••••" />
+        <span class="error" *ngIf="form.get('password')?.invalid && form.get('password')?.touched">
+          Mínimo 8 caracteres
+        </span>
+      </div>
+
+      <span class="error-general" *ngIf="errorMsg">{{ errorMsg }}</span>
+
+      <button type="submit" [disabled]="loading">
+        {{ loading ? 'Ingresando...' : 'Ingresar' }}
+      </button>
+    </form>
+
+    <p class="register-link">
+      ¿No tienes cuenta? <a routerLink="/login/registro">Regístrate</a>
+    </p>
+  </div>
+</div>
