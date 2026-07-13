@@ -1,0 +1,42 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: recicla_db
+      POSTGRES_USER: recicla_user
+      POSTGRES_PASSWORD: recicla_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./backend
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      DB_HOST: db
+      DB_NAME: recicla_db
+      DB_USER: recicla_user
+      DB_PASSWORD: recicla_pass
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    command: ng serve --host 0.0.0.0
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "4200:4200"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
