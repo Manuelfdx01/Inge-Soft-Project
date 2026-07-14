@@ -1,0 +1,92 @@
+<div class="page-wrapper">
+
+  <!-- Filtros -->
+  <div class="filter-bar">
+    <button
+      *ngFor="let f of filters"
+      class="chip"
+      [class.active]="activeFilter === f.value"
+      (click)="applyFilter(f.value)">
+      {{ f.label }}
+    </button>
+  </div>
+
+  <div class="content-grid">
+
+    <!-- Mapa -->
+    <div class="map-area">
+      <div class="map-placeholder" *ngIf="loading">
+        Cargando mapa...
+      </div>
+
+      <!-- Aquí irá google-map o mapbox cuando se instale -->
+      <!-- Por ahora renderizamos la lista visual como mapa -->
+      <div class="map-mock" *ngIf="!loading">
+        <div class="map-pins">
+          <div
+            *ngFor="let point of filteredPoints"
+            class="pin-item"
+            (click)="selectPoint(point)">
+            <div class="pin-dot" [style.background]="getPinColor(point)"></div>
+            <div class="pin-label">
+              {{ point.name }} · {{ point.capacity_pct }}%
+              <span *ngIf="point.status === 'CRITICO'"> ⚠️</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Popup de punto seleccionado -->
+        <div class="popup" *ngIf="selectedPoint">
+          <button class="popup-close" (click)="closePopup()">✕</button>
+          <h3>{{ selectedPoint.name }}</h3>
+          <p class="popup-address">📍 {{ selectedPoint.address }}</p>
+          <div class="popup-capacity">
+            <span>Ocupación:</span>
+            <div class="bar">
+              <div class="bar-fill"
+                [style.width.%]="selectedPoint.capacity_pct"
+                [style.background]="getBarColor(selectedPoint.capacity_pct)">
+              </div>
+            </div>
+            <strong>{{ selectedPoint.capacity_pct }}%</strong>
+          </div>
+          <div class="popup-wastes">
+            <span
+              *ngFor="let w of selectedPoint.waste_types"
+              class="waste-chip"
+              [style.background]="w.color + '22'"
+              [style.color]="w.color">
+              {{ w.icon }} {{ w.name }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel lateral de capacidad -->
+    <div class="side-panel">
+      <div class="panel-title">Estado por punto</div>
+      <div
+        *ngFor="let point of pointsSortedByCapacity"
+        class="point-row"
+        (click)="selectPoint(point)">
+        <div class="point-info">
+          <div class="point-name">
+            {{ point.name }}
+            <span *ngIf="point.status === 'CRITICO'" class="critical-badge">⚠️ Crítico</span>
+          </div>
+          <div class="bar">
+            <div class="bar-fill"
+              [style.width.%]="point.capacity_pct"
+              [style.background]="getBarColor(point.capacity_pct)">
+            </div>
+          </div>
+        </div>
+        <div class="point-pct" [style.color]="getBarColor(point.capacity_pct)">
+          {{ point.capacity_pct }}%
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
