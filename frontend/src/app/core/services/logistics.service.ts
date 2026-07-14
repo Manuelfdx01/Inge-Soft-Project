@@ -18,7 +18,7 @@ export interface LogisticsAlert {
 @Injectable({ providedIn: 'root' })
 export class LogisticsService {
   private apiUrl = 'http://localhost:8000/api/logistics';
-  private useMock = true;
+  private useMock = false;
 
   constructor(private http: HttpClient) {}
 

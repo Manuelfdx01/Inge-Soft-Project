@@ -6,7 +6,7 @@ import { MOCK_METRICS } from '../mocks/admin.mock';
 @Injectable({ providedIn: 'root' })
 export class AdminService {
   private apiUrl = 'http://localhost:8000/api';
-  private useMock = true;
+  private useMock = false;
 
   constructor(private http: HttpClient) {}
 

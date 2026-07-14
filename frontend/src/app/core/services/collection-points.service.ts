@@ -20,7 +20,7 @@ export interface CollectionPoint {
 @Injectable({ providedIn: 'root' })
 export class CollectionPointsService {
   private apiUrl = 'http://localhost:8000/api/collection-points';
-  private useMock = true; // cambiar a false cuando el backend esté listo
+  private useMock = false; // cambiar a false cuando el backend esté listo
 
   constructor(private http: HttpClient) {}
 
