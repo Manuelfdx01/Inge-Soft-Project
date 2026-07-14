@@ -1,0 +1,25 @@
+<div class="page-wrapper">
+  <h2 class="page-title">📚 Guía de reciclaje</h2>
+  <p class="page-subtitle">
+    Aprende a separar correctamente tus residuos.
+  </p>
+
+  <div class="guides-list">
+    <div
+      *ngFor="let guide of guides"
+      class="guide-card"
+      [class.expanded]="selectedGuide?.id === guide.id"
+      (click)="select(guide)">
+      <div class="guide-header">
+        <span class="guide-icon">{{ guide.icon }}</span>
+        <span class="guide-title">{{ guide.title }}</span>
+        <span class="guide-arrow">
+          {{ selectedGuide?.id === guide.id ? '▲' : '▼' }}
+        </span>
+      </div>
+      <div class="guide-content" *ngIf="selectedGuide?.id === guide.id">
+        {{ guide.content }}
+      </div>
+    </div>
+  </div>
+</div>
