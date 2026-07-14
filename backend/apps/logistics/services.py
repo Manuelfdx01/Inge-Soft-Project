@@ -85,6 +85,13 @@ def generar_alerta_si_critico(point, waste_type='', reported_by=None):
         distance_km=distancia,
     )
 
+    # ── NUEVO: notificar punto crítico ──
+    try:
+        from apps.users.notifications import notificar_punto_critico
+        notificar_punto_critico(point)
+    except Exception as e:
+        logger.error(f'Error al notificar punto crítico: {e}')
+
     logger.info(
         f'[ALERTA] {prioridad} generada: {point.name} '
         f'({point.capacity_pct}%) → {target_point.name} '
