@@ -349,3 +349,6 @@ docker-compose.override.yml
 
 # Entornos locales
 .env.production
+
+# Logs del sistema
+backend/logs/*.log
