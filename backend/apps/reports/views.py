@@ -75,8 +75,20 @@ class ReportViewSet(viewsets.ModelViewSet):
         return Report.objects.filter(user=user).order_by('-created_at')
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        report = serializer.save(user=self.request.user)
         logger.info(f'Nuevo reporte de {self.request.user.username}')
+
+        # ── NUEVO: otorgar puntos ──
+        try:
+            from apps.gamification.services import otorgar_puntos
+            from apps.reports.models import Report as R
+            count = R.objects.filter(user=self.request.user).count()
+            if count == 1:
+                otorgar_puntos(self.request.user, 'primer_reporte')
+            elif count == 5:
+                otorgar_puntos(self.request.user, 'cinco_reportes')
+        except Exception as e:
+            logger.error(f'Error al otorgar puntos por reporte: {e}')
 
     @action(detail=True, methods=['patch'], url_path='estado',
             permission_classes=[IsAdminGomi])
