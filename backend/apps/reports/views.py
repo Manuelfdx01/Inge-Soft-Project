@@ -51,6 +51,14 @@ class ProposalViewSet(viewsets.ModelViewSet):
         serializer = ProposalStatusSerializer(proposal, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
+
+            # ── NUEVO: notificar al usuario ──
+            try:
+                from apps.users.notifications import notificar_propuesta_actualizada
+                notificar_propuesta_actualizada(proposal)
+            except Exception as e:
+                logger.error(f'Error al notificar propuesta: {e}')
+
             logger.info(f'Propuesta {pk} cambió a estado {proposal.status}')
             return Response(ProposalSerializer(proposal).data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
