@@ -1,0 +1,110 @@
+<div class="admin-content" *ngIf="!loading && metrics">
+
+  <!-- Tarjetas de métricas -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-val">{{ metrics.totales.puntos_activos }}</div>
+      <div class="metric-lbl">Puntos activos</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-val">{{ metrics.totales.usuarios }}</div>
+      <div class="metric-lbl">Usuarios registrados</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-val">{{ metrics.totales.traslados_mes }}</div>
+      <div class="metric-lbl">Traslados este mes</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-val" style="color:#EF5350">
+        {{ metrics.totales.puntos_criticos }}
+      </div>
+      <div class="metric-lbl">Puntos críticos</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- Gráfica de ocupación semanal -->
+    <div class="card">
+      <div class="card-title">Ocupación semanal promedio</div>
+      <div class="chart-bars">
+        <div
+          *ngFor="let d of metrics.ocupacion_semanal"
+          class="chart-bar"
+          [style.height]="getBarHeight(d.promedio_pct)"
+          [style.background]="getBarColor(d.promedio_pct)"
+          [title]="d.dia + ': ' + d.promedio_pct + '%'">
+        </div>
+      </div>
+      <div class="chart-labels">
+        <span *ngFor="let d of metrics.ocupacion_semanal">{{ d.dia }}</span>
+      </div>
+    </div>
+
+    <!-- Propuestas recientes -->
+    <div class="card">
+      <div class="card-title">Propuestas recientes</div>
+      <table class="table-mock">
+        <thead>
+          <tr><th>Propuesta</th><th>Votos</th><th>Estado</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of metrics.propuestas_recientes">
+            <td>{{ p.title }}</td>
+            <td>{{ p.votes }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="getStatusBadgeClass(p.status)">
+                {{ p.status }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Estado de puntos -->
+    <div class="card">
+      <div class="card-title">Puntos de acopio</div>
+      <table class="table-mock">
+        <thead>
+          <tr><th>Nombre</th><th>Ocupación</th><th>Estado</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of metrics.puntos_estado">
+            <td>{{ p.name }}</td>
+            <td>{{ p.capacity_pct }}%</td>
+            <td>
+              <span class="status-badge" [ngClass]="getStatusBadgeClass(p.status)">
+                {{ p.status }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Reportes recientes -->
+    <div class="card">
+      <div class="card-title">Reportes recientes</div>
+      <table class="table-mock">
+        <thead>
+          <tr><th>Tipo</th><th>Punto</th><th>Estado</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of metrics.reportes_recientes">
+            <td>{{ r.type }}</td>
+            <td>{{ r['point__name'] }}</td>
+            <td>
+              <span class="status-badge" [ngClass]="getStatusBadgeClass(r.status)">
+                {{ r.status }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<div class="loading" *ngIf="loading">Cargando métricas...</div>
