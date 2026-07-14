@@ -63,6 +63,21 @@ class LogisticsAlertViewSet(viewsets.ReadOnlyModelViewSet):
         alert.status = LogisticsAlert.Status.COMPLETADA
         alert.resolved_at = timezone.now()
         alert.save()
+
+        # ── NUEVO: otorgar puntos al reciclador ──
+        try:
+            from apps.gamification.services import otorgar_puntos
+            from apps.logistics.models import LogisticsAlert as LA
+            count = LA.objects.filter(
+                reciclador=request.user, status='COMPLETADA'
+            ).count()
+            if count == 1:
+                otorgar_puntos(request.user, 'primer_traslado')
+            elif count == 10:
+                otorgar_puntos(request.user, 'diez_traslados')
+        except Exception as e:
+            logger.error(f'Error al otorgar puntos por traslado: {e}')
+
         logger.info(f'Alerta {pk} completada por {request.user.username}')
         return Response(LogisticsAlertSerializer(alert).data)
 
