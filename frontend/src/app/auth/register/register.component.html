@@ -1,0 +1,51 @@
+<div class="login-wrapper">
+  <div class="login-card">
+    <div class="brand">
+      <span class="brand-icon">🌱</span>
+      <span class="brand-name">GOMI — Registro</span>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="field">
+        <label>Usuario</label>
+        <input type="text" formControlName="username" placeholder="tu_usuario" />
+      </div>
+
+      <div class="field">
+        <label>Correo electrónico</label>
+        <input type="email" formControlName="email" placeholder="correo@ejemplo.com" />
+        <span class="error" *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
+          Correo inválido
+        </span>
+      </div>
+
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" formControlName="password" placeholder="Mínimo 8 caracteres" />
+      </div>
+
+      <div class="field">
+        <label>Rol</label>
+        <select formControlName="role">
+          <option *ngFor="let r of roles" [value]="r.value">{{ r.label }}</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Teléfono (opcional)</label>
+        <input type="tel" formControlName="phone" placeholder="3001234567" />
+      </div>
+
+      <span class="error-general" *ngIf="errorMsg">{{ errorMsg }}</span>
+      <span class="success" *ngIf="successMsg">{{ successMsg }}</span>
+
+      <button type="submit" [disabled]="loading">
+        {{ loading ? 'Registrando...' : 'Crear cuenta' }}
+      </button>
+    </form>
+
+    <p class="register-link">
+      ¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a>
+    </p>
+  </div>
+</div>
