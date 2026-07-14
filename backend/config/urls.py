@@ -5,6 +5,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenBlacklistView,
 )
+from apps.users.views_admin import AdminMetricsView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -13,6 +14,9 @@ urlpatterns = [
     path('api/auth/login/', TokenObtainPairView.as_view(), name='token_obtain'),
     path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/auth/logout/', TokenBlacklistView.as_view(), name='token_blacklist'),
+
+    # Admin métricas
+    path('api/admin/metrics/', AdminMetricsView.as_view(), name='admin-metrics'),
 
     # Apps
     path('api/users/', include('apps.users.urls')),
