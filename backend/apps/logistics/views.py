@@ -115,3 +115,18 @@ class CapacityUpdateView(viewsets.ViewSet):
             'alert_triggered': alerta is not None,
             'alert_id': alerta.id if alerta else None,
         })
+
+class CapacityLogViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = CapacityLogSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        point_id = self.kwargs.get('point_pk')
+        days = self.request.query_params.get('days', 7)
+        from django.utils import timezone
+        from datetime import timedelta
+        desde = timezone.now() - timedelta(days=int(days))
+        return CapacityLog.objects.filter(
+            point_id=point_id,
+            recorded_at__gte=desde,
+        ).order_by('-recorded_at')
