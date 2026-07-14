@@ -17,7 +17,8 @@ urlpatterns = [
     # Apps
     path('api/users/', include('apps.users.urls')),
     path('api/collection-points/', include('apps.collection_points.urls')),
-    path('api/collection-points/<int:point_pk>/', include('apps.reports.urls')),
+    path('api/collection-points/<int:point_pk>/reviews/', include('apps.reports.urls')),
+    path('api/collection-points/<int:point_pk>/historial/', include('apps.logistics.urls')),
     path('api/', include('apps.reports.urls')),
     path('api/logistics/', include('apps.logistics.urls')),
     path('api/gamification/', include('apps.gamification.urls')),
