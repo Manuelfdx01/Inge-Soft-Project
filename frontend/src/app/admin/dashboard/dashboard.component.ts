@@ -1,8 +1,13 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { AdminService } from '../../core/services/admin.service';
 
 @Component({
   selector: 'app-dashboard',
+  standalone: true,
+  imports: [
+    CommonModule
+  ],
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent implements OnInit {
@@ -17,7 +22,9 @@ export class DashboardComponent implements OnInit {
         this.metrics = data;
         this.loading = false;
       },
-      error: () => { this.loading = false; },
+      error: () => {
+        this.loading = false;
+      },
     });
   }
 
@@ -33,11 +40,12 @@ export class DashboardComponent implements OnInit {
       APROBADA:    'badge-green',
       RECHAZADA:   'badge-red',
     };
+
     return classes[status] ?? 'badge-gray';
   }
 
   getBarHeight(pct: number): string {
-    return ${pct}%;
+    return `${pct}%`;
   }
 
   getBarColor(pct: number): string {

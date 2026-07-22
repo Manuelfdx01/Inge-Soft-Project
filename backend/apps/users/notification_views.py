@@ -4,7 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import serializers
-from .models import Notification
+from apps.users.models import Notification
 
 logger = logging.getLogger(__name__)
 

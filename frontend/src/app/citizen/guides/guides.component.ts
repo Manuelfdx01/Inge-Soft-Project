@@ -1,10 +1,15 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { MOCK_GUIDES } from '../../core/mocks/guides.mock';
 
 @Component({
   selector: 'app-guides',
+  standalone: true,
+  imports: [
+    CommonModule
+  ],
   templateUrl: './guides.component.html',
 })
 export class GuidesComponent implements OnInit {

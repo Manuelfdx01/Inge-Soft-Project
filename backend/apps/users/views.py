@@ -4,6 +4,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import User
 from .serializers import UserSerializer, RegisterSerializer, PublicUserSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import MyTokenObtainPairSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -67,3 +69,6 @@ class UserViewSet(viewsets.ModelViewSet):
         if disponible == 'true':
             qs = qs.filter(is_available=True)
         return Response(PublicUserSerializer(qs, many=True).data)
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer

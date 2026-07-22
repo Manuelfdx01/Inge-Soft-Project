@@ -12,23 +12,39 @@ export class AdminService {
 
   getMetrics(): Observable<any> {
     if (this.useMock) return of(MOCK_METRICS);
-    return this.http.get(${this.apiUrl}/admin/metrics/);
+
+    return this.http.get(`${this.apiUrl}/admin/metrics/`);
   }
 
   getUsers(role?: string): Observable<any[]> {
     if (this.useMock) return of([]);
-    let url = ${this.apiUrl}/users/;
-    if (role) url += ?role=${role};
+
+    let url = `${this.apiUrl}/users/`;
+
+    if (role) {
+      url += `?role=${role}`;
+    }
+
     return this.http.get<any[]>(url);
   }
 
-  updateProposalStatus(id: string, status: string, response: string): Observable<any> {
-    return this.http.patch(${this.apiUrl}/proposals/${id}/estado/, {
-      status, admin_response: response,
+  updateProposalStatus(
+    id: string,
+    status: string,
+    response: string
+  ): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/proposals/${id}/estado/`, {
+      status,
+      admin_response: response,
     });
   }
 
-  updateReportStatus(id: string, status: string): Observable<any> {
-    return this.http.patch(${this.apiUrl}/reports/${id}/estado/, { status });
+  updateReportStatus(
+    id: string,
+    status: string
+  ): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/reports/${id}/estado/`, {
+      status,
+    });
   }
 }

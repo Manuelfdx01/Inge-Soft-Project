@@ -1,8 +1,11 @@
 import { Component, OnInit, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { NotificationsService, Notification } from '../../../core/services/notifications.service';
 
 @Component({
   selector: 'app-topbar',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './topbar.component.html',
 })
 export class TopbarComponent implements OnInit {

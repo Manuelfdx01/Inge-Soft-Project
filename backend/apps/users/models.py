@@ -38,27 +38,27 @@ class User(AbstractUser):
     def is_admin_gomi(self):
         return self.role == self.Role.ADMIN
 
-    class Notification(models.Model):
-        class Type(models.TextChoices):
-            PUNTO_CRITICO = 'PUNTO_CRITICO', 'Punto crítico'
-            PROPUESTA = 'PROPUESTA', 'Propuesta actualizada'
-            ALERTA_ASIGNADA = 'ALERTA_ASIGNADA', 'Alerta asignada'
-            GENERAL = 'GENERAL', 'General'
+class Notification(models.Model):
+    class Type(models.TextChoices):
+        PUNTO_CRITICO = 'PUNTO_CRITICO', 'Punto crítico'
+        PROPUESTA = 'PROPUESTA', 'Propuesta actualizada'
+        ALERTA_ASIGNADA = 'ALERTA_ASIGNADA', 'Alerta asignada'
+        GENERAL = 'GENERAL', 'General'
 
-        user = models.ForeignKey(
-            'users.User',
-            on_delete=models.CASCADE,
-            related_name='notifications',
-        )
-        type = models.CharField(max_length=20, choices=Type.choices)
-        message = models.TextField()
-        is_read = models.BooleanField(default=False)
-        created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(
+        'users.User',
+        on_delete=models.CASCADE,
+        related_name='notifications',
+    )
+    type = models.CharField(max_length=20, choices=Type.choices)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-        class Meta:
-            verbose_name = 'Notificación'
-            verbose_name_plural = 'Notificaciones'
-            ordering = ['-created_at']
+    class Meta:
+        verbose_name = 'Notificación'
+        verbose_name_plural = 'Notificaciones'
+        ordering = ['-created_at']
 
-        def __str__(self):
-            return f'{self.type} → {self.user.username}'
+    def __str__(self):
+        return f'{self.type} → {self.user.username}'
