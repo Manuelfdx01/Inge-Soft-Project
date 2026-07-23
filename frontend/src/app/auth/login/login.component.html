@@ -1,37 +1,95 @@
-<div class="login-wrapper">
-  <div class="login-card">
-    <div class="brand">
-      <span class="brand-icon">🌱</span>
-      <span class="brand-name">GOMI</span>
+<div class="login-screen">
+
+    <div class="form-panel">
+
+        <div class="brand">
+            <svg class="brand-logo" viewBox="0 0 48 48">
+                <circle cx="24" cy="24" r="24" fill="#2D6A4F"/>
+                <path d="M24 10C24 10 14 15 14 25C14 31.6 18.9 37 25 37C25.9 37 26 36 25.3 35.6C21.5 33.4 19 29.5 19 25C19 18.5 24 14 24 14C24 14 29 18.5 29 25C29 27.2 28.3 29.2 27.2 30.8C26.7 31.5 27.3 32.4 28.1 32.1C31.9 30.6 34.5 26.9 34.5 22.5C34.5 15.6 24 10 24 10Z"
+                    fill="#D8F3DC"/>
+            </svg>
+
+            <span class="brand-name">GOMI</span>
+        </div>
+
+        <div class="login-card">
+
+            <span class="eyebrow">
+                🌿 Reciclaje inteligente
+            </span>
+
+            <h1 class="headline">
+                Bienvenido de vuelta
+            </h1>
+
+            <p class="subhead">
+                Inicia sesión para seguir cuidando tu ciudad.
+            </p>
+
+            <form [formGroup]="form" (ngSubmit)="submit()">
+
+                <div class="field">
+                    <label>Usuario</label>
+
+                    <input
+                        type="text"
+                        formControlName="username"
+                        placeholder="tu_usuario">
+                </div>
+
+                <div class="field">
+
+                    <label>Contraseña</label>
+
+                    <input
+                        type="password"
+                        formControlName="password"
+                        placeholder="••••••••">
+
+                </div>
+
+                <span
+                    class="error-general"
+                    *ngIf="errorMsg">
+
+                    {{ errorMsg }}
+
+                </span>
+
+                <button
+                    class="submit"
+                    type="submit"
+                    [disabled]="loading">
+
+                    {{ loading ? 'Ingresando...' : 'Ingresar' }}
+
+                </button>
+
+            </form>
+
+            <p class="register-link">
+
+                ¿No tienes cuenta?
+
+                <a routerLink="/register">
+
+                    Regístrate
+
+                </a>
+
+            </p>
+
+        </div>
+
     </div>
-    <h2>Iniciar sesión</h2>
 
-    <form [formGroup]="form" (ngSubmit)="submit()">
-      <div class="field">
-        <label>Usuario</label>
-        <input type="text" formControlName="username" placeholder="tu_usuario" />
-        <span class="error" *ngIf="form.get('username')?.invalid && form.get('username')?.touched">
-          El usuario es requerido
-        </span>
-      </div>
+    <div class="scene-panel">
 
-      <div class="field">
-        <label>Contraseña</label>
-        <input type="password" formControlName="password" placeholder="••••••••" />
-        <span class="error" *ngIf="form.get('password')?.invalid && form.get('password')?.touched">
-          Mínimo 8 caracteres
-        </span>
-      </div>
+        <img
+          src="/images/login-forest.png"
+          class="scene-image"
+          alt="Bosque">
 
-      <span class="error-general" *ngIf="errorMsg">{{ errorMsg }}</span>
+    </div>
 
-      <button type="submit" [disabled]="loading">
-        {{ loading ? 'Ingresando...' : 'Ingresar' }}
-      </button>
-    </form>
-
-    <p class="register-link">
-      ¿No tienes cuenta? <a routerLink="/login/registro">Regístrate</a>
-    </p>
-  </div>
 </div>

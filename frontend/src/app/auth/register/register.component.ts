@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
@@ -9,9 +9,11 @@ import { HttpClient } from '@angular/common/http';
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    RouterLink, // necesario para routerLink="/login" en el template
   ],
   templateUrl: './register.component.html',
+  styleUrl: './register.component.scss', // <-- única línea nueva: conecta el diseño
 })
 export class RegisterComponent {
   form: FormGroup;
