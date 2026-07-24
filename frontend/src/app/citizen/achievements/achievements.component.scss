@@ -1,0 +1,97 @@
+/* ── Logros ciudadano ── */
+
+.page-wrapper {
+  padding: 20px;
+  max-width: 900px;
+}
+
+.achievements-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gray-900);
+  }
+}
+
+.points-badge {
+  background: var(--green-50);
+  color: var(--green-700);
+  border: 1px solid var(--green-200);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-400);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 14px;
+}
+
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.achievement-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-200);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow .2s, transform .2s;
+
+  &.earned {
+    border-color: var(--green-200);
+    background: linear-gradient(135deg, var(--white) 0%, var(--green-50) 100%);
+    &:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  }
+
+  &.locked {
+    opacity: 0.55;
+    filter: grayscale(0.6);
+  }
+}
+
+.ach-icon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.ach-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.ach-desc {
+  font-size: 11px;
+  color: var(--gray-400);
+  line-height: 1.4;
+}
+
+.ach-pts {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--green-500);
+  background: var(--green-50);
+  padding: 2px 8px;
+  border-radius: 20px;
+}

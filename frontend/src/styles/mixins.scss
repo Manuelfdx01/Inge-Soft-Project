@@ -1,0 +1,178 @@
+// ═══════════════════════════════════════════════════
+// GOMI — Mixins reutilizables
+// ═══════════════════════════════════════════════════
+
+@use 'variables' as v;
+
+// ────────────────────────────────────────────────────
+// RESPONSIVE
+// ────────────────────────────────────────────────────
+
+@mixin sm {
+  @media (max-width: #{v.$bp-sm}) { @content; }
+}
+
+@mixin md {
+  @media (max-width: #{v.$bp-md}) { @content; }
+}
+
+@mixin lg {
+  @media (max-width: #{v.$bp-lg}) { @content; }
+}
+
+@mixin xl {
+  @media (max-width: #{v.$bp-xl}) { @content; }
+}
+
+// Desde un tamaño hacia arriba
+@mixin md-up {
+  @media (min-width: #{v.$bp-md}) { @content; }
+}
+
+@mixin lg-up {
+  @media (min-width: #{v.$bp-lg}) { @content; }
+}
+
+// ────────────────────────────────────────────────────
+// FLEXBOX
+// ────────────────────────────────────────────────────
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-start {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+@mixin flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+// ────────────────────────────────────────────────────
+// TIPOGRAFÍA
+// ────────────────────────────────────────────────────
+
+@mixin font-display($size: v.$text-md, $weight: v.$font-bold) {
+  font-family: v.$font-display;
+  font-size: $size;
+  font-weight: $weight;
+  letter-spacing: -0.2px;
+}
+
+@mixin font-body($size: v.$text-base, $weight: v.$font-normal) {
+  font-family: v.$font-body;
+  font-size: $size;
+  font-weight: $weight;
+}
+
+@mixin truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@mixin line-clamp($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// ────────────────────────────────────────────────────
+// SCROLLBAR personalizado
+// ────────────────────────────────────────────────────
+
+@mixin custom-scrollbar($width: 5px, $color: v.$gray-200) {
+  &::-webkit-scrollbar       { width: $width; height: $width; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb {
+    background: $color;
+    border-radius: v.$radius-full;
+    &:hover { background: v.$gray-400; }
+  }
+}
+
+// ────────────────────────────────────────────────────
+// FOCUS RING accesible
+// ────────────────────────────────────────────────────
+
+@mixin focus-ring($color: v.$green-500) {
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba($color, 0.25);
+    border-color: $color;
+  }
+}
+
+// ────────────────────────────────────────────────────
+// SOMBRA con hover
+// ────────────────────────────────────────────────────
+
+@mixin card-hover {
+  box-shadow: v.$shadow-sm;
+  transition: box-shadow v.$transition-base, transform v.$transition-base;
+  &:hover {
+    box-shadow: v.$shadow-md;
+    transform: translateY(-1px);
+  }
+}
+
+// ────────────────────────────────────────────────────
+// BARRA DE ESTADO (capacidad)
+// ────────────────────────────────────────────────────
+
+@mixin capacity-color($pct) {
+  @if $pct >= 86 {
+    background: v.$red-400;
+  } @else if $pct >= 61 {
+    background: v.$amber-400;
+  } @else {
+    background: v.$green-500;
+  }
+}
+
+// ────────────────────────────────────────────────────
+// OVERLAY / BACKDROP
+// ────────────────────────────────────────────────────
+
+@mixin overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: v.$z-modal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// ────────────────────────────────────────────────────
+// ANIMACIONES comunes
+// ────────────────────────────────────────────────────
+
+@mixin fade-in($duration: .2s) {
+  animation: fadeIn $duration ease;
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+}
+
+@mixin slide-down($duration: .15s) {
+  animation: slideDown $duration ease;
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+}
