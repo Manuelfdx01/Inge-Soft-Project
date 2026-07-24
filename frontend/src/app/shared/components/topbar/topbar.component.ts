@@ -7,6 +7,7 @@ import { NotificationsService, Notification } from '../../../core/services/notif
   standalone: true,
   imports: [CommonModule],
   templateUrl: './topbar.component.html',
+  styleUrl: './topbar.component.scss'
 })
 export class TopbarComponent implements OnInit {
   @Input() title = '';
