@@ -1,0 +1,297 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:host {
+
+  --forest: #16332A;
+  --green: #2D6A4F;
+  --mint: #D8F3DC;
+  --cream: #FBF9F2;
+  --text: #17231d;
+
+  display: block;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  height: 100vh;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.login-screen {
+
+  display: grid;
+  grid-template-columns: 40% 60%;
+
+  width: 100%;
+  height: 100vh;
+
+  overflow: hidden;
+
+  background: var(--cream);
+}
+
+/* ============================
+   FORMULARIO
+============================ */
+
+.form-panel {
+
+  position: relative;
+  z-index: 5;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  padding-left: 60px;
+  padding-right: 70px;
+
+  max-width: 520px;
+
+  background: var(--cream);
+}
+
+.brand {
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  margin-bottom: 55px;
+}
+
+.brand-logo {
+
+  width: 34px;
+  height: 34px;
+}
+
+.brand-name {
+
+  font-family: 'Fraunces', serif;
+  font-size: 32px;
+  font-weight: 700;
+
+  color: var(--forest);
+}
+
+.login-card {
+
+  max-width: 390px;
+}
+
+.eyebrow {
+
+  display: inline-flex;
+  align-items: center;
+
+  width: fit-content;
+
+  padding: 6px 14px;
+
+  border-radius: 999px;
+
+  background: #EAF8EC;
+
+  color: var(--green);
+
+  font-size: 13px;
+  font-weight: 600;
+
+  margin-bottom: 24px;
+}
+
+.headline {
+
+  font-family: 'Fraunces', serif;
+
+  font-size: 54px;
+  line-height: 1.05;
+
+  margin: 0;
+
+  color: var(--forest);
+}
+
+.subhead {
+
+  margin-top: 14px;
+  margin-bottom: 34px;
+
+  color: #6f7672;
+
+  font-size: 15px;
+}
+
+.field {
+
+  display: flex;
+  flex-direction: column;
+
+  margin-bottom: 18px;
+}
+
+label {
+
+  margin-bottom: 8px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  color: var(--forest);
+}
+
+input {
+
+  height: 52px;
+
+  padding: 0 16px;
+
+  border: 1px solid #DCDCDC;
+
+  border-radius: 12px;
+
+  outline: none;
+
+  font-size: 15px;
+
+  transition: .2s;
+}
+
+input:focus {
+
+  border-color: var(--green);
+
+  box-shadow: 0 0 0 3px rgba(45,106,79,.15);
+}
+
+.error-general {
+
+  display: block;
+
+  margin-bottom: 14px;
+
+  color: #C62828;
+
+  font-size: 14px;
+}
+
+.submit {
+
+  width: 100%;
+  height: 52px;
+
+  margin-top: 10px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: var(--forest);
+
+  color: white;
+
+  font-size: 16px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: .25s;
+}
+
+.submit:hover {
+
+  background: #204937;
+}
+
+.register-link {
+
+  text-align: center;
+
+  margin-top: 28px;
+
+  font-size: 14px;
+}
+
+.register-link a {
+
+  color: var(--green);
+
+  text-decoration: none;
+
+  font-weight: 700;
+}
+
+/* ============================
+   IMAGEN
+============================ */
+
+.scene-panel {
+
+  position: relative;
+
+  overflow: hidden;
+
+  height: 100%;
+}
+
+.scene-image {
+
+  width: 110%;
+  height: 100%;
+
+  margin-left: 0px;
+
+  object-fit: cover;
+
+  display: block;
+
+  /* Desvanecimiento elegante */
+
+  -webkit-mask-image: linear-gradient(
+      to left,
+      black 82%,
+      rgba(0,0,0,.92) 88%,
+      rgba(0,0,0,.65) 94%,
+      rgba(0,0,0,.25) 98%,
+      transparent 100%
+  );
+
+  mask-image: linear-gradient(
+      to left,
+      black 82%,
+      rgba(0,0,0,.92) 88%,
+      rgba(0,0,0,.65) 94%,
+      rgba(0,0,0,.25) 98%,
+      transparent 100%
+  );
+}
+
+/* ============================
+   RESPONSIVE
+============================ */
+
+@media (max-width: 900px) {
+
+  .login-screen {
+
+    grid-template-columns: 1fr;
+  }
+
+  .scene-panel {
+
+    display: none;
+  }
+
+  .form-panel {
+
+    max-width: 100%;
+
+    padding: 35px;
+  }
+
+  .headline {
+
+    font-size: 40px;
+  }
+
+}

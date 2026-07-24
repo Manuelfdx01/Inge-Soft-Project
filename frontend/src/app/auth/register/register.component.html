@@ -1,51 +1,194 @@
-<div class="login-wrapper">
-  <div class="login-card">
+<div class="login-screen">
+
+  <div class="form-panel">
+
     <div class="brand">
-      <span class="brand-icon">🌱</span>
-      <span class="brand-name">GOMI — Registro</span>
+      <svg class="brand-logo" viewBox="0 0 48 48" fill="none">
+        <circle cx="24" cy="24" r="24" fill="#2D6A4F"/>
+        <path
+          d="M24 10C24 10 14 15 14 25C14 31.6274 18.9249 37 25 37C25.9 37 26 36 25.3 35.6C21.5 33.4 19 29.5 19 25C19 18.5 24 14 24 14C24 14 29 18.5 29 25C29 27.2 28.3 29.2 27.2 30.8C26.7 31.5 27.3 32.4 28.1 32.1C31.9 30.6 34.5 26.9 34.5 22.5C34.5 15.6 24 10 24 10Z"
+          fill="#D8F3DC"/>
+      </svg>
+
+      <span class="brand-name">
+        GOMI
+      </span>
     </div>
 
-    <form [formGroup]="form" (ngSubmit)="submit()">
-      <div class="field">
-        <label>Usuario</label>
-        <input type="text" formControlName="username" placeholder="tu_usuario" />
-      </div>
+    <div class="login-card">
 
-      <div class="field">
-        <label>Correo electrónico</label>
-        <input type="email" formControlName="email" placeholder="correo@ejemplo.com" />
-        <span class="error" *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
-          Correo inválido
+      <span class="eyebrow">
+        🌿 Únete al cambio
+      </span>
+
+      <h1 class="headline">
+        Crea tu cuenta
+      </h1>
+
+      <p class="subhead">
+        Regístrate y empieza a reciclar con tu ciudad.
+      </p>
+
+      <form
+        [formGroup]="form"
+        (ngSubmit)="submit()">
+
+        <div class="field">
+
+          <label>
+            Usuario
+          </label>
+
+          <input
+            type="text"
+            formControlName="username"
+            placeholder="tu_usuario">
+
+          <span
+            class="error"
+            *ngIf="form.get('username')?.invalid && form.get('username')?.touched">
+
+            El usuario es requerido
+
+          </span>
+
+        </div>
+
+        <div class="field">
+
+          <label>
+            Correo electrónico
+          </label>
+
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="correo@ejemplo.com">
+
+          <span
+            class="error"
+            *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
+
+            Correo inválido
+
+          </span>
+
+        </div>
+
+        <div class="field">
+
+          <label>
+            Contraseña
+          </label>
+
+          <input
+            type="password"
+            formControlName="password"
+            placeholder="Mínimo 8 caracteres">
+
+          <span
+            class="error"
+            *ngIf="form.get('password')?.invalid && form.get('password')?.touched">
+
+            Mínimo 8 caracteres
+
+          </span>
+
+        </div>
+
+        <div class="two-col">
+
+          <div class="field">
+
+            <label>
+              Rol
+            </label>
+
+            <select formControlName="role">
+
+              <option
+                *ngFor="let r of roles"
+                [value]="r.value">
+
+                {{ r.label }}
+
+              </option>
+
+            </select>
+
+          </div>
+
+          <div class="field">
+
+            <label>
+
+              Teléfono
+
+              <span class="optional">
+                (opcional)
+              </span>
+
+            </label>
+
+            <input
+              type="tel"
+              formControlName="phone"
+              placeholder="3001234567">
+
+          </div>
+
+        </div>
+
+        <span
+          class="error-general"
+          *ngIf="errorMsg">
+
+          {{ errorMsg }}
+
         </span>
-      </div>
 
-      <div class="field">
-        <label>Contraseña</label>
-        <input type="password" formControlName="password" placeholder="Mínimo 8 caracteres" />
-      </div>
+        <span
+          class="success"
+          *ngIf="successMsg">
 
-      <div class="field">
-        <label>Rol</label>
-        <select formControlName="role">
-          <option *ngFor="let r of roles" [value]="r.value">{{ r.label }}</option>
-        </select>
-      </div>
+          🌱 {{ successMsg }}
 
-      <div class="field">
-        <label>Teléfono (opcional)</label>
-        <input type="tel" formControlName="phone" placeholder="3001234567" />
-      </div>
+        </span>
 
-      <span class="error-general" *ngIf="errorMsg">{{ errorMsg }}</span>
-      <span class="success" *ngIf="successMsg">{{ successMsg }}</span>
+        <button
+          class="submit"
+          type="submit"
+          [disabled]="loading">
 
-      <button type="submit" [disabled]="loading">
-        {{ loading ? 'Registrando...' : 'Crear cuenta' }}
-      </button>
-    </form>
+          {{ loading ? 'Registrando...' : 'Crear cuenta' }}
 
-    <p class="register-link">
-      ¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a>
-    </p>
+        </button>
+
+      </form>
+
+      <p class="register-link">
+
+        ¿Ya tienes cuenta?
+
+        <a routerLink="/login">
+
+          Inicia sesión
+
+        </a>
+
+      </p>
+
+    </div>
+
   </div>
+
+  <div class="scene-panel">
+
+    <img
+      src="/images/register-fox.png"
+      class="scene-image"
+      alt="Bosque">
+
+  </div>
+
 </div>
