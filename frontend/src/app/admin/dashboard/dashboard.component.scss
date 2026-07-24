@@ -1,0 +1,108 @@
+/* ── Dashboard Admin ── */
+
+.admin-content {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Métricas */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+
+  @media (max-width: 1024px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 600px)  { grid-template-columns: 1fr; }
+}
+
+.metric-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-200);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow .2s;
+
+  &:hover { box-shadow: var(--shadow-md); }
+}
+
+.metric-val {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--gray-900);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.metric-lbl {
+  font-size: 12px;
+  color: var(--gray-400);
+  font-weight: 500;
+}
+
+.metric-delta {
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.delta-up   { color: var(--green-500); }
+.delta-down { color: var(--red-400); }
+
+/* Grid de tarjetas */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+
+  @media (max-width: 900px) { grid-template-columns: 1fr; }
+}
+
+/* Gráfica de barras */
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 110px;
+  padding: 0 4px;
+  margin-top: 8px;
+}
+
+.chart-bar {
+  flex: 1;
+  border-radius: 4px 4px 0 0;
+  opacity: 0.85;
+  transition: opacity .15s, transform .15s;
+  cursor: pointer;
+  min-height: 4px;
+
+  &:hover { opacity: 1; transform: scaleY(1.03); transform-origin: bottom; }
+}
+
+.chart-labels {
+  display: flex;
+  gap: 8px;
+  padding: 6px 4px 0;
+  margin-top: 4px;
+
+  span {
+    flex: 1;
+    text-align: center;
+    font-size: 10px;
+    color: var(--gray-400);
+    font-weight: 500;
+  }
+}
+
+/* Sección title */
+.section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-400);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 14px;
+}
