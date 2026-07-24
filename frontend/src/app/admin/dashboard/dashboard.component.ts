@@ -9,6 +9,7 @@ import { AdminService } from '../../core/services/admin.service';
     CommonModule
   ],
   templateUrl: './dashboard.component.html',
+  styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent implements OnInit {
   metrics: any = null;
