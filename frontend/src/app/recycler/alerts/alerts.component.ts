@@ -8,6 +8,7 @@ import { AuthService } from '../../core/services/auth.service';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './alerts.component.html',
+  styleUrl: './alerts.component.scss'
 })
 export class AlertsComponent implements OnInit {
   activeAlerts: LogisticsAlert[] = [];
