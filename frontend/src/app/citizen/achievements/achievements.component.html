@@ -1,0 +1,28 @@
+<div class="page-wrapper">
+  <div class="achievements-header">
+    <h2>🏆 Mis logros</h2>
+    <div class="points-badge">{{ userPoints }} pts acumulados</div>
+  </div>
+
+  <div class="section-title">Obtenidos ({{ earned.length }})</div>
+  <div class="achievements-grid">
+    <div *ngFor="let a of earned" class="achievement-card earned">
+      <div class="ach-icon">{{ a.icon }}</div>
+      <div class="ach-name">{{ a.name }}</div>
+      <div class="ach-desc">{{ a.description }}</div>
+      <div class="ach-pts">+{{ a.points_required }} pts</div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:24px">
+    Por obtener ({{ locked.length }})
+  </div>
+  <div class="achievements-grid">
+    <div *ngFor="let a of locked" class="achievement-card locked">
+      <div class="ach-icon">{{ a.icon }}</div>
+      <div class="ach-name">{{ a.name }}</div>
+      <div class="ach-desc">{{ a.description }}</div>
+      <div class="ach-pts">{{ a.points_required }} pts necesarios</div>
+    </div>
+  </div>
+</div>

@@ -15,20 +15,31 @@ export interface User {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private apiUrl = 'http://localhost:8000/api';
+
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private http: HttpClient, private router: Router) {
+  constructor(
+    private http: HttpClient,
+    private router: Router
+  ) {
     const stored = localStorage.getItem('user');
-    if (stored) this.currentUserSubject.next(JSON.parse(stored));
+
+    if (stored) {
+      this.currentUserSubject.next(JSON.parse(stored));
+    }
   }
 
   login(username: string, password: string): Observable<any> {
-    return this.http.post(${this.apiUrl}/auth/login/, { username, password }).pipe(
+    return this.http.post(
+      `${this.apiUrl}/auth/login/`,
+      { username, password }
+    ).pipe(
       tap((res: any) => {
         localStorage.setItem('access_token', res.access);
         localStorage.setItem('refresh_token', res.refresh);
         localStorage.setItem('user', JSON.stringify(res.user));
+
         this.currentUserSubject.next(res.user);
       })
     );
@@ -36,7 +47,12 @@ export class AuthService {
 
   logout(): void {
     const refresh = localStorage.getItem('refresh_token');
-    this.http.post(${this.apiUrl}/auth/logout/, { refresh }).subscribe();
+
+    this.http.post(
+      `${this.apiUrl}/auth/logout/`,
+      { refresh }
+    ).subscribe();
+
     localStorage.clear();
     this.currentUserSubject.next(null);
     this.router.navigate(['/login']);

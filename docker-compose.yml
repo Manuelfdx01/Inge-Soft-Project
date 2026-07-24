@@ -1,8 +1,7 @@
-version: '3.9'
-
 services:
   db:
     image: postgres:16-alpine
+    container_name: gomi-db
     environment:
       POSTGRES_DB: recicla_db
       POSTGRES_USER: recicla_user
@@ -11,9 +10,15 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U recicla_user -d recicla_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   backend:
     build: ./backend
+    container_name: gomi-backend
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./backend:/app
@@ -24,12 +29,15 @@ services:
       DB_NAME: recicla_db
       DB_USER: recicla_user
       DB_PASSWORD: recicla_pass
+      DB_PORT: 5432
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   frontend:
     build: ./frontend
-    command: ng serve --host 0.0.0.0
+    container_name: gomi-frontend
+    command: npm start -- --host 0.0.0.0 --port 4200
     volumes:
       - ./frontend:/app
       - /app/node_modules

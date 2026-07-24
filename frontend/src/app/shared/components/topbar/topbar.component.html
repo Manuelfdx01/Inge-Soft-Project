@@ -1,0 +1,36 @@
+<div class="topbar">
+  <span class="topbar-title">{{ title }}</span>
+
+  <div class="notif-wrapper">
+    <button class="notif-btn" (click)="toggleDropdown()">
+      🔔
+      <span class="notif-badge" *ngIf="unreadCount > 0">
+        {{ unreadCount }}
+      </span>
+    </button>
+
+    <div class="notif-dropdown" *ngIf="showDropdown">
+      <div class="notif-header">
+        <span>Notificaciones</span>
+        <button class="mark-all" (click)="markAllRead()">
+          Marcar todas como leídas
+        </button>
+      </div>
+
+      <div class="notif-empty" *ngIf="notifications.length === 0">
+        No hay notificaciones
+      </div>
+
+      <div
+        *ngFor="let notif of notifications"
+        class="notif-item"
+        [class.unread]="!notif.is_read"
+        (click)="markRead(notif)">
+        <div class="notif-message">{{ notif.message }}</div>
+        <div class="notif-time">
+          {{ notif.created_at | date:'short' }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

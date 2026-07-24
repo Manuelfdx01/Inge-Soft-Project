@@ -1,8 +1,13 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { CollectionPointsService, CollectionPoint } from '../../core/services/collection-points.service';
 
 @Component({
   selector: 'app-map',
+  standalone: true,
+  imports: [
+    CommonModule
+  ],
   templateUrl: './map.component.html',
 })
 export class MapComponent implements OnInit {
