@@ -1,0 +1,149 @@
+// ═══════════════════════════════════════════════════
+// GOMI — Botones
+// ═══════════════════════════════════════════════════
+
+@use 'variables' as v;
+@use 'mixins' as m;
+
+// ── Base ──
+.btn {
+  @include m.flex-start;
+  @include m.focus-ring;
+  gap: v.$space-2;
+  padding: 8px 16px;
+  border-radius: v.$radius;
+  font-family: v.$font-body;
+  font-size: v.$text-base;
+  font-weight: v.$font-semibold;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: v.$transition-fast;
+  line-height: 1.4;
+  user-select: none;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  // Tamaños
+  &.btn-xs  { padding: 4px 8px;   font-size: v.$text-xs; border-radius: v.$radius-sm; }
+  &.btn-sm  { padding: 5px 12px;  font-size: v.$text-sm; }
+  &.btn-lg  { padding: 11px 22px; font-size: v.$text-md; }
+  &.btn-xl  { padding: 14px 28px; font-size: v.$text-lg; }
+
+  // Ancho completo
+  &.btn-block { width: 100%; justify-content: center; }
+
+  // Solo ícono
+  &.btn-icon {
+    padding: 8px;
+    border-radius: v.$radius;
+    gap: 0;
+  }
+}
+
+// ── Primario (verde) ──
+.btn-primary {
+  background: v.$green-500;
+  color: v.$white;
+  border-color: v.$green-500;
+
+  &:hover:not(:disabled) {
+    background: v.$green-700;
+    border-color: v.$green-700;
+    box-shadow: 0 2px 8px rgba(v.$green-500, 0.35);
+  }
+
+  &:active:not(:disabled) {
+    background: v.$green-900;
+    transform: translateY(1px);
+  }
+}
+
+// ── Secundario (outline) ──
+.btn-outline {
+  background: v.$white;
+  color: v.$gray-700;
+  border-color: v.$gray-300;
+
+  &:hover:not(:disabled) {
+    background: v.$gray-50;
+    border-color: v.$gray-400;
+  }
+
+  &:active:not(:disabled) {
+    background: v.$gray-100;
+  }
+}
+
+// ── Ghost (solo texto) ──
+.btn-ghost {
+  background: transparent;
+  color: v.$gray-600;
+  border-color: transparent;
+
+  &:hover:not(:disabled) {
+    background: v.$gray-100;
+    color: v.$gray-900;
+  }
+}
+
+// ── Peligro (rojo) ──
+.btn-danger {
+  background: v.$red-400;
+  color: v.$white;
+  border-color: v.$red-400;
+
+  &:hover:not(:disabled) {
+    background: v.$red-700;
+    border-color: v.$red-700;
+    box-shadow: 0 2px 8px rgba(v.$red-400, 0.3);
+  }
+}
+
+// ── Outline peligro ──
+.btn-danger-outline {
+  background: v.$white;
+  color: v.$red-400;
+  border-color: v.$red-200;
+
+  &:hover:not(:disabled) {
+    background: v.$red-50;
+    border-color: v.$red-400;
+  }
+}
+
+// ── Éxito (confirmación) ──
+.btn-success {
+  background: #1D9E75;
+  color: v.$white;
+  border-color: #1D9E75;
+
+  &:hover:not(:disabled) {
+    background: #166b50;
+    box-shadow: 0 2px 8px rgba(#1D9E75, 0.3);
+  }
+}
+
+// ── Info (azul) ──
+.btn-info {
+  background: v.$blue-500;
+  color: v.$white;
+  border-color: v.$blue-500;
+
+  &:hover:not(:disabled) {
+    background: v.$blue-700;
+    box-shadow: 0 2px 8px rgba(v.$blue-500, 0.3);
+  }
+}
+
+// ── Grupo de botones ──
+.btn-group {
+  display: flex;
+  gap: v.$space-2;
+  flex-wrap: wrap;
+  align-items: center;
+}

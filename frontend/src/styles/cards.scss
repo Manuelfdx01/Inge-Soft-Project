@@ -1,0 +1,248 @@
+// ═══════════════════════════════════════════════════
+// GOMI — Cards / Tarjetas
+// ═══════════════════════════════════════════════════
+
+@use 'variables' as v;
+@use 'mixins' as m;
+
+// ── Card base ──
+.card {
+  background: var(--color-bg-card);
+  border-radius: v.$radius-md;
+  border: 1px solid var(--color-border);
+  padding: v.$space-4;
+  box-shadow: v.$shadow-sm;
+
+  &.card-hover {
+    @include m.card-hover;
+    cursor: pointer;
+  }
+
+  &.card-flat {
+    box-shadow: none;
+  }
+
+  &.card-bordered {
+    border-width: 2px;
+  }
+}
+
+// ── Card title ──
+.card-title {
+  font-size: v.$text-xs;
+  font-weight: v.$font-semibold;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: v.$space-3;
+}
+
+// ── Card header con acción ──
+.card-header {
+  @include m.flex-between;
+  margin-bottom: v.$space-4;
+
+  .card-title { margin-bottom: 0; }
+
+  .card-action {
+    font-size: v.$text-sm;
+    color: var(--color-brand);
+    font-weight: v.$font-medium;
+    cursor: pointer;
+    &:hover { text-decoration: underline; }
+  }
+}
+
+// ── Metric card ──
+.metric-card {
+  background: var(--color-bg-card);
+  border-radius: v.$radius-md;
+  border: 1px solid var(--color-border);
+  padding: 18px 20px;
+  box-shadow: v.$shadow-sm;
+  transition: box-shadow v.$transition-base;
+
+  &:hover { box-shadow: v.$shadow-md; }
+}
+
+.metric-val {
+  @include m.font-display(v.$text-3xl, v.$font-bold);
+  color: var(--color-text-primary);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.metric-lbl {
+  font-size: v.$text-sm;
+  font-weight: v.$font-medium;
+  color: var(--color-text-tertiary);
+}
+
+.metric-delta {
+  font-size: v.$text-xs;
+  font-weight: v.$font-semibold;
+  margin-top: 8px;
+
+  &.delta-up   { color: v.$green-500; }
+  &.delta-down { color: v.$red-400; }
+  &.delta-neutral { color: var(--color-text-tertiary); }
+}
+
+// ── Alert card (logística) ──
+.alert-card {
+  background: var(--color-bg-card);
+  border-radius: v.$radius-md;
+  border: 1px solid var(--color-border);
+  padding: v.$space-3 v.$space-4;
+  display: flex;
+  gap: v.$space-3;
+  align-items: flex-start;
+  box-shadow: v.$shadow-sm;
+  transition: box-shadow v.$transition-base;
+  margin-bottom: v.$space-3;
+
+  &:hover      { box-shadow: v.$shadow-md; }
+  &.completed  { opacity: 0.6; }
+}
+
+.alert-priority-bar {
+  width: 4px;
+  border-radius: 2px;
+  align-self: stretch;
+  flex-shrink: 0;
+  min-height: 40px;
+}
+
+.alert-body { flex: 1; min-width: 0; }
+
+.alert-title {
+  font-size: v.$text-base;
+  font-weight: v.$font-semibold;
+  color: var(--color-text-primary);
+  margin-bottom: 3px;
+}
+
+.alert-meta {
+  font-size: v.$text-xs;
+  color: var(--color-text-tertiary);
+  margin-bottom: v.$space-2;
+}
+
+.alert-route {
+  @include m.flex-start;
+  gap: 6px;
+  font-size: v.$text-xs;
+  color: var(--color-text-secondary);
+  background: var(--color-bg-subtle);
+  border-radius: v.$radius-sm;
+  padding: 5px 10px;
+  flex-wrap: wrap;
+
+  .route-arrow { color: v.$green-500; font-weight: v.$font-bold; }
+  .route-distance { margin-left: auto; color: var(--color-text-tertiary); }
+}
+
+.alert-actions {
+  display: flex;
+  gap: v.$space-2;
+  margin-top: v.$space-2;
+  flex-wrap: wrap;
+}
+
+// ── Guide card ──
+.guide-card {
+  background: var(--color-bg-card);
+  border-radius: v.$radius-md;
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  box-shadow: v.$shadow-sm;
+  cursor: pointer;
+  transition: v.$transition-base;
+
+  &:hover    { border-color: v.$green-200; }
+  &.expanded { border-color: v.$green-500; box-shadow: v.$shadow-md; }
+}
+
+.guide-header {
+  @include m.flex-start;
+  gap: v.$space-3;
+  padding: v.$space-3 v.$space-4;
+  user-select: none;
+}
+
+.guide-icon  { font-size: 22px; flex-shrink: 0; }
+.guide-title { flex: 1; font-size: v.$text-base; font-weight: v.$font-semibold; color: var(--color-text-primary); }
+.guide-arrow { font-size: v.$text-xs; color: var(--color-text-tertiary); }
+
+.guide-content {
+  padding: v.$space-3 v.$space-4 v.$space-4 50px;
+  font-size: v.$text-sm;
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+  border-top: 1px solid var(--color-border);
+  @include m.fade-in(.18s);
+}
+
+// ── Achievement card ──
+.achievement-card {
+  background: var(--color-bg-card);
+  border-radius: v.$radius-md;
+  border: 1px solid var(--color-border);
+  padding: v.$space-4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: v.$space-2;
+  box-shadow: v.$shadow-sm;
+  transition: v.$transition-base;
+
+  &.earned {
+    border-color: v.$green-200;
+    background: linear-gradient(135deg, v.$white 0%, v.$green-50 100%);
+    &:hover { box-shadow: v.$shadow-md; transform: translateY(-2px); }
+  }
+
+  &.locked { opacity: 0.5; filter: grayscale(0.5); }
+}
+
+.ach-icon  { font-size: 32px; line-height: 1; }
+.ach-name  { font-size: v.$text-base; font-weight: v.$font-semibold; color: var(--color-text-primary); }
+.ach-desc  { font-size: v.$text-xs; color: var(--color-text-tertiary); line-height: 1.4; }
+.ach-pts   {
+  font-size: v.$text-xs;
+  font-weight: v.$font-bold;
+  color: v.$green-500;
+  background: v.$green-50;
+  padding: 2px 8px;
+  border-radius: v.$radius-full;
+  border: 1px solid v.$green-100;
+}
+
+// ── Stat mini card ──
+.stat-row  { display: flex; gap: v.$space-2; }
+.stat {
+  flex: 1;
+  background: var(--color-bg-subtle);
+  border-radius: v.$radius;
+  padding: v.$space-2 v.$space-3;
+  text-align: center;
+}
+.stat-val  { @include m.font-display(22px, v.$font-bold); color: v.$green-500; }
+.stat-lbl  { font-size: v.$text-xs; color: var(--color-text-tertiary); margin-top: 2px; }
+
+// ── Point row ──
+.point-row {
+  @include m.flex-between;
+  padding: v.$space-2 0;
+  border-bottom: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: v.$transition-fast;
+
+  &:last-child { border-bottom: none; }
+  &:hover .point-name { color: v.$green-500; }
+}
+
+.point-info  { flex: 1; min-width: 0; }
+.point-name  { @include m.truncate; font-size: v.$text-sm; font-weight: v.$font-medium; color: var(--color-text-primary); margin-bottom: 3px; transition: color v.$transition-fast; }
+.point-pct   { font-size: v.$text-sm; font-weight: v.$font-bold; min-width: 36px; text-align: right; }
