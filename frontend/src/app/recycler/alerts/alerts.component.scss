@@ -1,0 +1,205 @@
+/* ── Vista Reciclador — Alertas ── */
+
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Toggle disponibilidad */
+.availability-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  flex-shrink: 0;
+}
+
+.avail-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.toggle {
+  width: 42px;
+  height: 22px;
+  border-radius: 11px;
+  background: var(--gray-200);
+  position: relative;
+  cursor: pointer;
+  transition: background .2s;
+
+  &::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    background: var(--white);
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: transform .2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+
+  &.on {
+    background: var(--green-500);
+    &::after { transform: translateX(20px); }
+  }
+}
+
+/* Contenido */
+.content-grid {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.alerts-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.section-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-400);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+/* Tarjeta de alerta */
+.alert-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-200);
+  padding: 14px;
+  margin-bottom: 10px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow .2s;
+
+  &:hover { box-shadow: var(--shadow-md); }
+  &.completed { opacity: 0.65; }
+}
+
+.alert-priority {
+  width: 4px;
+  border-radius: 2px;
+  align-self: stretch;
+  flex-shrink: 0;
+  min-height: 40px;
+}
+
+.alert-body { flex: 1; min-width: 0; }
+
+.alert-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin-bottom: 4px;
+}
+
+.alert-meta {
+  font-size: 11px;
+  color: var(--gray-400);
+  margin-bottom: 10px;
+}
+
+.alert-route {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--gray-700);
+  background: var(--gray-50);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  flex-wrap: wrap;
+}
+
+.route-arrow {
+  color: var(--green-500);
+  font-weight: 700;
+}
+
+.distance {
+  margin-left: auto;
+  color: var(--gray-400);
+  font-size: 11px;
+}
+
+.alert-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+/* Panel resumen */
+.summary-panel {
+  width: 210px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.summary-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-200);
+  padding: 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+.summary-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-400);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.summary-stats {
+  display: flex;
+  gap: 8px;
+}
+
+.stat {
+  flex: 1;
+  background: var(--gray-50);
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+}
+
+.stat-val {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--green-500);
+}
+
+.stat-lbl {
+  font-size: 10px;
+  color: var(--gray-400);
+  margin-top: 2px;
+}
+
+@media (max-width: 900px) {
+  .content-grid  { flex-direction: column; }
+  .summary-panel { width: 100%; }
+}
