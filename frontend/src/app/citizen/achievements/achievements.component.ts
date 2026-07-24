@@ -18,6 +18,7 @@ const MOCK_ACHIEVEMENTS = [
     CommonModule
   ],
   templateUrl: './achievements.component.html',
+  styleUrl: './achievements.component.scss'
 })
 export class AchievementsComponent implements OnInit {
   achievements: any[] = [];
