@@ -17,7 +17,7 @@ import { SidebarComponent } from '../sidebar/sidebar.component';
       </div>
     </div>
   `,
-  styleUrl: './shell.component.scss'
+  styleUrl: './shell.component.scss',
   styles: [`
     .app-shell { display: flex; height: 100vh; overflow: hidden; }
     .main { flex: 1; overflow-y: auto; background: #F8F9FA; }
