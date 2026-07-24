@@ -9,6 +9,7 @@ import { CollectionPointsService, CollectionPoint } from '../../core/services/co
     CommonModule
   ],
   templateUrl: './map.component.html',
+  styleUrl: './map.component.scss'
 })
 export class MapComponent implements OnInit {
   points: CollectionPoint[] = [];
