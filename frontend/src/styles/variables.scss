@@ -1,0 +1,199 @@
+// ═══════════════════════════════════════════════════
+// GOMI — Design Tokens
+// Fuente única de verdad para colores, tipografía,
+// espaciado, sombras y breakpoints.
+// ═══════════════════════════════════════════════════
+
+// ── Google Fonts ──
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+// ────────────────────────────────────────────────────
+// PALETA DE COLORES — modo claro (light mode)
+// ────────────────────────────────────────────────────
+
+// Verde (marca principal — reciclaje)
+$green-50:   #E8F5E4;
+$green-100:  #C8E6C9;
+$green-200:  #A5D6A7;
+$green-300:  #7CC96A;
+$green-500:  #2E7D32;
+$green-700:  #1B5E20;
+$green-900:  #0A3B0C;
+
+// Teal (reciclador)
+$teal-50:    #E0F7F4;
+$teal-200:   #5DCAA5;
+$teal-500:   #0F6E56;
+$teal-700:   #085041;
+
+// Azul (información)
+$blue-50:    #E3F2FD;
+$blue-200:   #90CAF9;
+$blue-500:   #1565C0;
+$blue-700:   #0D47A1;
+
+// Ámbar (alerta)
+$amber-50:   #FFF8E1;
+$amber-200:  #FFE082;
+$amber-400:  #FFA726;
+$amber-700:  #F57F17;
+
+// Rojo (crítico / peligro)
+$red-50:     #FFEBEE;
+$red-200:    #EF9A9A;
+$red-400:    #EF5350;
+$red-700:    #C62828;
+
+// Grises neutros
+$gray-50:    #F8F9FA;
+$gray-100:   #F1F3F4;
+$gray-200:   #E8EAED;
+$gray-300:   #DADCE0;
+$gray-400:   #9AA0A6;
+$gray-500:   #80868B;
+$gray-600:   #5F6368;
+$gray-700:   #3C4043;
+$gray-900:   #202124;
+
+// Blanco / negro
+$white:      #FFFFFF;
+$black:      #000000;
+
+// ── Variables CSS (permite modo oscuro futuro) ──
+:root {
+  // Fondos
+  --color-bg:           #{$gray-50};
+  --color-bg-card:      #{$white};
+  --color-bg-subtle:    #{$gray-100};
+  --color-bg-hover:     #{$gray-100};
+
+  // Bordes
+  --color-border:       #{$gray-200};
+  --color-border-focus: #{$green-500};
+
+  // Texto
+  --color-text-primary:   #{$gray-900};
+  --color-text-secondary: #{$gray-600};
+  --color-text-tertiary:  #{$gray-400};
+  --color-text-inverse:   #{$white};
+
+  // Marca
+  --color-brand:          #{$green-500};
+  --color-brand-dark:     #{$green-700};
+  --color-brand-light:    #{$green-50};
+
+  // Estados
+  --color-success:      #{$green-500};
+  --color-warning:      #{$amber-400};
+  --color-danger:       #{$red-400};
+  --color-info:         #{$blue-500};
+
+  // Roles
+  --color-ciudadano:    #{$green-700};
+  --color-reciclador:   #{$teal-500};
+  --color-admin:        #{$gray-900};
+}
+
+// Modo oscuro (preparado para el futuro)
+// @media (prefers-color-scheme: dark) {
+//   :root {
+//     --color-bg:         #121212;
+//     --color-bg-card:    #1E1E1E;
+//     --color-bg-subtle:  #2C2C2C;
+//     --color-border:     #333;
+//     --color-text-primary:   #E8EAED;
+//     --color-text-secondary: #9AA0A6;
+//   }
+// }
+
+// ────────────────────────────────────────────────────
+// TIPOGRAFÍA
+// ────────────────────────────────────────────────────
+
+$font-display: 'Space Grotesk', sans-serif;
+$font-body:    'Inter', sans-serif;
+$font-mono:    'Courier New', monospace;
+
+// Escala tipográfica
+$text-xs:   11px;
+$text-sm:   12px;
+$text-base: 14px;
+$text-md:   16px;
+$text-lg:   18px;
+$text-xl:   22px;
+$text-2xl:  28px;
+$text-3xl:  36px;
+
+// Pesos
+$font-normal:   400;
+$font-medium:   500;
+$font-semibold: 600;
+$font-bold:     700;
+
+// ────────────────────────────────────────────────────
+// ESPACIADO
+// ────────────────────────────────────────────────────
+
+$space-1:   4px;
+$space-2:   8px;
+$space-3:   12px;
+$space-4:   16px;
+$space-5:   20px;
+$space-6:   24px;
+$space-8:   32px;
+$space-10:  40px;
+$space-12:  48px;
+
+// ────────────────────────────────────────────────────
+// RADIOS
+// ────────────────────────────────────────────────────
+
+$radius-sm:   4px;
+$radius:      8px;
+$radius-md:   10px;
+$radius-lg:   14px;
+$radius-full: 9999px;
+
+// ────────────────────────────────────────────────────
+// SOMBRAS
+// ────────────────────────────────────────────────────
+
+$shadow-xs:  0 1px 2px rgba(0,0,0,0.06);
+$shadow-sm:  0 1px 4px rgba(0,0,0,0.08);
+$shadow-md:  0 4px 12px rgba(0,0,0,0.10);
+$shadow-lg:  0 8px 24px rgba(0,0,0,0.12);
+$shadow-xl:  0 20px 60px rgba(0,0,0,0.16);
+
+// ────────────────────────────────────────────────────
+// LAYOUT
+// ────────────────────────────────────────────────────
+
+$sidebar-width: 220px;
+$header-height: 56px;
+$content-max:   1280px;
+
+// ────────────────────────────────────────────────────
+// BREAKPOINTS
+// ────────────────────────────────────────────────────
+
+$bp-sm:  576px;
+$bp-md:  768px;
+$bp-lg:  1024px;
+$bp-xl:  1280px;
+
+// ────────────────────────────────────────────────────
+// TRANSICIONES
+// ────────────────────────────────────────────────────
+
+$transition-fast:   all .12s ease;
+$transition-base:   all .2s ease;
+$transition-slow:   all .35s ease;
+
+// ────────────────────────────────────────────────────
+// Z-INDEX
+// ────────────────────────────────────────────────────
+
+$z-base:     1;
+$z-dropdown: 100;
+$z-modal:    200;
+$z-toast:    300;
