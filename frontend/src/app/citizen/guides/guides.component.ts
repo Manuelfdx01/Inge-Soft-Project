@@ -11,6 +11,7 @@ import { MOCK_GUIDES } from '../../core/mocks/guides.mock';
     CommonModule
   ],
   templateUrl: './guides.component.html',
+  styleUrl: './guides.component.scss'
 })
 export class GuidesComponent implements OnInit {
   guides: any[] = [];
