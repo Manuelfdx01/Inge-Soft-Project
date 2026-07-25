@@ -1,0 +1,135 @@
+<div class="page">
+
+  <!-- ==========================
+       Encabezado
+  =========================== -->
+
+  <div class="header">
+
+    <h2>Capacidad de los puntos</h2>
+
+    <p>
+      Consulta el nivel de ocupación de cada punto de reciclaje.
+    </p>
+
+  </div>
+
+  <!-- ==========================
+       Cargando
+  =========================== -->
+
+  <div
+    class="empty"
+    *ngIf="loading">
+
+    Cargando puntos de reciclaje...
+
+  </div>
+
+  <!-- ==========================
+       Error
+  =========================== -->
+
+  <div
+    class="empty"
+    *ngIf="!loading && error">
+
+    {{ error }}
+
+  </div>
+
+  <!-- ==========================
+       Sin información
+  =========================== -->
+
+  <div
+    class="empty"
+    *ngIf="!loading && !error && points.length === 0">
+
+    No hay puntos de reciclaje registrados.
+
+  </div>
+
+  <!-- ==========================
+       Tarjetas
+  =========================== -->
+
+  <div
+    class="grid"
+    *ngIf="!loading && !error && points.length">
+
+    <div
+      class="card"
+      *ngFor="let point of points">
+
+      <!-- Cabecera -->
+
+      <div class="card-header">
+
+        <h3>
+          {{ point.name }}
+        </h3>
+
+        <span
+          class="badge"
+          [style.background]="getProgressColor(point)">
+
+          {{ getStatusText(point.status) }}
+
+        </span>
+
+      </div>
+
+      <!-- Dirección -->
+
+      <p class="address">
+
+        📍 {{ point.address }}
+
+      </p>
+
+      <!-- Barra de capacidad -->
+
+      <div class="progress">
+
+        <div
+          class="progress-fill"
+          [style.width.%]="point.capacity_pct"
+          [style.background]="getProgressColor(point)">
+
+        </div>
+
+      </div>
+
+      <div class="capacity">
+
+        {{ point.capacity_current }}
+        /
+        {{ point.capacity_max }}
+
+        ({{ point.capacity_pct }}%)
+
+      </div>
+
+      <!-- Tipos de residuos -->
+
+      <div class="types">
+
+        <span
+          class="type"
+          *ngFor="let waste of point.waste_types"
+          [style.background]="waste.color">
+
+          {{ waste.icon }}
+
+          {{ waste.name }}
+
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

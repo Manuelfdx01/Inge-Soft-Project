@@ -1,26 +1,36 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+
 import { SidebarComponent } from '../sidebar/sidebar.component';
+import { TopbarComponent } from '../topbar/topbar.component';
 
 @Component({
   selector: 'app-shell',
   standalone: true,
   imports: [
     RouterOutlet,
-    SidebarComponent
+    SidebarComponent,
+    TopbarComponent
   ],
   template: `
     <div class="app-shell">
+
       <app-sidebar></app-sidebar>
+
       <div class="main">
-        <router-outlet></router-outlet>
+
+        <app-topbar
+          title="Panel">
+        </app-topbar>
+
+        <div class="content">
+          <router-outlet></router-outlet>
+        </div>
+
       </div>
+
     </div>
   `,
-  styleUrl: './shell.component.scss',
-  styles: [`
-    .app-shell { display: flex; height: 100vh; overflow: hidden; }
-    .main { flex: 1; overflow-y: auto; background: #F8F9FA; }
-  `],
+  styleUrl: './shell.component.scss'
 })
 export class ShellComponent {}
