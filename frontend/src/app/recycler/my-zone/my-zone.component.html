@@ -1,0 +1,97 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h2>Mi zona</h2>
+      <p>Puntos cercanos que requieren atención.</p>
+    </div>
+
+    <button class="btn btn-primary">
+      Actualizar
+    </button>
+  </div>
+
+  <div class="map-card">
+
+    <div class="map-placeholder">
+
+      <div class="map-icon">🗺️</div>
+
+      <h3>Mapa de recolección</h3>
+
+      <p>
+        Aquí se integrará Google Maps mostrando los puntos de reciclaje.
+      </p>
+
+    </div>
+
+  </div>
+
+  <div class="points-card">
+
+    <div class="card-title">
+      Puntos cercanos
+    </div>
+
+    <div
+      *ngIf="loading"
+      class="loading">
+
+      Cargando puntos...
+
+    </div>
+
+    <div
+      *ngIf="!loading && points.length === 0"
+      class="empty">
+
+      No hay puntos registrados.
+
+    </div>
+
+    <div
+      *ngFor="let point of points"
+      class="point-item">
+
+      <div class="point-info">
+
+        <div class="point-name">
+
+          {{ point.name }}
+
+        </div>
+
+        <div class="point-address">
+
+          {{ point.address }}
+
+        </div>
+
+      </div>
+
+      <div class="point-status">
+
+        <div
+          class="capacity"
+
+          [ngClass]="{
+
+            high: point.capacity >= 90,
+
+            medium: point.capacity >= 70 && point.capacity < 90,
+
+            low: point.capacity < 70
+
+          }">
+
+          {{ point.capacity }}%
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

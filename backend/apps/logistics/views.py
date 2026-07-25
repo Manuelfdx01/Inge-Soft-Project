@@ -4,9 +4,17 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import LogisticsAlert, CapacityLog
-from .serializers import LogisticsAlertSerializer, CapacityLogSerializer
+from .serializers import (
+    LogisticsAlertSerializer,
+    CapacityLogSerializer,
+    RecyclerDashboardSerializer,
+    AvailabilitySerializer,
+    RecyclerReportsSerializer,
+)
 from .services import generar_alerta_si_critico, registrar_capacidad
 from apps.collection_points.models import CollectionPoint
+from django.db.models import Sum
+from datetime import timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -145,3 +153,266 @@ class CapacityLogViewSet(viewsets.ReadOnlyModelViewSet):
             point_id=point_id,
             recorded_at__gte=desde,
         ).order_by('-recorded_at')
+
+class RecyclerDashboardView(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def list(self, request):
+        user = request.user
+
+        if user.role != "RECICLADOR":
+            return Response(
+                {"error": "Solo recicladores."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        hoy = timezone.localdate()
+
+        # ==========================================================
+        # Estadísticas
+        # ==========================================================
+
+        completed_today = LogisticsAlert.objects.filter(
+            reciclador=user,
+            status=LogisticsAlert.Status.COMPLETADA,
+            resolved_at__date=hoy
+        )
+
+        completed_count = completed_today.count()
+
+        distance_today = (
+            completed_today.aggregate(
+                total=Sum("distance_km")
+            )["total"] or 0
+        )
+
+        pending_count = LogisticsAlert.objects.filter(
+            status=LogisticsAlert.Status.PENDIENTE
+        ).count()
+
+        # ==========================================================
+        # Traslado actual
+        # ==========================================================
+
+        current_trip = LogisticsAlert.objects.filter(
+            reciclador=user,
+            status__in=[
+                LogisticsAlert.Status.ACEPTADA,
+                LogisticsAlert.Status.EN_PROCESO,
+            ]
+        ).order_by("-created_at").first()
+
+        # ==========================================================
+        # Alertas pendientes
+        # ==========================================================
+
+        pending_alerts = LogisticsAlert.objects.filter(
+            status=LogisticsAlert.Status.PENDIENTE
+        ).order_by("-priority", "-created_at")[:5]
+
+        # ==========================================================
+        # Historial reciente
+        # ==========================================================
+
+        history = LogisticsAlert.objects.filter(
+            reciclador=user,
+            status=LogisticsAlert.Status.COMPLETADA
+        ).order_by("-resolved_at")[:10]
+
+        # ==========================================================
+        # Dashboard
+        # ==========================================================
+
+        dashboard = {
+
+            "is_available": user.is_available,
+
+            "stats": {
+
+                "completed_today": completed_count,
+
+                "pending": pending_count,
+
+                "distance_today": float(distance_today),
+
+                # Más adelante podrá venir del módulo
+                # de gamificación.
+                "level": 1,
+            },
+
+            "current_trip": (
+                LogisticsAlertSerializer(current_trip).data
+                if current_trip
+                else None
+            ),
+
+            "pending_alerts": LogisticsAlertSerializer(
+                pending_alerts,
+                many=True
+            ).data,
+
+            "history": LogisticsAlertSerializer(
+                history,
+                many=True
+            ).data,
+        }
+
+        serializer = RecyclerDashboardSerializer(dashboard)
+
+        return Response(serializer.data)
+
+class CurrentTransferView(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def list(self, request):
+
+        traslado = LogisticsAlert.objects.filter(
+            reciclador=request.user,
+            status__in=[
+                LogisticsAlert.Status.ACEPTADA,
+                LogisticsAlert.Status.EN_PROCESO,
+            ]
+        ).first()
+
+        if not traslado:
+            return Response(None)
+
+        serializer = LogisticsAlertSerializer(traslado)
+
+        return Response(serializer.data)
+
+class RecyclerHistoryView(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def list(self, request):
+
+        history = LogisticsAlert.objects.filter(
+            reciclador=request.user,
+            status=LogisticsAlert.Status.COMPLETADA
+        ).order_by("-resolved_at")
+
+        serializer = LogisticsAlertSerializer(
+            history,
+            many=True
+        )
+
+        return Response(serializer.data)
+
+class MyZoneView(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def list(self, request):
+
+        puntos = CollectionPoint.objects.all()
+
+        data = []
+
+        for p in puntos:
+
+            data.append({
+
+                "id": p.id,
+
+                "name": p.name,
+
+                "address": p.address,
+
+                "capacity": p.capacity_pct,
+
+                "status": p.status,
+
+                "latitude": p.latitude,
+
+                "longitude": p.longitude,
+
+            })
+
+        return Response(data)
+
+class AvailabilityView(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def list(self, request):
+        return Response({
+            "is_available": request.user.is_available
+        })
+
+    def partial_update(self, request, pk=None):
+        serializer = AvailabilitySerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        request.user.is_available = serializer.validated_data["is_available"]
+        request.user.save(update_fields=["is_available"])
+
+        return Response({
+            "is_available": request.user.is_available
+        })
+
+class RecyclerReportsView(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def list(self, request):
+
+        user = request.user
+
+        if user.role != "RECICLADOR":
+            return Response(
+                {"error": "Solo recicladores."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        today = timezone.localdate()
+
+        week = today - timedelta(days=7)
+
+        month = today - timedelta(days=30)
+
+        alerts = LogisticsAlert.objects.filter(
+            reciclador=user,
+            status=LogisticsAlert.Status.COMPLETADA
+        )
+
+        today_alerts = alerts.filter(
+            resolved_at__date=today
+        )
+
+        week_alerts = alerts.filter(
+            resolved_at__date__gte=week
+        )
+
+        month_alerts = alerts.filter(
+            resolved_at__date__gte=month
+        )
+
+        serializer = RecyclerReportsSerializer({
+
+            "today": {
+                "transfers": today_alerts.count(),
+                "distance": float(
+                    today_alerts.aggregate(
+                        total=Sum("distance_km")
+                    )["total"] or 0
+                ),
+            },
+
+            "week": {
+                "transfers": week_alerts.count(),
+                "distance": float(
+                    week_alerts.aggregate(
+                        total=Sum("distance_km")
+                    )["total"] or 0
+                ),
+            },
+
+            "month": {
+                "transfers": month_alerts.count(),
+                "distance": float(
+                    month_alerts.aggregate(
+                        total=Sum("distance_km")
+                    )["total"] or 0
+                ),
+            },
+
+        })
+
+        return Response(serializer.data)

@@ -1,0 +1,144 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h2>Reportar capacidad</h2>
+      <p>
+        Actualiza el nivel de ocupación de un punto de reciclaje.
+      </p>
+    </div>
+  </div>
+
+  <div class="report-card">
+
+    <form (ngSubmit)="submit()">
+
+      <!-- Punto -->
+
+      <div class="field">
+
+        <label>Punto de reciclaje</label>
+
+        <select
+          name="point"
+          [(ngModel)]="report.point">
+
+          <option
+            *ngFor="let point of points"
+            [value]="point.id">
+
+            {{ point.name }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+      <!-- Tipo -->
+
+      <div class="field">
+
+        <label>Tipo de residuo</label>
+
+        <select
+          name="waste_type"
+          [(ngModel)]="report.waste_type">
+
+          <option
+            *ngFor="let type of wasteTypes"
+            [value]="type.value">
+
+            {{ type.label }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+      <!-- Capacidad -->
+
+      <div class="field">
+
+        <label>
+
+          Capacidad actual
+
+          <span>
+
+            {{ report.capacity_current }}%
+
+          </span>
+
+        </label>
+
+        <input
+          type="range"
+          min="0"
+          max="100"
+          name="capacity_current"
+          [(ngModel)]="report.capacity_current">
+
+        <div class="capacity-bar">
+
+          <div
+            class="capacity-fill"
+            [style.width.%]="report.capacity_current">
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Observaciones -->
+
+      <div class="field">
+
+        <label>Observaciones</label>
+
+        <textarea
+          rows="5"
+          name="notes"
+          [(ngModel)]="report.notes"
+          placeholder="Información adicional...">
+
+        </textarea>
+
+      </div>
+
+      <!-- Mensajes -->
+
+      <div
+        class="success"
+        *ngIf="success">
+
+        ✅ Reporte enviado correctamente.
+
+      </div>
+
+      <div
+        class="error"
+        *ngIf="error">
+
+        {{ error }}
+
+      </div>
+
+      <!-- Botón -->
+
+      <button
+        class="btn btn-primary"
+        type="submit"
+        [disabled]="loading">
+
+        {{ loading ? 'Enviando...' : 'Actualizar capacidad' }}
+
+      </button>
+
+    </form>
+
+  </div>
+
+</div>

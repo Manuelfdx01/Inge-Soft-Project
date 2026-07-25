@@ -1,0 +1,397 @@
+<div class="dashboard-page" *ngIf="dashboard">
+
+  <!-- ===================================================== -->
+  <!-- HEADER -->
+  <!-- ===================================================== -->
+
+  <header class="dashboard-header">
+
+    <div>
+
+      <span class="eyebrow">
+        Panel del reciclador
+      </span>
+
+      <h1>
+        ¡Hola, {{ auth.getUser()?.username }}!
+      </h1>
+
+      <p>
+        Gestiona tus traslados y consulta tu actividad.
+      </p>
+
+    </div>
+
+    <button
+      class="availability-btn"
+      [class.available]="dashboard.is_available"
+      (click)="toggleAvailability()">
+
+      <span class="dot"></span>
+
+      {{ dashboard.is_available ? 'Disponible' : 'No disponible' }}
+
+    </button>
+
+  </header>
+
+  <!-- ===================================================== -->
+  <!-- ESTADÍSTICAS -->
+  <!-- ===================================================== -->
+
+  <section class="stats-grid">
+
+    <article class="stat-card">
+
+      <div class="icon">
+        🚛
+      </div>
+
+      <div>
+
+        <span class="label">
+          Traslados hoy
+        </span>
+
+        <h2>
+          {{ dashboard.stats.completed_today }}
+        </h2>
+
+      </div>
+
+    </article>
+
+    <article class="stat-card">
+
+      <div class="icon">
+        📦
+      </div>
+
+      <div>
+
+        <span class="label">
+          Pendientes
+        </span>
+
+        <h2>
+          {{ dashboard.stats.pending }}
+        </h2>
+
+      </div>
+
+    </article>
+
+    <article class="stat-card">
+
+      <div class="icon">
+        📍
+      </div>
+
+      <div>
+
+        <span class="label">
+          Distancia
+        </span>
+
+        <h2>
+          {{ dashboard.stats.distance_today }} km
+        </h2>
+
+      </div>
+
+    </article>
+
+    <article class="stat-card">
+
+      <div class="icon">
+        🌱
+      </div>
+
+      <div>
+
+        <span class="label">
+          Nivel
+        </span>
+
+        <h2>
+          {{ dashboard.stats.level }}
+        </h2>
+
+      </div>
+
+    </article>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- CONTENIDO -->
+  <!-- ===================================================== -->
+
+  <section class="dashboard-grid">
+
+    <!-- ====================================== -->
+    <!-- TRASLADO ACTUAL -->
+    <!-- ====================================== -->
+
+    <article class="card current-trip">
+
+      <div class="card-header">
+
+        <h3>
+          Mi traslado actual
+        </h3>
+
+      </div>
+
+      <ng-container *ngIf="dashboard.current_trip; else noTrip">
+
+        <div class="route">
+
+          <div>
+
+            <span class="small">
+              Origen
+            </span>
+
+            <strong>
+              {{ dashboard.current_trip.origin_point.name }}
+            </strong>
+
+            <p>
+              {{ dashboard.current_trip.origin_point.address }}
+            </p>
+
+          </div>
+
+          <div class="arrow">
+            ↓
+          </div>
+
+          <div>
+
+            <span class="small">
+              Destino
+            </span>
+
+            <strong>
+              {{ dashboard.current_trip.target_point.name }}
+            </strong>
+
+            <p>
+              {{ dashboard.current_trip.target_point.address }}
+            </p>
+
+          </div>
+
+        </div>
+
+        <div class="trip-info">
+
+          <span>
+
+            ♻ {{ dashboard.current_trip.waste_type }}
+
+          </span>
+
+          <span>
+
+            📍 {{ dashboard.current_trip.distance_km }} km
+
+          </span>
+
+        </div>
+
+        <div class="actions">
+
+          <button class="btn btn-primary">
+            Abrir mapa
+          </button>
+
+          <button
+            class="btn btn-success"
+            (click)="completeTransfer(dashboard.current_trip.id)">
+
+            Completar
+
+          </button>
+
+        </div>
+
+      </ng-container>
+
+      <ng-template #noTrip>
+
+        <div class="empty-state">
+
+          🚛
+
+          <p>
+            No tienes un traslado activo.
+          </p>
+
+        </div>
+
+      </ng-template>
+
+    </article>
+
+    <!-- ====================================== -->
+    <!-- ALERTAS -->
+    <!-- ====================================== -->
+
+    <article class="card">
+
+      <div class="card-header">
+
+        <h3>
+          Alertas pendientes
+        </h3>
+
+      </div>
+
+      <div
+        *ngFor="let alert of dashboard.pending_alerts"
+        class="alert-item">
+
+        <div>
+
+          <strong>
+
+            {{ alert.origin_point.name }}
+
+          </strong>
+
+          <p>
+
+            {{ alert.origin_point.capacity_pct }}% ·
+            {{ alert.waste_type }}
+
+          </p>
+
+        </div>
+
+        <button
+          class="btn btn-primary"
+          (click)="acceptTransfer(alert.id)">
+
+          Aceptar
+
+        </button>
+
+      </div>
+
+      <div
+        class="empty-state"
+        *ngIf="dashboard.pending_alerts.length === 0">
+
+        No hay alertas pendientes.
+
+      </div>
+
+    </article>
+
+    <!-- ====================================== -->
+    <!-- HISTORIAL -->
+    <!-- ====================================== -->
+
+    <article class="card full-width">
+
+      <div class="card-header">
+
+        <h3>
+
+          Actividad reciente
+
+        </h3>
+
+      </div>
+
+      <div
+        *ngFor="let trip of dashboard.history"
+        class="history-item">
+
+        <div>
+
+          <strong>
+
+            {{ trip.origin_point.name }}
+
+          </strong>
+
+          →
+
+          <strong>
+
+            {{ trip.target_point.name }}
+
+          </strong>
+
+          <p>
+
+            {{ trip.waste_type }}
+
+            ·
+
+            {{ trip.distance_km }} km
+
+          </p>
+
+        </div>
+
+        <span>
+
+          {{ trip.resolved_at | date:'short' }}
+
+        </span>
+
+      </div>
+
+      <div
+        class="empty-state"
+        *ngIf="dashboard.history.length === 0">
+
+        Aún no has realizado traslados.
+
+      </div>
+
+    </article>
+
+  </section>
+
+</div>
+
+<!-- ===================================================== -->
+<!-- LOADING -->
+<!-- ===================================================== -->
+
+<div
+  class="loading-screen"
+  *ngIf="loading">
+
+  Cargando dashboard...
+
+</div>
+
+<!-- ===================================================== -->
+<!-- ERROR -->
+<!-- ===================================================== -->
+
+<div
+  class="error-screen"
+  *ngIf="error">
+
+  <h3>
+
+    No fue posible cargar el dashboard.
+
+  </h3>
+
+  <button
+    class="btn btn-primary"
+    (click)="loadDashboard()">
+
+    Reintentar
+
+  </button>
+
+</div>
