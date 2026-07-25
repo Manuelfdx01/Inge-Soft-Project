@@ -1,5 +1,3 @@
-/* ── Shell: wrapper principal ── */
-
 .app-shell {
   display: flex;
   height: 100vh;
@@ -10,7 +8,11 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  background: var(--gray-50);
-  min-width: 0;
+  background: #F8F9FA;
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
 }
