@@ -1,0 +1,306 @@
+<div class="transfers-page">
+
+  <!-- ==========================
+       ENCABEZADO
+  =========================== -->
+  <div class="page-header">
+
+    <div>
+      <h1>Traslados</h1>
+      <p>
+        Gestiona tus traslados y consulta tu historial.
+      </p>
+    </div>
+
+    <button
+      class="refresh-btn"
+      (click)="loadData()">
+
+      ⟳ Actualizar
+
+    </button>
+
+  </div>
+
+  <!-- ==========================
+       TRASLADO ACTUAL
+  =========================== -->
+
+  <section
+    class="current-trip"
+    *ngIf="dashboard?.current_trip as trip">
+
+    <div class="section-title">
+      🚚 Traslado actual
+    </div>
+
+    <div class="trip-card active">
+
+      <div class="trip-header">
+
+        <div>
+
+          <div class="trip-name">
+
+            {{ trip.origin_point.name }}
+
+            →
+
+            {{ trip.target_point.name }}
+
+          </div>
+
+          <div class="trip-meta">
+
+            {{ trip.waste_type }}
+
+            ·
+
+            {{ trip.distance_km }} km
+
+          </div>
+
+        </div>
+
+        <span
+          class="status">
+
+          {{ trip.status }}
+
+        </span>
+
+      </div>
+
+      <div class="trip-route">
+
+        <div>
+
+          <strong>Origen</strong>
+
+          <span>{{ trip.origin_point.address }}</span>
+
+        </div>
+
+        <div class="arrow">
+          ↓
+        </div>
+
+        <div>
+
+          <strong>Destino</strong>
+
+          <span>{{ trip.target_point.address }}</span>
+
+        </div>
+
+      </div>
+
+      <div class="actions">
+
+        <button
+          class="btn btn-primary"
+          (click)="openMap(trip)">
+
+          Ver ruta
+
+        </button>
+
+        <button
+          class="btn btn-success"
+          (click)="completeTrip(trip)">
+
+          Completar traslado
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ==========================
+       PENDIENTES
+  =========================== -->
+
+  <section>
+
+    <div class="section-title">
+
+      🚨 Pendientes
+
+      <span class="badge">
+
+        {{ dashboard?.pending_alerts?.length || 0 }}
+
+      </span>
+
+    </div>
+
+    <div
+      class="empty"
+      *ngIf="dashboard?.pending_alerts?.length === 0">
+
+      No hay traslados disponibles.
+
+    </div>
+
+    <div
+      class="trip-card"
+      *ngFor="let trip of dashboard?.pending_alerts">
+
+      <div class="priority"
+           [style.background]="priorityColor(trip.priority)">
+      </div>
+
+      <div class="trip-content">
+
+        <div class="trip-header">
+
+          <div>
+
+            <div class="trip-name">
+
+              {{ trip.origin_point.name }}
+
+              →
+
+              {{ trip.target_point.name }}
+
+            </div>
+
+            <div class="trip-meta">
+
+              {{ trip.waste_type }}
+
+              ·
+
+              {{ trip.distance_km }} km
+
+            </div>
+
+          </div>
+
+          <span
+            class="priority-pill"
+            [style.background]="priorityColor(trip.priority)">
+
+            {{ trip.priority }}
+
+          </span>
+
+        </div>
+
+        <div class="trip-route">
+
+          <div>
+
+            <strong>Origen</strong>
+
+            <span>{{ trip.origin_point.address }}</span>
+
+          </div>
+
+          <div class="arrow">
+
+            →
+
+          </div>
+
+          <div>
+
+            <strong>Destino</strong>
+
+            <span>{{ trip.target_point.address }}</span>
+
+          </div>
+
+        </div>
+
+        <div class="actions">
+
+          <button
+            class="btn btn-outline"
+            (click)="openMap(trip)">
+
+            Ver mapa
+
+          </button>
+
+          <button
+            class="btn btn-primary"
+            (click)="acceptTrip(trip)">
+
+            Aceptar
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ==========================
+       HISTORIAL
+  =========================== -->
+
+  <section>
+
+    <div class="section-title">
+
+      ✅ Historial reciente
+
+    </div>
+
+    <div
+      class="history-table"
+      *ngIf="dashboard?.history?.length">
+
+      <div
+        class="history-row"
+        *ngFor="let trip of dashboard.history">
+
+        <div class="history-main">
+
+          <div class="history-route">
+
+            {{ trip.origin_point.name }}
+
+            →
+
+            {{ trip.target_point.name }}
+
+          </div>
+
+          <div class="history-date">
+
+            {{ formatDate(trip.resolved_at) }}
+
+          </div>
+
+        </div>
+
+        <div class="history-distance">
+
+          {{ trip.distance_km }} km
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div
+      class="empty"
+      *ngIf="dashboard?.history?.length === 0">
+
+      Todavía no has realizado traslados.
+
+    </div>
+
+  </section>
+
+</div>

@@ -1,205 +1,365 @@
-/* ── Vista Reciclador — Alertas ── */
-
-.page-wrapper {
+.page {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  overflow: hidden;
+  gap: 24px;
 }
 
-/* Toggle disponibilidad */
-.availability-bar {
+/* ==================================================
+   Header
+================================================== */
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h2 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--gray-900);
+  }
+
+  p {
+    margin-top: 6px;
+    color: var(--gray-500);
+    font-size: 14px;
+  }
+}
+
+/* ==================================================
+   Disponibilidad
+================================================== */
+
+.availability-card {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+
+  padding: 18px 22px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.availability-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gray-900);
+}
+
+.availability-subtitle {
+  margin-top: 4px;
+  color: var(--gray-500);
+  font-size: 13px;
+}
+
+.availability-toggle {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 12px 20px;
-  background: var(--white);
-  border-bottom: 1px solid var(--gray-200);
-  flex-shrink: 0;
+  gap: 14px;
 }
 
-.avail-label {
+.status {
   font-size: 13px;
   font-weight: 600;
-  color: var(--gray-700);
+  color: var(--gray-500);
+
+  &.active {
+    color: var(--green-600);
+  }
 }
 
 .toggle {
-  width: 42px;
-  height: 22px;
-  border-radius: 11px;
-  background: var(--gray-200);
+  width: 52px;
+  height: 28px;
+  border-radius: 999px;
+
+  background: var(--gray-300);
+
   position: relative;
+
   cursor: pointer;
-  transition: background .2s;
+
+  transition: .25s;
 
   &::after {
-    content: '';
+    content: "";
+
     position: absolute;
-    width: 18px;
-    height: 18px;
-    background: var(--white);
+
+    width: 22px;
+    height: 22px;
+
+    top: 3px;
+    left: 3px;
+
+    background: white;
+
     border-radius: 50%;
-    top: 2px;
-    left: 2px;
-    transition: transform .2s;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+
+    transition: .25s;
+
+    box-shadow: 0 2px 8px rgba(0,0,0,.18);
   }
 
   &.on {
     background: var(--green-500);
-    &::after { transform: translateX(20px); }
+
+    &::after {
+      transform: translateX(24px);
+    }
   }
 }
 
-/* Contenido */
-.content-grid {
-  display: flex;
-  gap: 16px;
-  flex: 1;
-  padding: 20px;
-  overflow: hidden;
+/* ==================================================
+   Grid
+================================================== */
+
+.alerts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(360px,1fr));
+  gap: 20px;
 }
 
-.alerts-list {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-}
+/* ==================================================
+   Tarjeta
+================================================== */
 
-.section-title {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--gray-400);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 12px;
-}
-
-/* Tarjeta de alerta */
 .alert-card {
   background: var(--white);
-  border-radius: var(--radius);
+
   border: 1px solid var(--gray-200);
-  padding: 14px;
-  margin-bottom: 10px;
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
+
+  border-radius: var(--radius);
+
+  overflow: hidden;
+
   box-shadow: var(--shadow-sm);
-  transition: box-shadow .2s;
 
-  &:hover { box-shadow: var(--shadow-md); }
-  &.completed { opacity: 0.65; }
+  transition:
+    transform .2s,
+    box-shadow .2s;
+
+  &:hover {
+
+    transform: translateY(-3px);
+
+    box-shadow: var(--shadow-md);
+
+  }
 }
 
-.alert-priority {
-  width: 4px;
-  border-radius: 2px;
-  align-self: stretch;
-  flex-shrink: 0;
-  min-height: 40px;
+.priority-bar {
+  height: 6px;
 }
 
-.alert-body { flex: 1; min-width: 0; }
-
-.alert-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--gray-900);
-  margin-bottom: 4px;
+.alert-content {
+  padding: 20px;
 }
 
-.alert-meta {
-  font-size: 11px;
-  color: var(--gray-400);
-  margin-bottom: 10px;
-}
-
-.alert-route {
+.alert-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  color: var(--gray-700);
-  background: var(--gray-50);
-  border-radius: var(--radius-sm);
-  padding: 6px 10px;
-  flex-wrap: wrap;
+
+  margin-bottom: 16px;
 }
 
-.route-arrow {
-  color: var(--green-500);
+.priority-badge {
+  color: white;
+
+  padding: 5px 12px;
+
+  border-radius: 999px;
+
+  font-size: 11px;
+
   font-weight: 700;
+
+  letter-spacing: .5px;
+}
+
+.time {
+  font-size: 12px;
+  color: var(--gray-400);
+}
+
+.alert-content h3 {
+  margin: 0 0 14px;
+
+  font-size: 20px;
+
+  color: var(--gray-900);
+}
+
+.waste-chip {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  background: var(--green-50);
+
+  color: var(--green-700);
+
+  padding: 7px 12px;
+
+  border-radius: 999px;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  margin-bottom: 14px;
+}
+
+.capacity {
+  font-size: 14px;
+
+  color: var(--gray-700);
+
+  margin-bottom: 20px;
+}
+
+/* ==================================================
+   Ruta
+================================================== */
+
+.route {
+  background: var(--gray-50);
+
+  border-radius: 12px;
+
+  padding: 14px;
+
+  margin-bottom: 16px;
+}
+
+.location {
+  color: var(--gray-700);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.arrow {
+  text-align: center;
+
+  margin: 8px 0;
+
+  color: var(--green-600);
+
+  font-size: 22px;
 }
 
 .distance {
-  margin-left: auto;
-  color: var(--gray-400);
-  font-size: 11px;
+  font-size: 14px;
+
+  font-weight: 700;
+
+  color: var(--green-600);
+
+  margin-bottom: 18px;
 }
 
-.alert-actions {
+/* ==================================================
+   Botones
+================================================== */
+
+.actions {
   display: flex;
-  gap: 8px;
-  margin-top: 10px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
-/* Panel resumen */
-.summary-panel {
-  width: 210px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+.actions .btn {
+  flex: 1;
+  min-width: 150px;
 }
 
-.summary-card {
+/* ==================================================
+   Estados
+================================================== */
+
+.loading,
+.empty {
   background: var(--white);
+
   border-radius: var(--radius);
+
   border: 1px solid var(--gray-200);
-  padding: 14px;
+
+  padding: 70px 30px;
+
+  text-align: center;
+
   box-shadow: var(--shadow-sm);
 }
 
-.summary-title {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--gray-400);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 12px;
+.empty-icon {
+  font-size: 56px;
+  margin-bottom: 16px;
 }
 
-.summary-stats {
-  display: flex;
-  gap: 8px;
+.empty h3 {
+  margin: 0 0 10px;
+  color: var(--gray-800);
 }
 
-.stat {
-  flex: 1;
-  background: var(--gray-50);
-  border-radius: 8px;
-  padding: 10px;
-  text-align: center;
+.empty p {
+  margin: 0;
+  color: var(--gray-500);
 }
 
-.stat-val {
-  font-family: var(--font-display);
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--green-500);
-}
-
-.stat-lbl {
-  font-size: 10px;
-  color: var(--gray-400);
-  margin-top: 2px;
-}
+/* ==================================================
+   Responsive
+================================================== */
 
 @media (max-width: 900px) {
-  .content-grid  { flex-direction: column; }
-  .summary-panel { width: 100%; }
+
+  .page-header {
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 18px;
+
+  }
+
+  .availability-card {
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 18px;
+
+  }
+
+  .alerts-grid {
+
+    grid-template-columns: 1fr;
+
+  }
+
+}
+
+@media (max-width: 600px) {
+
+  .actions {
+
+    flex-direction: column;
+
+  }
+
+  .actions .btn {
+
+    width: 100%;
+
+  }
+
 }

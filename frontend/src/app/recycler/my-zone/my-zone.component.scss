@@ -1,0 +1,197 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ==========================
+   Header
+========================== */
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h2 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--gray-900);
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: var(--gray-500);
+    font-size: 14px;
+  }
+}
+
+/* ==========================
+   Tarjeta mapa
+========================== */
+
+.map-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.map-placeholder {
+  height: 420px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  background: linear-gradient(
+    180deg,
+    #eef7f2 0%,
+    #f8fbf9 100%
+  );
+
+  text-align: center;
+  color: var(--gray-500);
+
+  .map-icon {
+    font-size: 64px;
+    margin-bottom: 18px;
+  }
+
+  h3 {
+    margin: 0 0 10px;
+    color: var(--gray-800);
+  }
+
+  p {
+    max-width: 340px;
+    line-height: 1.5;
+    margin: 0;
+  }
+}
+
+/* ==========================
+   Lista de puntos
+========================== */
+
+.points-card {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.card-title {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--gray-200);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+
+.point-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 18px 22px;
+
+  border-bottom: 1px solid var(--gray-100);
+
+  transition: background .2s;
+
+  &:hover {
+    background: var(--gray-50);
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.point-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.point-name {
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.point-address {
+  font-size: 13px;
+  color: var(--gray-500);
+}
+
+.capacity {
+  min-width: 64px;
+
+  text-align: center;
+
+  padding: 8px 14px;
+
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  &.low {
+    background: #E8F5E9;
+    color: #2E7D32;
+  }
+
+  &.medium {
+    background: #FFF3E0;
+    color: #EF6C00;
+  }
+
+  &.high {
+    background: #FDECEA;
+    color: #C62828;
+  }
+}
+
+/* ==========================
+   Estados
+========================== */
+
+.loading,
+.empty {
+  padding: 40px;
+  text-align: center;
+  color: var(--gray-500);
+}
+
+/* ==========================
+   Responsive
+========================== */
+
+@media (max-width: 900px) {
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .map-placeholder {
+    height: 300px;
+  }
+
+  .point-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .capacity {
+    align-self: flex-start;
+  }
+
+}
