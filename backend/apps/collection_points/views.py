@@ -44,19 +44,36 @@ class CollectionPointViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
 
-        queryset = super().get_queryset()
-
-        waste_type = self.request.query_params.get("waste_type")
         status_filter = self.request.query_params.get("status")
+        waste_type = self.request.query_params.get("waste_type")
+        search_query = self.request.query_params.get("search")
 
-        if waste_type:
+        if status_filter and status_filter.upper() == 'INACTIVO':
+            queryset = CollectionPoint.objects.filter(
+                status=CollectionPoint.Status.INACTIVO
+            ).prefetch_related("waste_types")
+        elif status_filter and status_filter.upper() == 'TODOS':
+            queryset = CollectionPoint.objects.all().prefetch_related("waste_types")
+        else:
+            queryset = CollectionPoint.objects.exclude(
+                status=CollectionPoint.Status.INACTIVO
+            ).prefetch_related("waste_types")
+
+        if waste_type and waste_type.upper() != 'TODOS':
             queryset = queryset.filter(
                 waste_types__name__iexact=waste_type
             )
 
-        if status_filter:
+        if status_filter and status_filter.upper() not in ['TODOS', 'INACTIVO']:
             queryset = queryset.filter(
                 status=status_filter.upper()
+            )
+
+        if search_query:
+            from django.db.models import Q
+            queryset = queryset.filter(
+                Q(name__icontains=search_query) |
+                Q(address__icontains=search_query)
             )
 
         return queryset.distinct()
@@ -127,6 +144,19 @@ class CollectionPointViewSet(viewsets.ModelViewSet):
             notes=request.data.get("notes", ""),
         )
 
+        from apps.logistics.services import generar_alerta_si_critico
+        alerta = generar_alerta_si_critico(
+            point=point,
+            waste_type=request.data.get("waste_type", ""),
+            reported_by=request.user,
+        )
+
+        try:
+            from apps.gamification.services import otorgar_puntos_y_xp
+            otorgar_puntos_y_xp(request.user, 'actualizar_capacidad')
+        except Exception as e:
+            logger.error(f'Error al otorgar puntos por capacidad: {e}')
+
         logger.info(
             "Capacidad actualizada: %s → %s%%",
             point.name,
@@ -139,6 +169,8 @@ class CollectionPointViewSet(viewsets.ModelViewSet):
                 "capacity_current": point.capacity_current,
                 "capacity_pct": point.capacity_pct,
                 "status": point.status,
+                "alert_triggered": alerta is not None,
+                "alert_id": alerta.id if alerta else None,
             }
         )
 

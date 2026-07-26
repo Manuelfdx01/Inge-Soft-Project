@@ -1,97 +1,115 @@
-<div class="page">
+<div class="my-zone-page">
 
-  <div class="page-header">
-    <div>
-      <h2>Mi zona</h2>
-      <p>Puntos cercanos que requieren atención.</p>
+  <!-- ════════════════════════
+       HERO / HEADER
+  ════════════════════════ -->
+  <div class="page-hero">
+    <div class="hero-text">
+      <span class="eyebrow">Panel de reciclador</span>
+      <h1>Mi Zona</h1>
+      <p>Puntos de reciclaje cercanos asignados a tu zona de trabajo.</p>
     </div>
 
-    <button class="btn btn-primary">
-      Actualizar
+    <button class="btn btn-outline" (click)="loadPoints()">
+      🔄 Actualizar
     </button>
   </div>
 
-  <div class="map-card">
+  <!-- ════════════════════════
+       FILTROS Y MAPA
+  ════════════════════════ -->
+  <div class="map-section-card">
 
-    <div class="map-placeholder">
+    <div class="filter-header">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          placeholder="Buscar punto o dirección..."
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="applyFilters()" />
+      </div>
 
-      <div class="map-icon">🗺️</div>
+      <select
+        class="status-select"
+        [(ngModel)]="statusFilter"
+        (ngModelChange)="applyFilters()">
+        <option value="">Todos los estados</option>
+        <option value="NORMAL">Normal</option>
+        <option value="ALERTA">Alerta</option>
+        <option value="CRITICO">Crítico</option>
+      </select>
+    </div>
 
-      <h3>Mapa de recolección</h3>
+    <div class="map-wrapper">
+      <div #mapContainer class="leaflet-map"></div>
 
-      <p>
-        Aquí se integrará Google Maps mostrando los puntos de reciclaje.
-      </p>
-
+      <!-- Loading overlay -->
+      <div class="map-loading" *ngIf="loading">
+        <div class="spinner"></div>
+        <span>Cargando puntos de tu zona…</span>
+      </div>
     </div>
 
   </div>
 
-  <div class="points-card">
+  <!-- ════════════════════════
+       LISTA DE PUNTOS
+  ════════════════════════ -->
+  <div class="section-header">
+    <h2>Puntos en tu zona ({{ filteredPoints.length }})</h2>
+  </div>
 
-    <div class="card-title">
-      Puntos cercanos
-    </div>
+  <!-- Empty state -->
+  <div class="state-card empty-state" *ngIf="!loading && filteredPoints.length === 0">
+    <div class="empty-icon">📍</div>
+    <h3>Sin puntos registrados</h3>
+    <p>No se encontraron puntos de reciclaje con los criterios actuales.</p>
+  </div>
 
+  <!-- Grid -->
+  <div class="grid" *ngIf="!loading && filteredPoints.length > 0">
     <div
-      *ngIf="loading"
-      class="loading">
+      *ngFor="let p of filteredPoints"
+      class="point-card"
+      [class.selected]="selectedPoint?.id === p.id"
+      (click)="selectPoint(p)">
 
-      Cargando puntos...
-
-    </div>
-
-    <div
-      *ngIf="!loading && points.length === 0"
-      class="empty">
-
-      No hay puntos registrados.
-
-    </div>
-
-    <div
-      *ngFor="let point of points"
-      class="point-item">
-
-      <div class="point-info">
-
-        <div class="point-name">
-
-          {{ point.name }}
-
-        </div>
-
-        <div class="point-address">
-
-          {{ point.address }}
-
-        </div>
-
-      </div>
-
-      <div class="point-status">
-
-        <div
-          class="capacity"
-
+      <div class="card-top">
+        <span class="point-name">{{ p.name }}</span>
+        <span
+          class="badge"
           [ngClass]="{
-
-            high: point.capacity >= 90,
-
-            medium: point.capacity >= 70 && point.capacity < 90,
-
-            low: point.capacity < 70
-
+            'badge-green': p.status === 'NORMAL',
+            'badge-amber': p.status === 'ALERTA',
+            'badge-red':   p.status === 'CRITICO'
           }">
+          {{ p.status }}
+        </span>
+      </div>
 
-          {{ point.capacity }}%
+      <span class="point-address">📍 {{ p.address }}</span>
 
+      <div class="cap-row">
+        <span>Capacidad ocupada</span>
+        <strong [style.color]="getBarColor(p.capacity)">{{ p.capacity }}%</strong>
+      </div>
+
+      <div class="cap-track">
+        <div
+          class="cap-fill"
+          [style.width.%]="p.capacity"
+          [style.background]="getBarColor(p.capacity)">
         </div>
+      </div>
 
+      <div class="card-actions">
+        <button class="btn btn-outline btn-sm" (click)="openOSM(p); $event.stopPropagation()">
+          🗺️ Ver en OSM
+        </button>
       </div>
 
     </div>
-
   </div>
 
 </div>

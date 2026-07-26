@@ -28,6 +28,11 @@ class ReviewViewSet(viewsets.ModelViewSet):
         point_id = self.kwargs.get('point_pk')
         serializer.save(user=self.request.user, point_id=point_id)
         logger.info(f'Nueva opinión de {self.request.user.username} en punto {point_id}')
+        try:
+            from apps.gamification.services import otorgar_puntos_y_xp
+            otorgar_puntos_y_xp(self.request.user, 'crear_opinion')
+        except Exception as e:
+            logger.error(f'Error al otorgar puntos por opinión: {e}')
 
 
 class ProposalViewSet(viewsets.ModelViewSet):
@@ -43,6 +48,11 @@ class ProposalViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
         logger.info(f'Nueva propuesta de {self.request.user.username}')
+        try:
+            from apps.gamification.services import otorgar_puntos_y_xp
+            otorgar_puntos_y_xp(self.request.user, 'crear_propuesta')
+        except Exception as e:
+            logger.error(f'Error al otorgar puntos por propuesta: {e}')
 
     @action(detail=True, methods=['patch'], url_path='estado',
             permission_classes=[IsAdminGomi])
@@ -78,15 +88,9 @@ class ReportViewSet(viewsets.ModelViewSet):
         report = serializer.save(user=self.request.user)
         logger.info(f'Nuevo reporte de {self.request.user.username}')
 
-        # ── NUEVO: otorgar puntos ──
         try:
-            from apps.gamification.services import otorgar_puntos
-            from apps.reports.models import Report as R
-            count = R.objects.filter(user=self.request.user).count()
-            if count == 1:
-                otorgar_puntos(self.request.user, 'primer_reporte')
-            elif count == 5:
-                otorgar_puntos(self.request.user, 'cinco_reportes')
+            from apps.gamification.services import otorgar_puntos_y_xp
+            otorgar_puntos_y_xp(self.request.user, 'crear_reporte')
         except Exception as e:
             logger.error(f'Error al otorgar puntos por reporte: {e}')
 

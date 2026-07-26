@@ -1,235 +1,152 @@
-.page {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+/* ══════════════════════════════════════
+   REPORT PAGE — RECYCLER MODULE
+   ══════════════════════════════════════ */
+
+$green:  #2E7D32;
+$amber:  #F9A825;
+$red:    #C62828;
+$bg:     #F4F6F8;
+$card:   #ffffff;
+$radius: 14px;
+$shadow: 0 2px 12px rgba(0,0,0,.07);
+
+/* ─── page ─── */
+.report-page {
+  padding: 28px 32px 40px;
+  background: $bg;
+  min-height: calc(100vh - 64px);
 }
 
-/* =====================================
-   Header
-===================================== */
+/* ─── hero ─── */
+.page-hero {
+  margin-bottom: 24px;
+}
 
-.page-header {
-
-  h2 {
-    margin: 0;
-    font-size: 26px;
+.hero-text {
+  .eyebrow {
+    display: inline-block;
+    font-size: .72rem;
     font-weight: 700;
-    color: var(--gray-900);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: $green;
+    background: #E8F5E9;
+    padding: 3px 10px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin: 0 0 4px;
+    color: #1a1a1a;
   }
 
   p {
-    margin-top: 6px;
-    font-size: 14px;
-    color: var(--gray-500);
+    color: #666;
+    font-size: .88rem;
+    margin: 0;
   }
-
 }
 
-/* =====================================
-   Tarjeta
-===================================== */
-
+/* ─── report card ─── */
 .report-card {
-  background: var(--white);
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-  padding: 28px;
-}
-
-/* =====================================
-   Formulario
-===================================== */
-
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
+  background: $card;
+  border-radius: $radius;
+  padding: 28px 32px;
+  box-shadow: $shadow;
+  max-width: 580px;
 }
 
 .field {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
+  margin-bottom: 20px;
 
-.field label {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: .84rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+  }
 
-  font-size: 14px;
-  font-weight: 600;
+  select, textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid #E0E0E0;
+    border-radius: 10px;
+    font-size: .88rem;
+    background: #FAFAFA;
+    transition: border-color .2s, box-shadow .2s;
+    font-family: inherit;
 
-  color: var(--gray-800);
-}
+    &:focus {
+      outline: none;
+      border-color: $green;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba($green, .12);
+    }
+  }
 
-.field label span {
-  color: var(--green-600);
-  font-weight: 700;
-}
-
-/* =====================================
-   Inputs
-===================================== */
-
-input,
-select,
-textarea {
-
-  width: 100%;
-
-  border: 1px solid var(--gray-300);
-
-  border-radius: 10px;
-
-  padding: 12px 14px;
-
-  font-size: 14px;
-
-  font-family: inherit;
-
-  transition: .2s;
-
-  background: white;
-
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-
-  outline: none;
-
-  border-color: var(--green-500);
-
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, .15);
-
-}
-
-textarea {
-  resize: vertical;
-  min-height: 120px;
-}
-
-/* =====================================
-   Slider
-===================================== */
-
-input[type="range"] {
-
-  padding: 0;
-
-  border: none;
-
-  background: transparent;
-
-  cursor: pointer;
-
+  input[type=range] {
+    width: 100%;
+    accent-color: $green;
+    cursor: pointer;
+  }
 }
 
 .capacity-bar {
-
-  width: 100%;
-
-  height: 10px;
-
-  background: var(--gray-200);
-
-  border-radius: 999px;
-
+  height: 8px;
+  background: #eee;
+  border-radius: 6px;
   overflow: hidden;
-
+  margin-top: 8px;
 }
 
 .capacity-fill {
-
   height: 100%;
-
-  background: linear-gradient(
-      90deg,
-      #22c55e,
-      #84cc16,
-      #facc15,
-      #fb923c,
-      #ef4444
-  );
-
-  transition: width .25s;
-
+  border-radius: 6px;
+  transition: width .2s ease, background .2s ease;
 }
 
-/* =====================================
-   Mensajes
-===================================== */
-
-.success,
-.error {
-
+.msg-alert {
+  padding: 12px 16px;
   border-radius: 10px;
+  font-size: .84rem;
+  margin-bottom: 18px;
 
-  padding: 14px 16px;
-
-  font-size: 14px;
-
+  &.success { background: #E8F5E9; color: $green; }
+  &.error   { background: #FFEBEE; color: $red; }
 }
 
-.success {
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background .2s, transform .1s;
+  font-size: .88rem;
+  gap: 6px;
 
-  background: #ECFDF3;
-
-  color: #027A48;
-
-  border: 1px solid #ABEFC6;
-
+  &:active { transform: scale(.97); }
+  &:disabled { opacity: .55; cursor: not-allowed; }
 }
 
-.error {
+.btn-primary {
+  background: $green;
+  color: #fff;
+  padding: 12px 24px;
+  width: 100%;
 
-  background: #FEF3F2;
-
-  color: #B42318;
-
-  border: 1px solid #FECDCA;
-
+  &:hover { background: darken($green, 6%); }
 }
-
-/* =====================================
-   Botón
-===================================== */
-
-button {
-
-  align-self: flex-start;
-
-  min-width: 220px;
-
-}
-
-button:disabled {
-
-  opacity: .65;
-
-  cursor: not-allowed;
-
-}
-
-/* =====================================
-   Responsive
-===================================== */
 
 @media (max-width: 768px) {
-
-  .report-card {
-    padding: 20px;
-  }
-
-  button {
-
-    width: 100%;
-
-    align-self: stretch;
-
-  }
-
+  .report-page { padding: 20px 16px; }
+  .report-card { padding: 20px 18px; }
 }

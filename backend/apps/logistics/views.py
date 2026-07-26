@@ -72,17 +72,21 @@ class LogisticsAlertViewSet(viewsets.ReadOnlyModelViewSet):
         alert.resolved_at = timezone.now()
         alert.save()
 
-        # ── NUEVO: otorgar puntos al reciclador ──
+        # Actualizar capacidades de los puntos de reciclaje
+        if alert.origin_point:
+            alert.origin_point.capacity_current = max(0, alert.origin_point.capacity_current - 50)
+            alert.origin_point.update_status()
+        if alert.target_point:
+            alert.target_point.capacity_current = min(
+                alert.target_point.capacity_max,
+                alert.target_point.capacity_current + 30
+            )
+            alert.target_point.update_status()
+
+        # ── Otorgar puntos al reciclador ──
         try:
-            from apps.gamification.services import otorgar_puntos
-            from apps.logistics.models import LogisticsAlert as LA
-            count = LA.objects.filter(
-                reciclador=request.user, status='COMPLETADA'
-            ).count()
-            if count == 1:
-                otorgar_puntos(request.user, 'primer_traslado')
-            elif count == 10:
-                otorgar_puntos(request.user, 'diez_traslados')
+            from apps.gamification.services import otorgar_puntos_y_xp
+            otorgar_puntos_y_xp(request.user, 'completar_traslado')
         except Exception as e:
             logger.error(f'Error al otorgar puntos por traslado: {e}')
 
@@ -220,8 +224,25 @@ class RecyclerDashboardView(viewsets.ViewSet):
         ).order_by("-resolved_at")[:10]
 
         # ==========================================================
+        # Puntos cercanos
+        # ==========================================================
+
+        nearby_points = [
+            {
+                "id": p.id,
+                "name": p.name,
+                "address": p.address,
+                "capacity": p.capacity_pct,
+                "status": p.status,
+            }
+            for p in CollectionPoint.objects.exclude(status=CollectionPoint.Status.INACTIVO)[:5]
+        ]
+
+        # ==========================================================
         # Dashboard
         # ==========================================================
+
+        user_level = max(1, (user.points // 100) + 1)
 
         dashboard = {
 
@@ -235,9 +256,7 @@ class RecyclerDashboardView(viewsets.ViewSet):
 
                 "distance_today": float(distance_today),
 
-                # Más adelante podrá venir del módulo
-                # de gamificación.
-                "level": 1,
+                "level": user_level,
             },
 
             "current_trip": (
@@ -255,11 +274,14 @@ class RecyclerDashboardView(viewsets.ViewSet):
                 history,
                 many=True
             ).data,
+
+            "nearby_points": nearby_points,
         }
 
         serializer = RecyclerDashboardSerializer(dashboard)
 
         return Response(serializer.data)
+
 
 class CurrentTransferView(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
@@ -281,6 +303,7 @@ class CurrentTransferView(viewsets.ViewSet):
 
         return Response(serializer.data)
 
+
 class RecyclerHistoryView(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -298,12 +321,13 @@ class RecyclerHistoryView(viewsets.ViewSet):
 
         return Response(serializer.data)
 
+
 class MyZoneView(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def list(self, request):
 
-        puntos = CollectionPoint.objects.all()
+        puntos = CollectionPoint.objects.exclude(status=CollectionPoint.Status.INACTIVO)
 
         data = []
 
@@ -319,15 +343,18 @@ class MyZoneView(viewsets.ViewSet):
 
                 "capacity": p.capacity_pct,
 
+                "capacity_pct": p.capacity_pct,
+
                 "status": p.status,
 
-                "latitude": p.latitude,
+                "latitude": float(p.latitude),
 
-                "longitude": p.longitude,
+                "longitude": float(p.longitude),
 
             })
 
         return Response(data)
+
 
 class AvailabilityView(viewsets.ViewSet):
     permission_classes = [permissions.IsAuthenticated]
@@ -337,11 +364,24 @@ class AvailabilityView(viewsets.ViewSet):
             "is_available": request.user.is_available
         })
 
-    def partial_update(self, request, pk=None):
-        serializer = AvailabilitySerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+    def create(self, request):
+        return self._handle_update(request)
 
-        request.user.is_available = serializer.validated_data["is_available"]
+    def partial_update(self, request, pk=None):
+        return self._handle_update(request)
+
+    @action(detail=False, methods=["patch", "post"], url_path="")
+    def update_availability(self, request):
+        return self._handle_update(request)
+
+    def _handle_update(self, request):
+        is_avail = request.data.get("is_available")
+        if is_avail is None:
+            is_avail = not request.user.is_available
+        else:
+            is_avail = bool(is_avail)
+
+        request.user.is_available = is_avail
         request.user.save(update_fields=["is_available"])
 
         return Response({
