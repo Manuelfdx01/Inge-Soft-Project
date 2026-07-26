@@ -68,7 +68,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME', default='recicla_db'),
+        'NAME': config('DB_NAME', default='recicla_db_ai1k'),
         'USER': config('DB_USER', default='recicla_user'),
         'PASSWORD': config('DB_PASSWORD', default='recicla_pass'),
         'HOST': config('DB_HOST', default='db'),
