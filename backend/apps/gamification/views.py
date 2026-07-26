@@ -175,3 +175,47 @@ class GamificationSummaryViewSet(viewsets.ViewSet):
     def history(self, request):
         txs = PointTransaction.objects.filter(user=request.user)
         return Response(PointTransactionSerializer(txs, many=True).data)
+
+    @action(detail=False, methods=['post'], url_path='record_action',
+            permission_classes=[permissions.IsAuthenticated])
+    def record_action(self, request):
+        action_type = request.data.get('action_type')
+        if not action_type:
+            return Response({'error': 'action_type is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        valid_actions = ['jugar_juego', 'leer_guia', 'reportar_punto_mapa']
+        if action_type not in valid_actions:
+            return Response({'error': 'Invalid action_type for direct recording'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = request.user
+        
+        # If the action is playing the game, we can optionally receive the score
+        custom_points = None
+        custom_xp = None
+        
+        if action_type == 'jugar_juego':
+            score = request.data.get('score')
+            if score is not None:
+                try:
+                    # e.g., 1 point and 1 xp per 10 score
+                    score_val = int(score)
+                    custom_points = max(10, score_val // 10)
+                    custom_xp = max(15, score_val // 10)
+                except ValueError:
+                    pass
+
+        from .services import otorgar_puntos_y_xp
+        pts, xp = otorgar_puntos_y_xp(
+            user, 
+            action_type, 
+            custom_points=custom_points, 
+            custom_xp=custom_xp
+        )
+
+        return Response({
+            'message': f'Acción registrada con éxito. ¡Has ganado {pts} puntos y {xp} XP!',
+            'points_earned': pts,
+            'xp_earned': xp,
+            'total_points': user.points,
+            'total_xp': user.xp
+        }, status=status.HTTP_200_OK)

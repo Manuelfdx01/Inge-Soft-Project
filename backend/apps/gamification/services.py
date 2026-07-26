@@ -18,6 +18,9 @@ ACTION_REWARDS = {
     'crear_opinion':        {'points': 15, 'xp': 20, 'desc': 'Opinión registrada en punto de reciclaje'},
     'completar_traslado':   {'points': 100, 'xp': 120, 'desc': 'Traslado de recolección completado'},
     'streak_diario':        {'points': 10, 'xp': 10, 'desc': 'Bonus por racha diaria activa'},
+    'jugar_juego':          {'points': 10, 'xp': 15, 'desc': 'Puntos ganados en Memoria Reciclable'},
+    'leer_guia':            {'points': 15, 'xp': 20, 'desc': 'Guía de reciclaje completada'},
+    'reportar_punto_mapa':  {'points': 30, 'xp': 35, 'desc': 'Información verificada en punto del mapa'},
 }
 
 DEFAULT_ACHIEVEMENTS = [
@@ -120,6 +123,36 @@ DEFAULT_ACHIEVEMENTS = [
         'xp_reward': 200,
         'condition_key': 'xp_total',
         'condition_value': 500,
+    },
+    {
+        'name': 'Maestro de la Memoria',
+        'description': 'Demostraste tu conocimiento jugando Memoria Reciclable',
+        'icon': '🎮',
+        'category': 'RECICLAJE',
+        'points_reward': 50,
+        'xp_reward': 50,
+        'condition_key': 'juegos_count',
+        'condition_value': 1,
+    },
+    {
+        'name': 'Lector Erudito',
+        'description': 'Leíste una guía de reciclaje para informarte',
+        'icon': '📚',
+        'category': 'COMUNIDAD',
+        'points_reward': 30,
+        'xp_reward': 30,
+        'condition_key': 'guias_count',
+        'condition_value': 1,
+    },
+    {
+        'name': 'Explorador del Mapa',
+        'description': 'Verificaste o reportaste información sobre un punto de acopio',
+        'icon': '🗺️',
+        'category': 'REPORTE',
+        'points_reward': 40,
+        'xp_reward': 40,
+        'condition_key': 'mapa_reportes_count',
+        'condition_value': 1,
     },
 ]
 
@@ -268,15 +301,22 @@ def verificar_logros(user):
     opiniones_count = Review.objects.filter(user=user).count()
     traslados_count = LogisticsAlert.objects.filter(reciclador=user, status='COMPLETADA').count()
 
+    juegos_count = PointTransaction.objects.filter(user=user, action_type='jugar_juego').count()
+    guias_count = PointTransaction.objects.filter(user=user, action_type='leer_guia').count()
+    mapa_reportes_count = PointTransaction.objects.filter(user=user, action_type='reportar_punto_mapa').count()
+
     condiciones = {
-        'capacidad_count':  capacidad_count,
-        'reportes_count':   reportes_count,
-        'propuestas_count': propuestas_count,
-        'opiniones_count':  opiniones_count,
-        'traslados_count':  traslados_count,
-        'streak_days':      user.streak_days,
-        'puntos_total':     user.points,
-        'xp_total':         user.xp,
+        'capacidad_count':     capacidad_count,
+        'reportes_count':      reportes_count,
+        'propuestas_count':    propuestas_count,
+        'opiniones_count':     opiniones_count,
+        'traslados_count':     traslados_count,
+        'juegos_count':        juegos_count,
+        'guias_count':         guias_count,
+        'mapa_reportes_count': mapa_reportes_count,
+        'streak_days':         user.streak_days,
+        'puntos_total':        user.points,
+        'xp_total':            user.xp,
     }
 
     achievements = Achievement.objects.all()

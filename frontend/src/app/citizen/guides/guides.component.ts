@@ -1,8 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { GuidesService, RecyclingGuide } from '../../core/services/guides.service';
+import { GamificationService } from '../../core/services/gamification.service';
 
 interface Category {
   label: string;
@@ -13,7 +15,7 @@ interface Category {
 @Component({
   selector: 'app-guides',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './guides.component.html',
   styleUrl: './guides.component.scss',
 })
@@ -51,7 +53,10 @@ export class GuidesComponent implements OnInit, OnDestroy {
     AVANZADO: { label: 'Avanzado',   cls: 'diff-hard' },
   };
 
-  constructor(private guidesService: GuidesService) {}
+  constructor(
+    private guidesService: GuidesService,
+    private gamificationService: GamificationService
+  ) {}
 
   ngOnInit(): void {
     // Debounced client-side search — no extra HTTP call
@@ -122,7 +127,15 @@ export class GuidesComponent implements OnInit, OnDestroy {
   }
 
   toggle(guide: RecyclingGuide): void {
-    this.selectedGuide = this.selectedGuide?.id === guide.id ? null : guide;
+    const isOpening = this.selectedGuide?.id !== guide.id;
+    this.selectedGuide = isOpening ? guide : null;
+    
+    if (isOpening) {
+      this.gamificationService.recordAction('leer_guia').subscribe({
+        next: () => console.log('Gamification: points for reading guide'),
+        error: (err) => console.error('Gamification error:', err)
+      });
+    }
   }
 
   isExpanded(guide: RecyclingGuide): boolean {
