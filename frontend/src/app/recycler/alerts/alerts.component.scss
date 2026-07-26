@@ -1,6 +1,4 @@
-/* ══════════════════════════════════════
-   ALERTAS PAGE — RECYCLER MODULE (CITIZEN DESIGN SYSTEM)
-   ══════════════════════════════════════ */
+@use 'sass:color';
 
 $green:  #2E7D32;
 $amber:  #F9A825;
@@ -383,7 +381,7 @@ $shadow: 0 2px 12px rgba(0,0,0,.07);
   color: #fff;
   padding: 8px 16px;
 
-  &:hover:not(:disabled) { background: darken($green, 6%); }
+  &:hover:not(:disabled) { background: color.adjust($green, $lightness: -6%); }
 }
 
 .btn-success {
@@ -391,7 +389,7 @@ $shadow: 0 2px 12px rgba(0,0,0,.07);
   color: #fff;
   padding: 8px 16px;
 
-  &:hover:not(:disabled) { background: darken($teal, 6%); }
+  &:hover:not(:disabled) { background: color.adjust($teal, $lightness: -6%); }
 }
 
 .btn-outline {

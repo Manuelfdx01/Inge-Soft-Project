@@ -1,0 +1,179 @@
+<div class="game-wrapper">
+
+  <!-- Control de audio: visible en todas las pantallas -->
+  <div id="mr-audio-control" class="mr-audio-control">
+    <button id="mr-btn-audio-toggle" class="mr-audio-control__btn" aria-label="Sonido" aria-expanded="false">
+      <span id="mr-audio-toggle-icon">🔊</span>
+    </button>
+    <div id="mr-audio-panel" class="mr-audio-panel mr-hidden">
+      <label class="mr-audio-panel__row">
+        <span>Música</span>
+        <input type="checkbox" id="mr-toggle-music" checked>
+      </label>
+      <label class="mr-audio-panel__row">
+        <span>Efectos de sonido</span>
+        <input type="checkbox" id="mr-toggle-sfx" checked>
+      </label>
+      <label class="mr-audio-panel__row mr-audio-panel__row--slider">
+        <span>Volumen</span>
+        <input type="range" id="mr-volume-slider" min="0" max="100" step="1" value="70">
+      </label>
+    </div>
+  </div>
+
+  <div id="mr-app">
+
+    <!-- ============ PANTALLA: MENÚ ============ -->
+    <section id="mr-screen-menu" class="mr-screen mr-active">
+      <div class="mr-belt-frame mr-belt-frame--top">
+        <div class="mr-belt-strip"></div>
+      </div>
+
+      <div class="mr-menu-content">
+        <p class="mr-eyebrow">Planta de clasificación · turno de hoy</p>
+        <h1 class="mr-game-title">
+          <span>Memoria</span>
+          <span class="mr-game-title__accent">Reciclable</span>
+        </h1>
+        <p class="mr-tagline">Memoriza el paquete. Léelo antes de que caiga. Ponlo donde el reciclador lo necesita.</p>
+
+        <button id="mr-btn-play" class="mr-btn mr-btn--primary mr-btn--xl">
+          <span class="mr-btn__icon">▶</span> Jugar turno
+        </button>
+
+        <div class="mr-score-plate">
+          <span class="mr-score-plate__label">Récord de la planta</span>
+          <span class="mr-score-plate__value" id="mr-high-score-display">0</span>
+        </div>
+
+        <div class="mr-edu-card">
+          <div class="mr-edu-card__icon" aria-hidden="true">♻</div>
+          <p>
+            Cada paquete bien clasificado es un paquete menos que un reciclador
+            tiene que revisar a mano. Separar bien desde el origen es lo que
+            hace que el material realmente se pueda aprovechar.
+          </p>
+        </div>
+      </div>
+
+      <div class="mr-belt-frame mr-belt-frame--bottom">
+        <div class="mr-belt-strip"></div>
+      </div>
+    </section>
+
+    <!-- ============ PANTALLA: JUEGO ============ -->
+    <section id="mr-screen-game" class="mr-screen">
+
+      <header class="mr-hud">
+        <div class="mr-hud__stat">
+          <span class="mr-hud__label">Nivel</span>
+          <span class="mr-hud__value" id="mr-hud-level">1</span>
+        </div>
+        <div class="mr-hud__stat mr-hud__stat--score">
+          <span class="mr-hud__label">Puntaje</span>
+          <span class="mr-hud__value" id="mr-hud-score">0</span>
+        </div>
+      </header>
+
+      <!-- Fase de memoria -->
+      <div id="mr-memory-phase" class="mr-memory-phase mr-hidden">
+        <p class="mr-memory-phase__prompt">¡Memoriza el orden de los residuos!</p>
+        <div id="mr-memory-list" class="mr-memory-list"></div>
+        <div class="mr-memory-timer">
+          <div id="mr-memory-timer-bar" class="mr-memory-timer__bar"></div>
+        </div>
+      </div>
+
+      <!-- Fase de la cinta / clasificación -->
+      <div id="mr-play-phase" class="mr-play-phase mr-hidden">
+
+        <div class="mr-plant">
+          <div class="mr-chute">
+            <span class="mr-chute__label">Paquete anónimo</span>
+            <div class="mr-chute__box" aria-hidden="true">📦</div>
+          </div>
+
+          <div class="mr-conveyor-wrap">
+            <div class="mr-conveyor-track" id="mr-conveyor-track"></div>
+            <div class="mr-conveyor-belt">
+              <div class="mr-conveyor-belt__stripes"></div>
+            </div>
+          </div>
+
+          <div class="mr-bins">
+            <div class="mr-bin mr-bin--organicos" data-category="organicos">
+              <div class="mr-bin__body">
+                <span class="mr-bin__icon">🟢</span>
+              </div>
+              <span class="mr-bin__label">Orgánicos</span>
+            </div>
+            <div class="mr-bin mr-bin--aprovechables" data-category="aprovechables">
+              <div class="mr-bin__body">
+                <span class="mr-bin__icon">⚪</span>
+              </div>
+              <span class="mr-bin__label">Aprovechables</span>
+            </div>
+            <div class="mr-bin mr-bin--no_aprovechables" data-category="no_aprovechables">
+              <div class="mr-bin__body">
+                <span class="mr-bin__icon">⚫</span>
+              </div>
+              <span class="mr-bin__label">No aprovechables</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="mr-feedback-toast" class="mr-feedback-toast"></div>
+        <div id="mr-reveal-stage" class="mr-reveal-stage"></div>
+      </div>
+
+      <!-- Transición de nivel -->
+      <div id="mr-level-transition" class="mr-level-transition mr-hidden">
+        <p class="mr-level-transition__title">¡Nivel completado!</p>
+        <p class="mr-level-transition__sub" id="mr-level-transition-sub"></p>
+      </div>
+
+    </section>
+
+    <!-- ============ PANTALLA: GAME OVER ============ -->
+    <section id="mr-screen-gameover" class="mr-screen">
+      <div class="mr-gameover-card">
+        <p class="mr-gameover-card__kicker">Fin del turno</p>
+        <h2 class="mr-gameover-card__title">GAME OVER</h2>
+
+        <div id="mr-gameover-error" class="mr-gameover-error"></div>
+
+        <div class="mr-gameover-stats">
+          <div class="mr-gameover-stats__item">
+            <span>Nivel alcanzado</span>
+            <strong id="mr-go-level">1</strong>
+          </div>
+          <div class="mr-gameover-stats__item">
+            <span>Puntaje obtenido</span>
+            <strong id="mr-go-score">0</strong>
+          </div>
+          <div class="mr-gameover-stats__item">
+            <span>Puntaje más alto</span>
+            <strong id="mr-go-highscore">0</strong>
+          </div>
+        </div>
+
+        <p id="mr-go-new-record" class="mr-new-record mr-hidden">🏆 ¡NUEVO PUNTAJE MÁS ALTO!</p>
+
+        <div class="mr-edu-card mr-edu-card--compact">
+          <div class="mr-edu-card__icon" aria-hidden="true">♻</div>
+          <p>Clasificar bien facilita el trabajo de los recicladores y hace que más material se pueda aprovechar de verdad.</p>
+        </div>
+
+        <div class="mr-gameover-actions">
+          <button id="mr-btn-retry" class="mr-btn mr-btn--primary">🔄 Jugar de nuevo</button>
+          <button id="mr-btn-menu" class="mr-btn mr-btn--ghost">🏠 Volver al menú</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Elemento de paquete arrastrable, reutilizado dinámicamente -->
+  <div id="mr-drag-ghost" class="mr-package mr-package--dragging mr-hidden">📦</div>
+
+</div>

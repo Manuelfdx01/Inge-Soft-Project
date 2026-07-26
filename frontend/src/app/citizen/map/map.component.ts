@@ -9,6 +9,7 @@ import {
   CollectionPointsService,
   CollectionPoint
 } from '../../core/services/collection-points.service';
+import { GamificationService } from '../../core/services/gamification.service';
 
 // Fix de íconos de Leaflet cuando se usa con Webpack/Angular
 const iconRetinaUrl = 'assets/marker-icon-2x.png';
@@ -79,7 +80,10 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     { label: '⚪ Inactivo', value: 'INACTIVO' },
   ];
 
-  constructor(private pointsService: CollectionPointsService) {}
+  constructor(
+    private pointsService: CollectionPointsService,
+    private gamificationService: GamificationService
+  ) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -450,6 +454,13 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       next: () => {
         this.reporting     = false;
         this.reportSuccess = true;
+        
+        // Record gamification action
+        this.gamificationService.recordAction('reportar_punto_mapa').subscribe({
+          next: () => console.log('Gamification: points for map report'),
+          error: (err) => console.error('Gamification error:', err)
+        });
+
         setTimeout(() => {
           this.closeReportModal();
           this.loadData();

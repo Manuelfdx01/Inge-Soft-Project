@@ -1,6 +1,4 @@
-/* ══════════════════════════════════════
-   REPORT PAGE — RECYCLER MODULE
-   ══════════════════════════════════════ */
+@use 'sass:color';
 
 $green:  #2E7D32;
 $amber:  #F9A825;
@@ -143,7 +141,7 @@ $shadow: 0 2px 12px rgba(0,0,0,.07);
   padding: 12px 24px;
   width: 100%;
 
-  &:hover { background: darken($green, 6%); }
+  &:hover { background: color.adjust($green, $lightness: -6%); }
 }
 
 @media (max-width: 768px) {

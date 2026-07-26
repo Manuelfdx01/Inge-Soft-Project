@@ -15,7 +15,7 @@ export interface Notification {
   providedIn: 'root'
 })
 export class NotificationsService {
-  private apiUrl = 'http://localhost:8000/api/users/notifications';
+  private apiUrl = 'https://gomi-backend.onrender.com/api/users/notifications';
 
   private unreadCount = new BehaviorSubject<number>(0);
   unreadCount$ = this.unreadCount.asObservable();

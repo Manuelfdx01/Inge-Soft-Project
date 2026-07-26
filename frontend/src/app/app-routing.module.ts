@@ -70,6 +70,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./citizen/achievements/achievements.component')
             .then(c => c.AchievementsComponent)
+      },
+
+      {
+        path: 'juego',
+        loadComponent: () =>
+          import('./citizen/game/game.component')
+            .then(c => c.GameComponent)
       }
 
     ]

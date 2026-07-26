@@ -49,6 +49,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
       icon: '🏆',
       label: 'Mis logros',
       route: '/ciudadano/logros'
+    },
+    {
+      icon: '🎮',
+      label: 'Juego de reciclaje',
+      route: '/ciudadano/juego'
     }
   ];
 

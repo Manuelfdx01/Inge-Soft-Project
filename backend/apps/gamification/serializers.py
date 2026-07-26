@@ -65,6 +65,12 @@ class AchievementSerializer(serializers.ModelSerializer):
             return Review.objects.filter(user=user).count()
         elif cond_key == 'traslados_count':
             return LogisticsAlert.objects.filter(reciclador=user, status='COMPLETADA').count()
+        elif cond_key == 'juegos_count':
+            return PointTransaction.objects.filter(user=user, action_type='jugar_juego').count()
+        elif cond_key == 'guias_count':
+            return PointTransaction.objects.filter(user=user, action_type='leer_guia').count()
+        elif cond_key == 'mapa_reportes_count':
+            return PointTransaction.objects.filter(user=user, action_type='reportar_punto_mapa').count()
         elif cond_key == 'streak_days':
             return user.streak_days
         elif cond_key == 'xp_total':
