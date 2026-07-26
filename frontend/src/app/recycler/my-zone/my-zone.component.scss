@@ -1,197 +1,381 @@
-.page {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+/* ══════════════════════════════════════
+   MY ZONE PAGE — RECYCLER MODULE
+   ══════════════════════════════════════ */
+
+$green:  #2E7D32;
+$amber:  #F9A825;
+$red:    #C62828;
+$bg:     #F4F6F8;
+$card:   #ffffff;
+$radius: 14px;
+$shadow: 0 2px 12px rgba(0,0,0,.07);
+
+/* ─── page ─── */
+.my-zone-page {
+  padding: 28px 32px 40px;
+  background: $bg;
+  min-height: calc(100vh - 64px);
 }
 
-/* ==========================
-   Header
-========================== */
-
-.page-header {
+/* ─── hero ─── */
+.page-hero {
   display: flex;
+  align-items: flex-end;
   justify-content: space-between;
-  align-items: center;
+  margin-bottom: 24px;
+}
 
-  h2 {
-    margin: 0;
-    font-size: 26px;
+.hero-text {
+  .eyebrow {
+    display: inline-block;
+    font-size: .72rem;
     font-weight: 700;
-    color: var(--gray-900);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: $green;
+    background: #E8F5E9;
+    padding: 3px 10px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin: 0 0 4px;
+    color: #1a1a1a;
   }
 
   p {
-    margin: 6px 0 0;
-    color: var(--gray-500);
-    font-size: 14px;
-  }
-}
-
-/* ==========================
-   Tarjeta mapa
-========================== */
-
-.map-card {
-  background: var(--white);
-  border-radius: var(--radius);
-  border: 1px solid var(--gray-200);
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
-}
-
-.map-placeholder {
-  height: 420px;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
-  background: linear-gradient(
-    180deg,
-    #eef7f2 0%,
-    #f8fbf9 100%
-  );
-
-  text-align: center;
-  color: var(--gray-500);
-
-  .map-icon {
-    font-size: 64px;
-    margin-bottom: 18px;
-  }
-
-  h3 {
-    margin: 0 0 10px;
-    color: var(--gray-800);
-  }
-
-  p {
-    max-width: 340px;
-    line-height: 1.5;
+    color: #666;
+    font-size: .88rem;
     margin: 0;
   }
 }
 
-/* ==========================
-   Lista de puntos
-========================== */
-
-.points-card {
-  background: var(--white);
-  border: 1px solid var(--gray-200);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
+/* ─── map section ─── */
+.map-section-card {
+  background: $card;
+  border-radius: $radius;
+  box-shadow: $shadow;
   overflow: hidden;
+  margin-bottom: 28px;
 }
 
-.card-title {
-  padding: 18px 22px;
-  border-bottom: 1px solid var(--gray-200);
-  font-size: 15px;
+.filter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid #F0F2F5;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #F0F2F5;
+  border-radius: 8px;
+  padding: 6px 12px;
+  flex: 1;
+  max-width: 320px;
+
+  input {
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: .85rem;
+    width: 100%;
+  }
+}
+
+.status-select {
+  padding: 6px 12px;
+  border: 1px solid #E0E0E0;
+  border-radius: 8px;
+  font-size: .82rem;
+  background: #fff;
+  cursor: pointer;
+}
+
+.map-wrapper {
+  width: 100%;
+  height: 400px;
+  position: relative;
+}
+
+.leaflet-map {
+  width: 100%;
+  height: 100%;
+}
+
+.map-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,.75);
+  z-index: 900;
+  gap: 12px;
+
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid #E0E0E0;
+    border-top-color: $green;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Leaflet pin customization ─── */
+:host ::ng-deep .custom-map-pin {
+  background: none !important;
+  border: none !important;
+}
+
+:host ::ng-deep .pin-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+:host ::ng-deep .pin-head {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--pin-color, $green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,.25);
+  border: 2.5px solid #fff;
+  transition: transform .2s;
+}
+
+:host ::ng-deep .pin-head:hover {
+  transform: scale(1.15);
+}
+
+:host ::ng-deep .pin-inner {
+  font-size: .6rem;
   font-weight: 700;
-  color: var(--gray-800);
+  color: #fff;
 }
 
-.point-item {
+:host ::ng-deep .pin-tail {
+  width: 2px; height: 10px;
+  background: var(--pin-color, $green);
+  border-radius: 0 0 2px 2px;
+}
+
+/* ─── Popup customization ─── */
+:host ::ng-deep .modern-popup .leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 4px 20px rgba(0,0,0,.12);
+}
+
+:host ::ng-deep .modern-popup .leaflet-popup-content {
+  margin: 0;
+  width: 100% !important;
+}
+
+:host ::ng-deep .map-popup-card {
+  padding: 14px 16px;
+}
+
+:host ::ng-deep .popup-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
+}
 
-  padding: 18px 22px;
+:host ::ng-deep .popup-name {
+  font-weight: 700;
+  font-size: .88rem;
+}
 
-  border-bottom: 1px solid var(--gray-100);
+:host ::ng-deep .popup-status {
+  font-size: .68rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
 
-  transition: background .2s;
+:host ::ng-deep .popup-normal  { background: #E8F5E9; color: $green; }
+:host ::ng-deep .popup-alerta  { background: #FFF8E1; color: #E65100; }
+:host ::ng-deep .popup-critico { background: #FFEBEE; color: $red; }
 
-  &:hover {
-    background: var(--gray-50);
-  }
+:host ::ng-deep .popup-address {
+  font-size: .78rem;
+  color: #666;
+  margin-top: 6px;
+}
 
-  &:last-child {
-    border-bottom: none;
+:host ::ng-deep .popup-capacity-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: .8rem;
+}
+
+:host ::ng-deep .popup-progress {
+  height: 5px;
+  background: #eee;
+  border-radius: 3px;
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+:host ::ng-deep .popup-progress-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width .3s;
+}
+
+/* ─── grid ─── */
+.section-header {
+  margin-bottom: 16px;
+  h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1a1a1a;
   }
 }
 
-.point-info {
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.point-card {
+  background: $card;
+  border-radius: $radius;
+  padding: 22px;
+  box-shadow: $shadow;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 12px;
+  transition: transform .15s, box-shadow .15s;
+  cursor: pointer;
+  border: 2px solid transparent;
+
+  &:hover, &.selected {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 22px rgba(0,0,0,.10);
+  }
+
+  &.selected {
+    border-color: $green;
+  }
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .point-name {
-  font-weight: 600;
-  color: var(--gray-900);
+  font-size: .95rem;
+  font-weight: 700;
+  color: #1a1a1a;
 }
+
+.badge {
+  font-size: .68rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 10px;
+}
+
+.badge-green { background: #E8F5E9; color: $green; }
+.badge-amber { background: #FFF8E1; color: #E65100; }
+.badge-red   { background: #FFEBEE; color: $red;   }
 
 .point-address {
-  font-size: 13px;
-  color: var(--gray-500);
+  font-size: .8rem;
+  color: #888;
 }
 
-.capacity {
-  min-width: 64px;
+.cap-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: .82rem;
+  color: #555;
+}
 
+.cap-track {
+  height: 8px;
+  background: #eee;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.cap-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width .4s ease;
+}
+
+.card-actions {
+  display: flex;
+  margin-top: 4px;
+}
+
+/* ─── buttons ─── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background .2s, transform .1s;
+  font-size: .85rem;
+  gap: 6px;
+
+  &:active { transform: scale(.97); }
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1.5px solid #D0D5DD;
+  color: #333;
+  padding: 8px 16px;
+
+  &:hover { background: #F5F5F5; }
+}
+
+.btn-sm { padding: 6px 12px; font-size: .8rem; }
+
+/* ─── empty ─── */
+.state-card {
   text-align: center;
+  padding: 48px 24px;
+  background: $card;
+  border-radius: $radius;
+  box-shadow: $shadow;
 
-  padding: 8px 14px;
-
-  border-radius: 999px;
-
-  font-size: 13px;
-  font-weight: 700;
-
-  &.low {
-    background: #E8F5E9;
-    color: #2E7D32;
-  }
-
-  &.medium {
-    background: #FFF3E0;
-    color: #EF6C00;
-  }
-
-  &.high {
-    background: #FDECEA;
-    color: #C62828;
-  }
+  .empty-icon { font-size: 2.5rem; margin-bottom: 12px; }
+  h3 { margin: 0 0 6px; }
+  p  { color: #888; font-size: .85rem; }
 }
 
-/* ==========================
-   Estados
-========================== */
-
-.loading,
-.empty {
-  padding: 40px;
-  text-align: center;
-  color: var(--gray-500);
-}
-
-/* ==========================
-   Responsive
-========================== */
-
-@media (max-width: 900px) {
-
-  .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
-
-  .map-placeholder {
-    height: 300px;
-  }
-
-  .point-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 14px;
-  }
-
-  .capacity {
-    align-self: flex-start;
-  }
-
+/* ─── responsive ─── */
+@media (max-width: 768px) {
+  .my-zone-page { padding: 20px 16px; }
+  .page-hero { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .filter-header { flex-direction: column; align-items: stretch; }
+  .search-box { max-width: 100%; }
+  .grid { grid-template-columns: 1fr; }
 }
