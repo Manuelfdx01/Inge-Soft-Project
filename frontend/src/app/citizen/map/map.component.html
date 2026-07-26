@@ -1,92 +1,225 @@
-<div class="page-wrapper">
+<div class="map-page">
 
-  <!-- Filtros -->
-  <div class="filter-bar">
-    <button
-      *ngFor="let f of filters"
-      class="chip"
-      [class.active]="activeFilter === f.value"
-      (click)="applyFilter(f.value)">
-      {{ f.label }}
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- TOOLBAR: BÚSQUEDA + FILTROS                   -->
+  <!-- ══════════════════════════════════════════════ -->
+  <header class="toolbar">
+
+    <!-- Búsqueda -->
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        placeholder="Buscar por nombre o dirección..."
+        [(ngModel)]="searchQuery"
+        (input)="onSearchChange()"
+      />
+      <button *ngIf="searchQuery" class="clear-btn" (click)="searchQuery = ''; onSearchChange()">✕</button>
+    </div>
+
+    <!-- Mi ubicación -->
+    <button class="geo-btn" (click)="getCurrentLocation()" title="Usar mi ubicación GPS">
+      📍 <span>Mi Ubicación</span>
     </button>
-  </div>
 
-  <div class="content-grid">
+    <!-- Filtros por tipo de residuo -->
+    <div class="filter-chips">
+      <button
+        *ngFor="let f of wasteFilters"
+        class="chip"
+        [class.active]="activeWasteFilter === f.value"
+        (click)="applyWasteFilter(f.value)"
+      >
+        <span class="chip-icon">{{ f.icon }}</span>
+        <span>{{ f.label }}</span>
+      </button>
+    </div>
 
-    <!-- Mapa -->
-    <div class="map-area">
-      <div class="map-placeholder" *ngIf="loading">
-        Cargando mapa...
+    <!-- Filtro de estado -->
+    <div class="status-select-wrap">
+      <select [(ngModel)]="activeStatusFilter" (change)="applyStatusFilter(activeStatusFilter)">
+        <option *ngFor="let s of statusFilters" [value]="s.value">{{ s.label }}</option>
+      </select>
+    </div>
+
+    <!-- Toggle móvil -->
+    <div class="mobile-toggle">
+      <button [class.active]="mobileTab === 'MAP'"  (click)="setMobileTab('MAP')">🗺️ Mapa</button>
+      <button [class.active]="mobileTab === 'LIST'" (click)="setMobileTab('LIST')">📋 Lista</button>
+    </div>
+
+  </header>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- LAYOUT PRINCIPAL                              -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="main-layout">
+
+    <!-- MAPA -->
+    <div class="map-container" [class.mobile-hidden]="mobileTab === 'LIST'">
+
+      <!-- Spinner -->
+      <div class="loading-overlay" *ngIf="loading">
+        <div class="spinner"></div>
+        <p>Cargando puntos de reciclaje...</p>
       </div>
 
-      <!-- Aquí irá google-map o mapbox cuando se instale -->
-      <!-- Por ahora renderizamos la lista visual como mapa -->
-      <div class="map-mock" *ngIf="!loading">
-        <div class="map-pins">
-          <div
-            *ngFor="let point of filteredPoints"
-            class="pin-item"
-            (click)="selectPoint(point)">
-            <div class="pin-dot" [style.background]="getPinColor(point)"></div>
-            <div class="pin-label">
-              {{ point.name }} · {{ point.capacity_pct }}%
-              <span *ngIf="point.status === 'CRITICO'"> ⚠️</span>
-            </div>
-          </div>
-        </div>
+      <!-- Canvas de Leaflet -->
+      <div #mapCanvas class="leaflet-map-canvas"></div>
 
-        <!-- Popup de punto seleccionado -->
-        <div class="popup" *ngIf="selectedPoint">
-          <button class="popup-close" (click)="closePopup()">✕</button>
+      <!-- Leyenda -->
+      <div class="map-legend">
+        <div class="legend-item"><span class="legend-dot" style="background:#2E7D32"></span> Normal</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#FFA726"></span> Alerta</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#EF5350"></span> Crítico</div>
+      </div>
+
+      <!-- Popup de punto seleccionado -->
+      <article class="point-popup-card" *ngIf="selectedPoint">
+        <button class="btn-close-popup" (click)="closePopup()">✕</button>
+
+        <div class="popup-header">
+          <span class="status-badge" [style.background]="getPinColor(selectedPoint)">
+            {{ selectedPoint.status }}
+          </span>
           <h3>{{ selectedPoint.name }}</h3>
-          <p class="popup-address">📍 {{ selectedPoint.address }}</p>
-          <div class="popup-capacity">
-            <span>Ocupación:</span>
-            <div class="bar">
-              <div class="bar-fill"
-                [style.width.%]="selectedPoint.capacity_pct"
-                [style.background]="getBarColor(selectedPoint.capacity_pct)">
-              </div>
-            </div>
-            <strong>{{ selectedPoint.capacity_pct }}%</strong>
+        </div>
+
+        <p class="address">📍 {{ selectedPoint.address }}</p>
+
+        <p class="distance" *ngIf="selectedPoint.distance_km">
+          📏 <strong>{{ selectedPoint.distance_km }} km</strong> de tu ubicación
+        </p>
+
+        <!-- Barra de capacidad -->
+        <div class="capacity-box">
+          <div class="capacity-label">
+            <span>Nivel de ocupación</span>
+            <strong [style.color]="getBarColor(selectedPoint.capacity_pct)">
+              {{ selectedPoint.capacity_pct }}%
+            </strong>
           </div>
-          <div class="popup-wastes">
-            <span
-              *ngFor="let w of selectedPoint.waste_types"
-              class="waste-chip"
-              [style.background]="w.color + '22'"
-              [style.color]="w.color">
-              {{ w.icon }} {{ w.name }}
-            </span>
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              [style.width.%]="selectedPoint.capacity_pct"
+              [style.background]="getBarColor(selectedPoint.capacity_pct)"
+            ></div>
           </div>
         </div>
-      </div>
+
+        <!-- Tags de residuos -->
+        <div class="waste-tags">
+          <span
+            *ngFor="let w of selectedPoint.waste_types"
+            class="tag"
+            [style.background]="(w.color || '#2E7D32') + '22'"
+            [style.color]="w.color || '#2E7D32'"
+          >
+            {{ w.icon }} {{ w.name }}
+          </span>
+        </div>
+
+        <!-- Acciones -->
+        <div class="card-actions">
+          <button class="btn btn-primary" (click)="openInOSM(selectedPoint)">
+            🗺️ Cómo llegar
+          </button>
+          <button class="btn btn-secondary" (click)="openReportModal(selectedPoint)">
+            📢 Reportar
+          </button>
+        </div>
+      </article>
+
     </div>
 
-    <!-- Panel lateral de capacidad -->
-    <div class="side-panel">
-      <div class="panel-title">Estado por punto</div>
-      <div
-        *ngFor="let point of pointsSortedByCapacity"
-        class="point-row"
-        (click)="selectPoint(point)">
-        <div class="point-info">
-          <div class="point-name">
-            {{ point.name }}
-            <span *ngIf="point.status === 'CRITICO'" class="critical-badge">⚠️ Crítico</span>
-          </div>
-          <div class="bar">
-            <div class="bar-fill"
-              [style.width.%]="point.capacity_pct"
-              [style.background]="getBarColor(point.capacity_pct)">
+    <!-- PANEL LATERAL DE LISTA -->
+    <aside class="sidebar-panel" [class.mobile-hidden]="mobileTab === 'MAP'">
+
+      <div class="panel-header">
+        <h3>Centros de Acopio ({{ filteredPoints.length }})</h3>
+        <span class="subtitle">Ordenados por cercanía y ocupación</span>
+      </div>
+
+      <div class="points-scroll-list">
+
+        <div
+          *ngFor="let point of pointsSorted"
+          class="point-item"
+          [class.selected]="selectedPoint?.id === point.id"
+          (click)="selectPoint(point)"
+        >
+          <div class="point-main-info">
+            <div class="name-row">
+              <span class="status-indicator" [style.background]="getPinColor(point)"></span>
+              <strong class="point-name">{{ point.name }}</strong>
+            </div>
+            <p class="point-address">{{ point.address }}</p>
+            <div class="tags-mini">
+              <span *ngFor="let w of point.waste_types" class="tag-mini">
+                {{ w.icon }} {{ w.name }}
+              </span>
             </div>
           </div>
+
+          <div class="point-metrics">
+            <div class="pct-pill" [style.background]="getBarColor(point.capacity_pct)">
+              {{ point.capacity_pct }}%
+            </div>
+            <span class="dist" *ngIf="point.distance_km">{{ point.distance_km }} km</span>
+          </div>
         </div>
-        <div class="point-pct" [style.color]="getBarColor(point.capacity_pct)">
-          {{ point.capacity_pct }}%
+
+        <div class="empty-results" *ngIf="filteredPoints.length === 0 && !loading">
+          📭 No hay puntos con los filtros seleccionados.
         </div>
+
       </div>
-    </div>
+    </aside>
 
   </div>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- MODAL DE REPORTE                              -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="modal-overlay" *ngIf="isReportModalOpen">
+    <div class="modal-card">
+      <button class="btn-close-modal" (click)="closeReportModal()">✕</button>
+
+      <h3>Reportar Novedad</h3>
+      <p class="modal-subtitle">{{ selectedPoint?.name }}</p>
+
+      <div class="form-group">
+        <label>Tipo de Residuo Afectado</label>
+        <select [(ngModel)]="reportWasteType">
+          <option value="PLASTICO">🟠 Plástico</option>
+          <option value="VIDRIO">🔵 Vidrio</option>
+          <option value="PAPEL">🟣 Papel</option>
+          <option value="METAL">⚪ Metal</option>
+          <option value="ORGANICO">🟢 Orgánico</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Descripción del estado</label>
+        <textarea
+          rows="4"
+          placeholder="Ej: Contenedor lleno, residuos fuera de lugar, daño físico..."
+          [(ngModel)]="reportNotes"
+        ></textarea>
+      </div>
+
+      <div class="success-msg" *ngIf="reportSuccess">
+        ✅ Novedad reportada correctamente.
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-secondary" (click)="closeReportModal()">Cancelar</button>
+        <button class="btn btn-primary" [disabled]="reporting" (click)="submitReport()">
+          {{ reporting ? 'Enviando...' : 'Enviar Reporte' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
 </div>

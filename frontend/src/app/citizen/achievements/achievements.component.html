@@ -1,28 +1,315 @@
 <div class="page-wrapper">
-  <div class="achievements-header">
-    <h2>🏆 Mis logros</h2>
-    <div class="points-badge">{{ userPoints }} pts acumulados</div>
+  <!-- Loading state -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Cargando tu progreso y logros...</p>
   </div>
 
-  <div class="section-title">Obtenidos ({{ earned.length }})</div>
-  <div class="achievements-grid">
-    <div *ngFor="let a of earned" class="achievement-card earned">
-      <div class="ach-icon">{{ a.icon }}</div>
-      <div class="ach-name">{{ a.name }}</div>
-      <div class="ach-desc">{{ a.description }}</div>
-      <div class="ach-pts">+{{ a.points_required }} pts</div>
-    </div>
-  </div>
+  <div *ngIf="!loading && summary" class="gamification-container">
+    
+    <!-- ════════════════════════════════════════
+         HERO USER PROFILE & LEVEL PROGRESS CARD
+         ════════════════════════════════════════ -->
+    <div class="user-hero-card">
+      <div class="hero-top">
+        <div class="user-avatar-badge">
+          <span class="lvl-icon">{{ summary.level_info.icon }}</span>
+        </div>
+        <div class="user-meta">
+          <div class="level-pill">Nivel {{ summary.level_info.level }}</div>
+          <h2 class="level-title">{{ summary.level_info.title }}</h2>
+          <p class="user-name">¡Hola, <strong>{{ summary.username }}</strong>! Sigue reciclando para subir de nivel.</p>
+        </div>
+        <div class="badges-stack">
+          <div class="points-pill" title="Puntos acumulados canjeables">
+            <span class="coin-icon">🪙</span>
+            <strong>{{ summary.points }}</strong> <small>pts</small>
+          </div>
+          <div class="streak-pill" title="Días consecutivos con actividad de reciclaje">
+            <span class="fire-icon">🔥</span>
+            <strong>{{ summary.streak_days }}</strong> <small>días de racha</small>
+          </div>
+        </div>
+      </div>
 
-  <div class="section-title" style="margin-top:24px">
-    Por obtener ({{ locked.length }})
-  </div>
-  <div class="achievements-grid">
-    <div *ngFor="let a of locked" class="achievement-card locked">
-      <div class="ach-icon">{{ a.icon }}</div>
-      <div class="ach-name">{{ a.name }}</div>
-      <div class="ach-desc">{{ a.description }}</div>
-      <div class="ach-pts">{{ a.points_required }} pts necesarios</div>
+      <!-- XP Progress Bar -->
+      <div class="xp-progress-wrapper">
+        <div class="xp-labels">
+          <span>Experiencia: <strong>{{ summary.xp }} XP</strong></span>
+          <span *ngIf="summary.level_info.xp_to_next > 0">
+            Siguiente nivel: <strong>{{ summary.level_info.next_level_title }}</strong> (Faltan {{ summary.level_info.xp_to_next }} XP)
+          </span>
+          <span *ngIf="summary.level_info.xp_to_next === 0">
+            🏆 <strong>¡Nivel Máximo Alcanzado!</strong>
+          </span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" [style.width.%]="summary.level_info.progress_pct"></div>
+        </div>
+      </div>
     </div>
+
+    <!-- ════════════════════════════════════════
+         IMPACT & STATS HIGHLIGHTS GRID
+         ════════════════════════════════════════ -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-info">
+          <span class="stat-value">{{ summary.statistics.total_actions }}</span>
+          <span class="stat-label">Acciones realizadas</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">♻️</div>
+        <div class="stat-info">
+          <span class="stat-value">{{ summary.statistics.kg_recycled }} kg</span>
+          <span class="stat-label">Material recuperado</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🍃</div>
+        <div class="stat-info">
+          <span class="stat-value">{{ summary.statistics.co2_saved_kg }} kg</span>
+          <span class="stat-label">CO₂ evitado</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🥇</div>
+        <div class="stat-info">
+          <span class="stat-value">Puesto #{{ summary.statistics.ranking_position }}</span>
+          <span class="stat-label">Ranking ciudadano</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         NAVIGATION TABS
+         ════════════════════════════════════════ -->
+    <div class="tabs-nav">
+      <button class="tab-btn" [class.active]="activeTab === 'ACHIEVEMENTS'" (click)="setTab('ACHIEVEMENTS')">
+        🏆 Logros y Medallas ({{ summary.unlocked_achievements_count }}/{{ summary.total_achievements_count }})
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'REWARDS'" (click)="setTab('REWARDS')">
+        🎁 Canje de Recompensas
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'RANKING'" (click)="setTab('RANKING')">
+        🥇 Tabla de Clasificación
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'HISTORY'" (click)="setTab('HISTORY')">
+        📜 Historial de Puntos
+      </button>
+    </div>
+
+    <!-- Alert Messages for Redemptions -->
+    <div *ngIf="redeemMessage" class="alert-banner" [class.success]="redeemMessage.success" [class.error]="!redeemMessage.success">
+      <span>{{ redeemMessage.text }}</span>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         TAB 1: LOGROS Y MEDALLAS
+         ════════════════════════════════════════ -->
+    <div *ngIf="activeTab === 'ACHIEVEMENTS'" class="tab-content">
+      
+      <!-- Category filters -->
+      <div class="category-filters">
+        <button 
+          *ngFor="let f of categoryFilters" 
+          class="cat-filter-btn" 
+          [class.active]="activeCategoryFilter === f.value"
+          (click)="setCategoryFilter(f.value)">
+          <span>{{ f.icon }}</span> {{ f.label }}
+        </button>
+      </div>
+
+      <!-- Unlocked Section -->
+      <div *ngIf="unlockedAchievements.length > 0" class="achievements-section">
+        <div class="section-title">
+          <span>✨ Desbloqueados ({{ unlockedAchievements.length }})</span>
+        </div>
+        <div class="achievements-grid">
+          <div *ngFor="let a of unlockedAchievements" class="achievement-card earned">
+            <div class="ach-badge-unlocked">✔</div>
+            <div class="ach-icon">{{ a.icon }}</div>
+            <div class="ach-content">
+              <h4 class="ach-name">{{ a.name }}</h4>
+              <p class="ach-desc">{{ a.description }}</p>
+              <div class="ach-footer">
+                <span class="ach-rewards">+{{ a.points_reward }} pts | +{{ a.xp_reward }} XP</span>
+                <span *ngIf="a.earned_at" class="ach-date">Desbloqueado {{ a.earned_at | date:'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Locked Section -->
+      <div *ngIf="lockedAchievements.length > 0" class="achievements-section" style="margin-top: 24px;">
+        <div class="section-title">
+          <span>🔒 Por desbloquear ({{ lockedAchievements.length }})</span>
+        </div>
+        <div class="achievements-grid">
+          <div *ngFor="let a of lockedAchievements" class="achievement-card locked">
+            <div class="ach-icon">{{ a.icon }}</div>
+            <div class="ach-content">
+              <h4 class="ach-name">{{ a.name }}</h4>
+              <p class="ach-desc">{{ a.description }}</p>
+
+              <!-- Progress towards unlocking -->
+              <div class="ach-progress-wrap">
+                <div class="ach-progress-text">
+                  <span>Progreso: {{ a.progress_current }} / {{ a.condition_value }}</span>
+                  <span>{{ a.progress_pct }}%</span>
+                </div>
+                <div class="ach-progress-bar">
+                  <div class="ach-progress-fill" [style.width.%]="a.progress_pct"></div>
+                </div>
+              </div>
+
+              <div class="ach-footer">
+                <span class="ach-rewards">+{{ a.points_reward }} pts | +{{ a.xp_reward }} XP</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="filteredAchievements.length === 0" class="empty-state">
+        <p>No se encontraron logros en esta categoría.</p>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         TAB 2: CANJE DE RECOMPENSAS
+         ════════════════════════════════════════ -->
+    <div *ngIf="activeTab === 'REWARDS'" class="tab-content">
+      <div class="section-title">
+        <span>🎁 Catálogo de Recompensas y Beneficios</span>
+      </div>
+
+      <div class="rewards-grid">
+        <div *ngFor="let r of rewards" class="reward-card" [class.unaffordable]="!r.can_afford || !r.level_met || r.stock <= 0">
+          <div class="reward-header">
+            <span class="reward-icon">{{ r.icon }}</span>
+            <span class="reward-category-badge">{{ r.category }}</span>
+          </div>
+
+          <h4 class="reward-title">{{ r.title }}</h4>
+          <p class="reward-desc">{{ r.description }}</p>
+
+          <div class="reward-meta">
+            <div class="reward-cost">
+              <span class="cost-value">🪙 {{ r.points_cost }} pts</span>
+            </div>
+            <div class="reward-req">
+              <span class="req-badge" [class.met]="r.level_met">Requiere Nivel {{ r.level_required }}</span>
+              <span class="stock-badge" [class.out]="r.stock <= 0">Stock: {{ r.stock }}</span>
+            </div>
+          </div>
+
+          <button 
+            class="btn-redeem" 
+            [disabled]="!r.can_afford || !r.level_met || r.stock <= 0 || redeemingId === r.id"
+            (click)="redeem(r)">
+            <span *ngIf="redeemingId !== r.id">
+              {{ r.stock <= 0 ? 'Agotado' : (!r.level_met ? 'Nivel Insuficiente' : (!r.can_afford ? 'Puntos Insuficientes' : 'Canjear Recompensa')) }}
+            </span>
+            <span *ngIf="redeemingId === r.id">Canjeando...</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- User's Redemptions History -->
+      <div *ngIf="summary.redemptions.length > 0" class="redemptions-section" style="margin-top: 32px;">
+        <div class="section-title">
+          <span>🎟️ Mis Recompensas Canjeadas ({{ summary.redemptions.length }})</span>
+        </div>
+        <div class="redemptions-grid">
+          <div *ngFor="let red of summary.redemptions" class="redemption-card">
+            <div class="red-icon">{{ red.reward_icon }}</div>
+            <div class="red-info">
+              <h5 class="red-title">{{ red.reward_title }}</h5>
+              <div class="red-code-box">
+                <span class="code-label">Código:</span>
+                <strong class="code-value">{{ red.code }}</strong>
+              </div>
+              <span class="red-date">Canjeado el {{ red.redeemed_at | date:'dd/MM/yyyy HH:mm' }} (-{{ red.points_spent }} pts)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         TAB 3: TABLA DE CLASIFICACIÓN (RANKING)
+         ════════════════════════════════════════ -->
+    <div *ngIf="activeTab === 'RANKING'" class="tab-content">
+      <div class="section-title">
+        <span>🥇 Ranking de Ciudadanos & Recicladores Líderes</span>
+      </div>
+
+      <div class="ranking-list">
+        <div 
+          *ngFor="let u of ranking" 
+          class="ranking-item" 
+          [class.current-user]="u.id === summary.user_id">
+          
+          <div class="rank-pos">
+            <span class="rank-badge">{{ getRankBadge(u.position) }}</span>
+          </div>
+
+          <div class="rank-user">
+            <div class="rank-avatar">
+              <span>{{ u.level_info.icon }}</span>
+            </div>
+            <div class="rank-user-details">
+              <span class="rank-username">{{ u.username }}</span>
+              <span class="rank-lvl-title">Nivel {{ u.level_info.level }}: {{ u.level_info.title }}</span>
+            </div>
+          </div>
+
+          <div class="rank-scores">
+            <div class="score-pill xp">
+              <span>⭐ {{ u.xp }} XP</span>
+            </div>
+            <div class="score-pill pts">
+              <span>🪙 {{ u.points }} pts</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         TAB 4: HISTORIAL DE PUNTOS Y XP
+         ════════════════════════════════════════ -->
+    <div *ngIf="activeTab === 'HISTORY'" class="tab-content">
+      <div class="section-title">
+        <span>📜 Historial de Transacciones de Puntos y XP</span>
+      </div>
+
+      <div *ngIf="summary.recent_transactions.length > 0" class="history-list">
+        <div *ngFor="let tx of summary.recent_transactions" class="history-item">
+          <div class="tx-icon" [class.negative]="tx.points < 0">
+            {{ tx.points >= 0 ? '➕' : '➖' }}
+          </div>
+          <div class="tx-details">
+            <h5 class="tx-desc">{{ tx.description }}</h5>
+            <span class="tx-date">{{ tx.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+          <div class="tx-values">
+            <span class="tx-pts" [class.negative]="tx.points < 0">
+              {{ tx.points >= 0 ? '+' : '' }}{{ tx.points }} pts
+            </span>
+            <span *ngIf="tx.xp > 0" class="tx-xp">+{{ tx.xp }} XP</span>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="summary.recent_transactions.length === 0" class="empty-state">
+        <p>Aún no tienes registros de puntos en tu historial.</p>
+      </div>
+    </div>
+
   </div>
 </div>

@@ -1,25 +1,137 @@
-<div class="page-wrapper">
-  <h2 class="page-title">📚 Guía de reciclaje</h2>
-  <p class="page-subtitle">
-    Aprende a separar correctamente tus residuos.
-  </p>
+<div class="guides-page">
 
-  <div class="guides-list">
+  <!-- ── Header ── -->
+  <div class="guides-header">
+    <div class="header-text">
+      <h1 class="page-title">📚 Guías de reciclaje</h1>
+      <p class="page-subtitle">
+        Aprende a separar correctamente tus residuos y cuida el planeta.
+      </p>
+    </div>
+
+    <!-- Search bar -->
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input
+        id="guides-search"
+        type="text"
+        class="search-input"
+        placeholder="Buscar guía…"
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="onSearchChange()"
+        autocomplete="off"
+      />
+      <button
+        *ngIf="searchQuery"
+        class="search-clear"
+        (click)="searchQuery = ''; loadAll()"
+        title="Limpiar búsqueda"
+      >✕</button>
+    </div>
+  </div>
+
+  <!-- ── Category tabs ── -->
+  <div class="category-strip">
+    <button
+      *ngFor="let cat of categories"
+      class="cat-pill"
+      [class.active]="activeCategory === cat.waste_type"
+      (click)="selectCategory(cat.waste_type)"
+      [id]="'cat-' + (cat.waste_type ?? 'all')"
+    >
+      <span class="cat-icon">{{ cat.icon }}</span>
+      {{ cat.label }}
+    </button>
+  </div>
+
+  <!-- ── Result count ── -->
+  <div class="result-count" *ngIf="!loading && !error && totalCount > 0">
+    <span *ngIf="activeCategory || searchQuery.trim(); else showAll">
+      {{ filteredCount }} de {{ totalCount }} guías
+    </span>
+    <ng-template #showAll>{{ totalCount }} guías disponibles</ng-template>
+  </div>
+
+  <!-- ── Loading ── -->
+  <div class="state-box loading-box" *ngIf="loading">
+    <div class="spinner"></div>
+    <span>Cargando guías…</span>
+  </div>
+
+  <!-- ── Error ── -->
+  <div class="state-box error-box" *ngIf="error && !loading">
+    <span class="state-icon">⚠️</span>
+    <p>No se pudo conectar con el servidor.</p>
+    <button class="btn btn-outline btn-sm" (click)="retry()">Reintentar</button>
+  </div>
+
+  <!-- ── Empty ── -->
+  <div class="state-box empty-box" *ngIf="!loading && !error && guides.length === 0">
+    <span class="state-icon">🔎</span>
+    <p>No se encontraron guías con esos criterios.</p>
+    <button class="btn btn-outline btn-sm" (click)="selectCategory(null)">Ver todas</button>
+  </div>
+
+  <!-- ── Guides list ── -->
+  <div class="guides-list" *ngIf="!loading && !error && guides.length > 0">
     <div
-      *ngFor="let guide of guides"
+      *ngFor="let guide of guides; trackBy: trackGuide"
       class="guide-card"
-      [class.expanded]="selectedGuide?.id === guide.id"
-      (click)="select(guide)">
-      <div class="guide-header">
-        <span class="guide-icon">{{ guide.icon }}</span>
-        <span class="guide-title">{{ guide.title }}</span>
-        <span class="guide-arrow">
-          {{ selectedGuide?.id === guide.id ? '▲' : '▼' }}
-        </span>
+      [class.expanded]="isExpanded(guide)"
+      [id]="'guide-' + guide.id"
+    >
+      <!-- Card header (always visible, clickable) -->
+      <div class="guide-header" (click)="toggle(guide)">
+        <div class="guide-icon-wrap">
+          <span class="guide-icon">{{ guide.icon || '♻️' }}</span>
+        </div>
+
+        <div class="guide-meta">
+          <span class="guide-title">{{ guide.title }}</span>
+          <div class="guide-chips">
+            <span
+              class="diff-chip"
+              [ngClass]="getDifficulty(guide.difficulty).cls"
+            >{{ getDifficulty(guide.difficulty).label }}</span>
+            <span class="time-chip">
+              🕒 {{ guide.reading_time_min }} min de lectura
+            </span>
+            <span class="cat-chip" *ngIf="guide.category">{{ guide.category }}</span>
+          </div>
+        </div>
+
+        <span class="guide-chevron" [class.open]="isExpanded(guide)">›</span>
       </div>
-      <div class="guide-content" *ngIf="selectedGuide?.id === guide.id">
-        {{ guide.content }}
+
+      <!-- Expanded content -->
+      <div class="guide-body" *ngIf="isExpanded(guide)">
+        <div class="guide-divider"></div>
+
+        <!-- Main text -->
+        <p class="guide-text">{{ guide.content }}</p>
+
+        <!-- Tips list -->
+        <div class="tips-section" *ngIf="guide.tips && guide.tips.length > 0">
+          <h3 class="tips-title">💡 Consejos prácticos</h3>
+          <ul class="tips-list">
+            <li *ngFor="let tip of guide.tips" class="tip-item">
+              <span class="tip-bullet">✓</span>
+              {{ tip }}
+            </li>
+          </ul>
+        </div>
+
+        <!-- Footer metadata -->
+        <div class="guide-footer">
+          <span class="footer-item" *ngIf="guide.updated_at">
+            🗓️ Actualizado: {{ guide.updated_at | date:'mediumDate' }}
+          </span>
+          <span class="footer-item" *ngIf="guide.created_by_username">
+            ✍️ {{ guide.created_by_username }}
+          </span>
+        </div>
       </div>
     </div>
   </div>
+
 </div>

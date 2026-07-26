@@ -17,6 +17,9 @@ class CollectionPointSerializer(serializers.ModelSerializer):
         source='waste_types',
     )
     capacity_pct = serializers.ReadOnlyField()
+    latitude = serializers.FloatField()
+    longitude = serializers.FloatField()
+    distance_km = serializers.SerializerMethodField()
 
     class Meta:
         model = CollectionPoint
@@ -25,7 +28,21 @@ class CollectionPointSerializer(serializers.ModelSerializer):
             'latitude', 'longitude',
             'capacity_max', 'capacity_current', 'capacity_pct',
             'waste_types', 'waste_type_ids',
-            'status', 'admin',
+            'status', 'admin', 'distance_km',
             'created_at', 'updated_at',
         ]
         read_only_fields = ['id', 'status', 'created_at', 'updated_at']
+
+    def get_distance_km(self, obj):
+        request = self.context.get('request')
+        if not request:
+            return None
+        user_lat = request.query_params.get('lat')
+        user_lng = request.query_params.get('lng')
+        if user_lat and user_lng:
+            try:
+                from apps.logistics.services import calcular_distancia
+                return calcular_distancia(user_lat, user_lng, obj.latitude, obj.longitude)
+            except Exception:
+                return None
+        return None

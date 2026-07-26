@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { MOCK_POINTS } from '../mocks/collection-points.mock';
+import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface WasteType {
   id: string;
@@ -21,8 +21,10 @@ export interface CollectionPoint {
   capacity_current: number;
   capacity_pct: number;
   waste_types: WasteType[];
-  status: 'NORMAL' | 'ALERTA' | 'CRITICO';
-  updated_at: string;
+  status: 'NORMAL' | 'ALERTA' | 'CRITICO' | 'INACTIVO';
+  distance_km?: number | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 @Injectable({
@@ -30,60 +32,45 @@ export interface CollectionPoint {
 })
 export class CollectionPointsService {
 
-  private readonly apiUrl =
-    'http://localhost:8000/api/collection-points';
+  private readonly apiUrl = `${environment.apiUrl}/collection-points`;
 
-  private readonly useMock = false;
-
-  constructor(
-    private http: HttpClient
-  ) {}
+  constructor(private http: HttpClient) {}
 
   getAll(
     wasteType?: string,
-    status?: string
+    status?: string,
+    search?: string,
+    lat?: number,
+    lng?: number
   ): Observable<CollectionPoint[]> {
-
-    if (this.useMock) {
-      return of(MOCK_POINTS as CollectionPoint[]);
-    }
 
     let params = new HttpParams();
 
-    if (wasteType) {
+    if (wasteType && wasteType !== 'TODOS') {
       params = params.set('waste_type', wasteType);
     }
 
-    if (status) {
+    if (status && status !== 'TODOS') {
       params = params.set('status', status);
     }
 
-    return this.http.get<CollectionPoint[]>(
-      `${this.apiUrl}/`,
-      { params }
-    );
-  }
-
-  getById(
-    id: string
-  ): Observable<CollectionPoint> {
-
-    if (this.useMock) {
-      return of(
-        MOCK_POINTS.find(p => p.id === id) as CollectionPoint
-      );
+    if (search) {
+      params = params.set('search', search);
     }
 
-    return this.http.get<CollectionPoint>(
-      `${this.apiUrl}/${id}/`
-    );
+    if (lat !== undefined && lng !== undefined) {
+      params = params.set('lat', lat.toString()).set('lng', lng.toString());
+    }
+
+    return this.http.get<CollectionPoint[]>(`${this.apiUrl}/`, { params });
+  }
+
+  getById(id: string): Observable<CollectionPoint> {
+    return this.http.get<CollectionPoint>(`${this.apiUrl}/${id}/`);
   }
 
   getWasteTypes(): Observable<WasteType[]> {
-
-    return this.http.get<WasteType[]>(
-      `${this.apiUrl}/waste-types/`
-    );
+    return this.http.get<WasteType[]>(`${this.apiUrl}/waste-types/`);
   }
 
   updateCapacity(
@@ -92,15 +79,9 @@ export class CollectionPointsService {
     waste_type = '',
     notes = ''
   ): Observable<any> {
-
     return this.http.patch(
       `${this.apiUrl}/${id}/capacidad/`,
-      {
-        capacity_current,
-        waste_type,
-        notes
-      }
+      { capacity_current, waste_type, notes }
     );
   }
-
 }
