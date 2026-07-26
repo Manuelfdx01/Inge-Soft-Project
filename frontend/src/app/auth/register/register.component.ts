@@ -45,7 +45,7 @@ export class RegisterComponent {
     this.loading = true;
     this.errorMsg = '';
 
-    this.http.post('http://localhost:8000/api/users/register/', this.form.value)
+    this.http.post('https://gomi-backend.onrender.com/api/users/register/', this.form.value)
       .subscribe({
         next: () => {
           this.loading = false;
