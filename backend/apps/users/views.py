@@ -59,9 +59,9 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='recicladores')
     def recicladores(self, request):
-        if not request.user.is_admin_gomi:
+        if not request.user.is_centro_acopio:
             return Response(
-                {'error': 'Solo administradores pueden ver esta lista.'},
+                {'error': 'Solo centros de acopio pueden ver esta lista.'},
                 status=status.HTTP_403_FORBIDDEN
             )
         disponible = request.query_params.get('disponible')

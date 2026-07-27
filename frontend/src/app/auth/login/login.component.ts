@@ -43,7 +43,6 @@ export class LoginComponent {
         const role = res.user?.role;
         if (role === 'CIUDADANO')      this.router.navigate(['/ciudadano/mapa']);
         if (role === 'RECICLADOR')     this.router.navigate(['/reciclador/mapa']);
-        if (role === 'ADMIN')          this.router.navigate(['/admin/dashboard']);
         if (role === 'CENTRO_ACOPIO') this.router.navigate(['/centro-acopio/dashboard']);
       },
       error: () => {

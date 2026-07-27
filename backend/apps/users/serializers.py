@@ -39,7 +39,29 @@ class RegisterSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        return User.objects.create_user(**validated_data)
+        user = User.objects.create_user(**validated_data)
+        if user.role == User.Role.CENTRO_ACOPIO:
+            from apps.collection_points.models import CollectionPoint
+            CollectionPoint.objects.create(
+                name=f"Centro de Acopio - {user.username}",
+                address="Dirección por definir",
+                latitude=4.6097,
+                longitude=-74.0817,
+                capacity_max=2000,
+                capacity_current=0,
+                status=CollectionPoint.Status.DISPONIBLE,
+                admin=user,
+                precio_kg={
+                    "PLASTICO": 1200,
+                    "VIDRIO": 450,
+                    "PAPEL": 800,
+                    "METAL": 3500,
+                    "ORGANICO": 200,
+                },
+                schedule="Lunes a Sábado: 7:00 AM - 6:00 PM",
+                phone=user.phone or "+57 300 000 0000",
+            )
+        return user
 
 
 class PublicUserSerializer(serializers.ModelSerializer):

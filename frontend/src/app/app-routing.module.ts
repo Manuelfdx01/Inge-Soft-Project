@@ -134,40 +134,10 @@ export const routes: Routes = [
 
   },
 
-  // ===============================
-  // ADMIN
-  // ===============================
-
   {
     path: 'admin',
-
-    canActivate: [AuthGuard, RoleGuard],
-
-    data: {
-      roles: ['ADMIN']
-    },
-
-    loadComponent: () =>
-      import('./shared/components/shell/shell.component')
-        .then(c => c.ShellComponent),
-
-    children: [
-
-      {
-        path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full'
-      },
-
-      {
-        path: 'dashboard',
-        loadComponent: () =>
-          import('./admin/dashboard/dashboard.component')
-            .then(c => c.DashboardComponent)
-      }
-
-    ]
-
+    redirectTo: 'centro-acopio',
+    pathMatch: 'full'
   },
 
   // ===============================

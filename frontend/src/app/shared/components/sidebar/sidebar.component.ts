@@ -81,18 +81,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
   ];
 
   // ===========================
-  // MENÚ ADMIN
-  // ===========================
-
-  menuAdmin: NavItem[] = [
-    {
-      icon: '📊',
-      label: 'Dashboard',
-      route: '/admin/dashboard'
-    }
-  ];
-
-  // ===========================
   // MENÚ CENTRO DE ACOPIO
   // ===========================
 
@@ -159,10 +147,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
           this.navItems = this.menuReciclador;
           break;
 
-        case 'ADMIN':
-          this.navItems = this.menuAdmin;
-          break;
-
         case 'CENTRO_ACOPIO':
           this.navItems = this.menuCentroAcopio;
           break;
@@ -184,7 +168,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
     const colors: Record<string, string> = {
       CIUDADANO:     '#2E7D32',
       RECICLADOR:    '#0F6E56',
-      ADMIN:         '#202124',
       CENTRO_ACOPIO: '#1565C0',
     };
 
