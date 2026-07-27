@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CentroAcopioService, CentroDashboard } from '../../core/services/centro-acopio.service';
@@ -11,20 +11,20 @@ import { CentroAcopioService, CentroDashboard } from '../../core/services/centro
   styleUrl: './dashboard.component.scss'
 })
 export class CentroDashboardComponent implements OnInit {
-  dashboardData: CentroDashboard | null = null;
-  loading = true;
+  readonly dashboardData = signal<CentroDashboard | null>(null);
+  readonly loading = signal(true);
 
   constructor(private centroService: CentroAcopioService) {}
 
   ngOnInit(): void {
     this.centroService.getDashboard().subscribe({
       next: (data) => {
-        this.dashboardData = data;
-        this.loading = false;
+        this.dashboardData.set(data);
+        this.loading.set(false);
       },
       error: (err) => {
         console.error('Error cargando dashboard:', err);
-        this.loading = false;
+        this.loading.set(false);
       }
     });
   }

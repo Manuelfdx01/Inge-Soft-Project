@@ -1,38 +1,38 @@
 <div class="dashboard-page">
   <div class="header">
     <h1>🏭 Dashboard - Centro de Acopio</h1>
-    <p class="subtitle" *ngIf="dashboardData">{{ dashboardData.centro.name }}</p>
+    <p class="subtitle" *ngIf="dashboardData()">{{ dashboardData()!.centro.name }}</p>
   </div>
 
-  <div class="loading-spinner" *ngIf="loading">Cargando métricas...</div>
+  <div class="loading-spinner" *ngIf="loading()">Cargando métricas...</div>
 
-  <div class="dashboard-grid" *ngIf="!loading && dashboardData">
+  <div class="dashboard-grid" *ngIf="!loading() && dashboardData()">
     <!-- Card Ocupación Actual -->
     <div class="card stat-card">
       <h3>Capacidad Actual</h3>
-      <div class="big-number" [style.color]="getBarColor(dashboardData.centro.capacity_pct)">
-        {{ dashboardData.centro.capacity_pct }}%
+      <div class="big-number" [style.color]="getBarColor(dashboardData()!.centro.capacity_pct)">
+        {{ dashboardData()!.centro.capacity_pct }}%
       </div>
       <div class="progress-bar">
-        <div class="fill" [style.width.%]="dashboardData.centro.capacity_pct" [style.background]="getBarColor(dashboardData.centro.capacity_pct)"></div>
+        <div class="fill" [style.width.%]="dashboardData()!.centro.capacity_pct" [style.background]="getBarColor(dashboardData()!.centro.capacity_pct)"></div>
       </div>
-      <p class="stat-detail">{{ dashboardData.centro.capacity_current }} / {{ dashboardData.centro.capacity_max }} kg</p>
+      <p class="stat-detail">{{ dashboardData()!.centro.capacity_current }} / {{ dashboardData()!.centro.capacity_max }} kg</p>
     </div>
 
     <!-- Card Calificación Promedio -->
     <div class="card stat-card">
       <h3>Calificación Promedio</h3>
       <div class="big-number warning-color">
-        ★ {{ dashboardData.avg_rating || 'N/A' }}
+        ★ {{ dashboardData()!.avg_rating || 'N/A' }}
       </div>
-      <p class="stat-detail">Basado en {{ dashboardData.total_reviews }} comentarios</p>
+      <p class="stat-detail">Basado en {{ dashboardData()!.total_reviews }} comentarios</p>
     </div>
 
     <!-- Card Alertas Activas -->
     <div class="card stat-card">
       <h3>Alertas Activas</h3>
       <div class="big-number danger-color">
-        {{ dashboardData.alertas_activas }}
+        {{ dashboardData()!.alertas_activas }}
       </div>
       <p class="stat-detail">Translados o alertas en proceso</p>
     </div>
@@ -41,7 +41,7 @@
     <div class="card chart-card full-width">
       <h3>Ocupación Semanal Promedio</h3>
       <div class="weekly-bars">
-        <div *ngFor="let dia of dashboardData.ocupacion_semanal" class="bar-col">
+        <div *ngFor="let dia of dashboardData()!.ocupacion_semanal" class="bar-col">
           <div class="bar-fill-wrap">
             <div class="bar-fill" [style.height.%]="dia.promedio_pct" [style.background]="getBarColor(dia.promedio_pct)"></div>
           </div>
@@ -55,7 +55,7 @@
     <div class="card list-card">
       <h3>Calificaciones y Comentarios Recientes</h3>
       <div class="list-container">
-        <div *ngFor="let c of dashboardData.calificaciones_recientes" class="list-item">
+        <div *ngFor="let c of dashboardData()!.calificaciones_recientes" class="list-item">
           <div class="item-header">
             <strong>👤 {{ c.user }}</strong>
             <span class="stars">★ {{ c.rating }}/5</span>
@@ -63,7 +63,7 @@
           <p class="comment">{{ c.comment || 'Sin comentario.' }}</p>
           <span class="date">{{ c.created_at | date:'short' }}</span>
         </div>
-        <div *ngIf="dashboardData.calificaciones_recientes.length === 0" class="empty-list">No hay calificaciones.</div>
+        <div *ngIf="dashboardData()!.calificaciones_recientes.length === 0" class="empty-list">No hay calificaciones.</div>
       </div>
     </div>
 
@@ -71,7 +71,7 @@
     <div class="card list-card">
       <h3>Reportes Recientes</h3>
       <div class="list-container">
-        <div *ngFor="let r of dashboardData.reportes_recientes" class="list-item">
+        <div *ngFor="let r of dashboardData()!.reportes_recientes" class="list-item">
           <div class="item-header">
             <strong>📢 {{ r.type }}</strong>
             <span class="badge" [class.badge-pending]="r.status === 'PENDIENTE'">{{ r.status }}</span>
@@ -79,7 +79,7 @@
           <p class="comment">{{ r.description }}</p>
           <span class="date">{{ r.created_at | date:'short' }}</span>
         </div>
-        <div *ngIf="dashboardData.reportes_recientes.length === 0" class="empty-list">No hay reportes recientes.</div>
+        <div *ngIf="dashboardData()!.reportes_recientes.length === 0" class="empty-list">No hay reportes recientes.</div>
       </div>
     </div>
   </div>
