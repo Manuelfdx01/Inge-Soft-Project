@@ -1,38 +1,86 @@
-<div style="padding: 24px; font-family: monospace;">
+<div class="dashboard-page">
+  <div class="header">
+    <h1>🏭 Dashboard - Centro de Acopio</h1>
+    <p class="subtitle" *ngIf="dashboardData">{{ dashboardData.centro.name }}</p>
+  </div>
 
-  <h1 style="color: #2563eb;">
-    Dashboard Centro de Acopio
-  </h1>
+  <div class="loading-spinner" *ngIf="loading">Cargando métricas...</div>
 
-  <hr>
+  <div class="dashboard-grid" *ngIf="!loading && dashboardData">
+    <!-- Card Ocupación Actual -->
+    <div class="card stat-card">
+      <h3>Capacidad Actual</h3>
+      <div class="big-number" [style.color]="getBarColor(dashboardData.centro.capacity_pct)">
+        {{ dashboardData.centro.capacity_pct }}%
+      </div>
+      <div class="progress-bar">
+        <div class="fill" [style.width.%]="dashboardData.centro.capacity_pct" [style.background]="getBarColor(dashboardData.centro.capacity_pct)"></div>
+      </div>
+      <p class="stat-detail">{{ dashboardData.centro.capacity_current }} / {{ dashboardData.centro.capacity_max }} kg</p>
+    </div>
 
-  <p><strong>loading:</strong> {{ loading }}</p>
+    <!-- Card Calificación Promedio -->
+    <div class="card stat-card">
+      <h3>Calificación Promedio</h3>
+      <div class="big-number warning-color">
+        ★ {{ dashboardData.avg_rating || 'N/A' }}
+      </div>
+      <p class="stat-detail">Basado en {{ dashboardData.total_reviews }} comentarios</p>
+    </div>
 
-  <p><strong>dashboardData existe:</strong> {{ dashboardData !== null }}</p>
+    <!-- Card Alertas Activas -->
+    <div class="card stat-card">
+      <h3>Alertas Activas</h3>
+      <div class="big-number danger-color">
+        {{ dashboardData.alertas_activas }}
+      </div>
+      <p class="stat-detail">Translados o alertas en proceso</p>
+    </div>
 
-  <p><strong>Nombre del centro:</strong> {{ dashboardData?.centro?.name }}</p>
+    <!-- Ocupación Semanal -->
+    <div class="card chart-card full-width">
+      <h3>Ocupación Semanal Promedio</h3>
+      <div class="weekly-bars">
+        <div *ngFor="let dia of dashboardData.ocupacion_semanal" class="bar-col">
+          <div class="bar-fill-wrap">
+            <div class="bar-fill" [style.height.%]="dia.promedio_pct" [style.background]="getBarColor(dia.promedio_pct)"></div>
+          </div>
+          <span class="bar-label">{{ dia.dia }}</span>
+          <span class="bar-val">{{ dia.promedio_pct }}%</span>
+        </div>
+      </div>
+    </div>
 
-  <p><strong>Capacidad:</strong> {{ dashboardData?.centro?.capacity_pct }}%</p>
+    <!-- Calificaciones Recientes -->
+    <div class="card list-card">
+      <h3>Calificaciones y Comentarios Recientes</h3>
+      <div class="list-container">
+        <div *ngFor="let c of dashboardData.calificaciones_recientes" class="list-item">
+          <div class="item-header">
+            <strong>👤 {{ c.user }}</strong>
+            <span class="stars">★ {{ c.rating }}/5</span>
+          </div>
+          <p class="comment">{{ c.comment || 'Sin comentario.' }}</p>
+          <span class="date">{{ c.created_at | date:'short' }}</span>
+        </div>
+        <div *ngIf="dashboardData.calificaciones_recientes.length === 0" class="empty-list">No hay calificaciones.</div>
+      </div>
+    </div>
 
-  <p><strong>Calificación:</strong> {{ dashboardData?.avg_rating }}</p>
-
-  <p><strong>Total reviews:</strong> {{ dashboardData?.total_reviews }}</p>
-
-  <p><strong>Alertas:</strong> {{ dashboardData?.alertas_activas }}</p>
-
-  <hr>
-
-  <h2>JSON completo</h2>
-
-  <pre style="
-    background:#f5f5f5;
-    padding:16px;
-    border-radius:8px;
-    overflow:auto;
-    max-height:600px;
-    white-space:pre-wrap;
-  ">
-{{ dashboardData | json }}
-  </pre>
-
+    <!-- Reportes Recientes -->
+    <div class="card list-card">
+      <h3>Reportes Recientes</h3>
+      <div class="list-container">
+        <div *ngFor="let r of dashboardData.reportes_recientes" class="list-item">
+          <div class="item-header">
+            <strong>📢 {{ r.type }}</strong>
+            <span class="badge" [class.badge-pending]="r.status === 'PENDIENTE'">{{ r.status }}</span>
+          </div>
+          <p class="comment">{{ r.description }}</p>
+          <span class="date">{{ r.created_at | date:'short' }}</span>
+        </div>
+        <div *ngIf="dashboardData.reportes_recientes.length === 0" class="empty-list">No hay reportes recientes.</div>
+      </div>
+    </div>
+  </div>
 </div>
