@@ -71,3 +71,12 @@ def notificar_reporte_nuevo_a_centro(report):
             type='REPORTE_NUEVO',
             message=f'📝 Nuevo reporte en tu centro "{report.point.name}": {report.get_type_display()}.',
         )
+
+
+def notificar_reporte_actualizado(report):
+    """Notifica al usuario cuando su reporte cambia de estado."""
+    crear_notificacion(
+        user=report.user,
+        type='GENERAL',
+        message=f'📋 Tu reporte en "{report.point.name}" cambió a estado: {report.get_status_display()}.',
+    )

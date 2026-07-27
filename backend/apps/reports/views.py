@@ -142,5 +142,12 @@ class ReportViewSet(viewsets.ModelViewSet):
             )
         report.status = new_status
         report.save()
+
+        try:
+            from apps.users.notifications import notificar_reporte_actualizado
+            notificar_reporte_actualizado(report)
+        except Exception as e:
+            logger.error(f'Error al notificar reporte actualizado: {e}')
+
         logger.info(f'Reporte {pk} cambió a {new_status}')
         return Response(ReportSerializer(report).data)

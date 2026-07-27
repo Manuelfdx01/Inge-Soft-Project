@@ -73,7 +73,7 @@ class CollectionPointViewSet(viewsets.ModelViewSet):
     ).prefetch_related("waste_types")
 
     def get_permissions(self):
-        if self.action in ["list", "retrieve"]:
+        if self.action in ["list", "retrieve", "reviews"]:
             return [permissions.AllowAny()]
 
         if self.action == "capacidad":
@@ -267,6 +267,78 @@ class CollectionPointViewSet(viewsets.ModelViewSet):
 
         logger.info("Materiales actualizados en %s por %s", point.name, request.user.username)
         return Response(CollectionPointSerializer(point).data)
+
+    @action(
+        detail=True,
+        methods=["get", "post"],
+        url_path="reviews",
+        permission_classes=[permissions.AllowAny],
+    )
+    def reviews(self, request, pk=None):
+        point = self.get_object()
+        if request.method == "GET":
+            reviews_qs = Review.objects.filter(point=point).order_by("-created_at")
+            return Response([
+                {
+                    'id': r.id,
+                    'user': r.user.id,
+                    'username': r.user.username,
+                    'rating': r.rating,
+                    'comment': r.comment,
+                    'created_at': r.created_at,
+                }
+                for r in reviews_qs
+            ])
+
+        if not request.user or not request.user.is_authenticated:
+            return Response(
+                {"error": "Debes estar autenticado para calificar."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        rating = request.data.get("rating")
+        comment = request.data.get("comment", "")
+        try:
+            rating_val = int(rating)
+            if not (1 <= rating_val <= 5):
+                raise ValueError()
+        except (TypeError, ValueError):
+            return Response(
+                {"error": "rating debe ser un número entero entre 1 y 5."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        review, created = Review.objects.update_or_create(
+            user=request.user,
+            point=point,
+            defaults={"rating": rating_val, "comment": comment},
+        )
+
+        try:
+            from apps.gamification.services import otorgar_puntos_y_xp
+            otorgar_puntos_y_xp(request.user, "crear_opinion")
+        except Exception as e:
+            logger.error(f"Error al otorgar puntos por opinión: {e}")
+
+        if point.admin and point.admin.role == "CENTRO_ACOPIO":
+            try:
+                from apps.users.notifications import crear_notificacion
+                crear_notificacion(
+                    user=point.admin,
+                    type="GENERAL",
+                    message=f"⭐ {request.user.username} calificó tu centro con {review.rating} estrellas.",
+                )
+            except Exception as e:
+                logger.error(f"Error al notificar calificación al centro: {e}")
+
+        return Response({
+            "id": review.id,
+            "user": request.user.id,
+            "username": request.user.username,
+            "rating": review.rating,
+            "comment": review.comment,
+            "created_at": review.created_at,
+        }, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
 
     @action(
         detail=False,
