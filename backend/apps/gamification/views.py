@@ -21,9 +21,9 @@ from .services import canjear_recompensa, inicializar_gamification_data
 logger = logging.getLogger(__name__)
 
 
-class IsAdminGomi(permissions.BasePermission):
+class IsCentroAcopio(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role == 'ADMIN'
+        return request.user.is_authenticated and request.user.role == 'CENTRO_ACOPIO'
 
 
 class RecyclingGuideViewSet(viewsets.ModelViewSet):
@@ -42,7 +42,7 @@ class RecyclingGuideViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
             return [permissions.AllowAny()]
-        return [IsAdminGomi()]
+        return [IsCentroAcopio()]
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)

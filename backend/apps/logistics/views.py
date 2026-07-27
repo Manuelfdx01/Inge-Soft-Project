@@ -63,7 +63,7 @@ class LogisticsAlertViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, methods=['patch'], url_path='completar')
     def completar(self, request, pk=None):
         alert = self.get_object()
-        if alert.reciclador != request.user and request.user.role != 'ADMIN':
+        if alert.reciclador != request.user and request.user.role != 'CENTRO_ACOPIO':
             return Response(
                 {'error': 'Solo el reciclador asignado puede completar este traslado.'},
                 status=status.HTTP_403_FORBIDDEN,

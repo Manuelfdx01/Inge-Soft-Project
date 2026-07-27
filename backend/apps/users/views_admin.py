@@ -12,13 +12,13 @@ from apps.reports.models import Report, Proposal
 logger = logging.getLogger(__name__)
 
 
-class IsAdminGomi(permissions.BasePermission):
+class IsCentroAcopio(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role == 'ADMIN'
+        return request.user.is_authenticated and request.user.role == 'CENTRO_ACOPIO'
 
 
 class AdminMetricsView(APIView):
-    permission_classes = [IsAdminGomi]
+    permission_classes = [IsCentroAcopio]
 
     def get(self, request):
         ahora = timezone.now()

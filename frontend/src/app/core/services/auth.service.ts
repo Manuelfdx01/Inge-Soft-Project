@@ -7,7 +7,7 @@ export interface User {
   id: string;
   username: string;
   email: string;
-  role: 'CIUDADANO' | 'RECICLADOR' | 'ADMIN' | 'CENTRO_ACOPIO';
+  role: 'CIUDADANO' | 'RECICLADOR' | 'CENTRO_ACOPIO';
   points: number;
   is_available: boolean;
 }

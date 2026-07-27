@@ -7,7 +7,6 @@ class User(AbstractUser):
     class Role(models.TextChoices):
         CIUDADANO     = 'CIUDADANO',     'Ciudadano'
         RECICLADOR    = 'RECICLADOR',    'Reciclador'
-        ADMIN         = 'ADMIN',         'Administrador'
         CENTRO_ACOPIO = 'CENTRO_ACOPIO', 'Centro de Acopio'
 
     role = models.CharField(
@@ -38,10 +37,6 @@ class User(AbstractUser):
     @property
     def is_ciudadano(self):
         return self.role == self.Role.CIUDADANO
-
-    @property
-    def is_admin_gomi(self):
-        return self.role == self.Role.ADMIN
 
     @property
     def is_centro_acopio(self):

@@ -12,7 +12,7 @@ class CollectionPointTestCase(TestCase):
         self.admin = User.objects.create_user(
             username='admintest',
             password='admin1234pass',
-            role='ADMIN',
+            role='CENTRO_ACOPIO',
         )
         self.ciudadano = User.objects.create_user(
             username='ciudadanotest',

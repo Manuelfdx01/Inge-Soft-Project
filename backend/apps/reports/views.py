@@ -11,14 +11,9 @@ from .serializers import (
 logger = logging.getLogger(__name__)
 
 
-class IsAdminGomi(permissions.BasePermission):
+class IsCentroAcopio(permissions.BasePermission):
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role == 'ADMIN'
-
-
-class IsAdminOrCentroAcopio(permissions.BasePermission):
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role in ('ADMIN', 'CENTRO_ACOPIO')
+        return request.user.is_authenticated and request.user.role == 'CENTRO_ACOPIO'
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -60,7 +55,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'ADMIN':
+        if user.role == 'CENTRO_ACOPIO':
             return Proposal.objects.all().order_by('-created_at')
         return Proposal.objects.filter(user=user).order_by('-created_at')
 
@@ -74,7 +69,7 @@ class ProposalViewSet(viewsets.ModelViewSet):
             logger.error(f'Error al otorgar puntos por propuesta: {e}')
 
     @action(detail=True, methods=['patch'], url_path='estado',
-            permission_classes=[IsAdminGomi])
+            permission_classes=[IsCentroAcopio])
     def estado(self, request, pk=None):
         proposal = self.get_object()
         serializer = ProposalStatusSerializer(proposal, data=request.data, partial=True)
@@ -98,14 +93,14 @@ class ReportViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role in ('ADMIN', 'CENTRO_ACOPIO'):
-            if user.role == 'CENTRO_ACOPIO':
-                from apps.collection_points.models import CollectionPoint
-                try:
-                    point = CollectionPoint.objects.get(admin=user)
-                    return Report.objects.filter(point=point).order_by('-created_at')
-                except CollectionPoint.DoesNotExist:
-                    return Report.objects.none()
+        if user.role == 'CENTRO_ACOPIO':
+            from apps.collection_points.models import CollectionPoint
+            try:
+                points = CollectionPoint.objects.filter(admin=user)
+                if points.exists():
+                    return Report.objects.filter(point__in=points).order_by('-created_at')
+            except Exception:
+                pass
             return Report.objects.all().order_by('-created_at')
         return Report.objects.filter(user=user).order_by('-created_at')
 
@@ -127,7 +122,7 @@ class ReportViewSet(viewsets.ModelViewSet):
             logger.error(f'Error al notificar reporte al centro: {e}')
 
     @action(detail=True, methods=['patch'], url_path='estado',
-            permission_classes=[IsAdminOrCentroAcopio])
+            permission_classes=[IsCentroAcopio])
     def estado(self, request, pk=None):
         report = self.get_object()
         new_status = request.data.get('status')

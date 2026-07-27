@@ -85,3 +85,16 @@ class AuthTestCase(TestCase):
         res = self.client.patch('/api/users/disponibilidad/')
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data['is_available'], True)
+
+    def test_registro_centro_acopio_crea_punto(self):
+        """Al registrar un Centro de Acopio se crea automáticamente su CollectionPoint."""
+        res = self.client.post('/api/users/register/', {
+            'username': 'centrotest',
+            'email': 'centro@test.com',
+            'password': 'password123',
+            'role': 'CENTRO_ACOPIO',
+        })
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        from apps.collection_points.models import CollectionPoint
+        point = CollectionPoint.objects.filter(admin__username='centrotest').first()
+        self.assertIsNotNone(point)
