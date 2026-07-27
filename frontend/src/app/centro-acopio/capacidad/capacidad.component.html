@@ -1,0 +1,78 @@
+<div class="ca-page">
+  <div class="ca-header">
+    <div>
+      <h1>⚖️ Gestión de Capacidad</h1>
+      <p class="subtitle" *ngIf="centro()">{{ centro()!.name }}</p>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="ca-loading" *ngIf="loading()">
+    <div class="spinner"></div>
+    <span>Cargando datos del centro...</span>
+  </div>
+
+  <!-- Error inicial -->
+  <div class="ca-alert ca-alert--error" *ngIf="errorMsg() && !centro()">
+    ⚠️ {{ errorMsg() }}
+  </div>
+
+  <!-- Contenido principal -->
+  <div class="ca-content" *ngIf="!loading() && centro()">
+
+    <!-- Estado actual -->
+    <div class="status-banner" [class.status-ok]="pct < 61" [class.status-warn]="pct >= 61 && pct < 86" [class.status-danger]="pct >= 86">
+      <div class="status-info">
+        <span class="status-label">Ocupación actual</span>
+        <span class="status-value" [style.color]="barColor">{{ pct }}%</span>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-track">
+          <div class="progress-fill" [style.width.%]="pct" [style.background]="barColor"></div>
+        </div>
+        <span class="progress-detail">{{ centro()!.capacity_current }} / {{ centro()!.capacity_max }} kg · Estado: <strong>{{ centro()!.status }}</strong></span>
+      </div>
+    </div>
+
+    <div class="ca-grid">
+      <!-- Card: Capacidad Máxima -->
+      <div class="ca-card">
+        <div class="card-icon">🏗️</div>
+        <h3>Capacidad Máxima</h3>
+        <p class="card-desc">Define el límite total de almacenamiento del centro en kilogramos.</p>
+        <div class="field-group">
+          <label for="newMax">Nuevo valor (kg)</label>
+          <div class="input-row">
+            <input id="newMax" type="number" [(ngModel)]="newMax" min="1" placeholder="Ej: 5000" />
+            <button class="btn btn--secondary" (click)="saveMax()" [disabled]="saving()">
+              {{ saving() ? 'Guardando…' : 'Guardar' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card: Capacidad Actual -->
+      <div class="ca-card">
+        <div class="card-icon">📦</div>
+        <h3>Capacidad Actual</h3>
+        <p class="card-desc">Registra el volumen actual de material almacenado en el centro.</p>
+        <div class="field-group">
+          <label for="newCurrent">Valor actual (kg)</label>
+          <div class="input-row">
+            <input id="newCurrent" type="number" [(ngModel)]="newCurrent" min="0" [max]="newMax" placeholder="Ej: 2500" />
+            <button class="btn btn--primary" (click)="saveCurrent()" [disabled]="saving()">
+              {{ saving() ? 'Guardando…' : 'Actualizar' }}
+            </button>
+          </div>
+        </div>
+        <div class="live-pct">
+          Vista previa: <span [style.color]="barColor"><strong>{{ pct }}%</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feedback -->
+    <div class="ca-alert ca-alert--success" *ngIf="successMsg()">✅ {{ successMsg() }}</div>
+    <div class="ca-alert ca-alert--error"   *ngIf="errorMsg() && centro()">⚠️ {{ errorMsg() }}</div>
+  </div>
+</div>

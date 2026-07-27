@@ -1,0 +1,64 @@
+<div class="ca-page">
+  <div class="ca-header">
+    <div>
+      <h1>⭐ Calificaciones y Reseñas</h1>
+      <p class="subtitle">Opiniones recibidas por tu centro</p>
+    </div>
+  </div>
+
+  <div class="ca-loading" *ngIf="loading()">
+    <div class="spinner"></div>
+    <span>Cargando calificaciones...</span>
+  </div>
+
+  <div class="ca-alert ca-alert--error" *ngIf="errorMsg()">⚠️ {{ errorMsg() }}</div>
+
+  <div class="ca-content" *ngIf="!loading()">
+
+    <!-- Resumen general -->
+    <div class="summary-card" *ngIf="reviews().length > 0">
+      <div class="avg-block">
+        <span class="avg-number">{{ avgRating() }}</span>
+        <div class="avg-stars">★★★★★</div>
+        <span class="avg-sub">{{ reviews().length }} opiniones</span>
+      </div>
+      <div class="dist-block">
+        <div class="dist-row" *ngFor="let d of distribution()">
+          <span class="dist-star">{{ d.star }}★</span>
+          <div class="dist-bar-track">
+            <div class="dist-bar-fill" [style.width.%]="d.pct"></div>
+          </div>
+          <span class="dist-count">{{ d.count }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de reseñas -->
+    <div class="reviews-list" *ngIf="reviews().length > 0">
+      <div class="review-card" *ngFor="let item of reviews()">
+        <div class="rv-header">
+          <div class="rv-user">
+            <div class="avatar">{{ item.user[0].toUpperCase() }}</div>
+            <div class="user-info">
+              <strong>{{ item.user }}</strong>
+              <span class="rv-date">{{ item.created_at | date:'mediumDate' }}</span>
+            </div>
+          </div>
+          <div class="rv-stars" [class.stars-5]="item.rating === 5" [class.stars-low]="item.rating <= 2">
+            {{ stars(item.rating) }}
+          </div>
+        </div>
+        <p class="rv-comment" *ngIf="item.comment">{{ item.comment }}</p>
+        <p class="rv-comment rv-comment--empty" *ngIf="!item.comment">Sin comentario.</p>
+      </div>
+    </div>
+
+    <!-- Estado vacío -->
+    <div class="empty-state" *ngIf="reviews().length === 0">
+      <div class="empty-icon">⭐</div>
+      <h3>Sin calificaciones aún</h3>
+      <p>Cuando los usuarios califiquen tu centro, las reseñas aparecerán aquí.</p>
+    </div>
+
+  </div>
+</div>

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CentroAcopioService } from '../../core/services/centro-acopio.service';
@@ -8,81 +8,88 @@ import { CollectionPoint } from '../../core/services/collection-points.service';
   selector: 'app-centro-capacidad',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  template: `
-    <div class="page-container">
-      <h2>⚖️ Actualizar Capacidad del Centro</h2>
-      <div *ngIf="loading">Cargando datos...</div>
-      <div *ngIf="!loading && centro" class="card">
-        <h3>{{ centro.name }}</h3>
-        <p><strong>Capacidad Actual:</strong> {{ centro.capacity_current }} / {{ centro.capacity_max }} kg ({{ centro.capacity_pct }}%)</p>
-
-        <div class="form-group">
-          <label>Nueva Capacidad Máxima (kg):</label>
-          <input type="number" [(ngModel)]="newMax" min="1" />
-          <button class="btn" (click)="saveMax()">Guardar Capacidad Máxima</button>
-        </div>
-
-        <hr />
-
-        <div class="form-group">
-          <label>Nueva Capacidad Actual (kg):</label>
-          <input type="number" [(ngModel)]="newCurrent" min="0" [max]="newMax" />
-          <button class="btn btn-primary" (click)="saveCurrent()">Actualizar Capacidad Actual</button>
-        </div>
-
-        <p class="success" *ngIf="successMsg">✅ {{ successMsg }}</p>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .page-container { padding: 24px; font-family: sans-serif; }
-    .card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; max-width: 500px; }
-    .form-group { margin: 16px 0; display: flex; flex-direction: column; gap: 8px; }
-    input { padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1; }
-    .btn { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; background: #e2e8f0; }
-    .btn-primary { background: #10b981; color: #fff; }
-    .success { color: #10b981; font-weight: bold; }
-  `]
+  templateUrl: './capacidad.component.html',
+  styleUrl: './capacidad.component.scss'
 })
 export class CapacidadComponent implements OnInit {
-  centro: CollectionPoint | null = null;
-  loading = true;
+  readonly centro = signal<CollectionPoint | null>(null);
+  readonly loading = signal(true);
+  readonly saving = signal(false);
+  readonly successMsg = signal('');
+  readonly errorMsg = signal('');
+
   newMax = 100;
   newCurrent = 0;
-  successMsg = '';
 
   constructor(private centroService: CentroAcopioService) {}
 
   ngOnInit(): void {
     this.centroService.getMiCentro().subscribe({
       next: (data) => {
-        this.centro = data;
+        this.centro.set(data);
         this.newMax = data.capacity_max;
         this.newCurrent = data.capacity_current;
-        this.loading = false;
+        this.loading.set(false);
       },
-      error: () => this.loading = false
+      error: () => {
+        this.errorMsg.set('No se pudo cargar el centro. Intenta de nuevo.');
+        this.loading.set(false);
+      }
     });
   }
 
+  get pct(): number {
+    const c = this.centro();
+    if (!c || c.capacity_max === 0) return 0;
+    return Math.round((this.newCurrent / this.newMax) * 100);
+  }
+
+  get barColor(): string {
+    const p = this.pct;
+    if (p >= 86) return '#EF5350';
+    if (p >= 61) return '#FFA726';
+    return '#2E7D32';
+  }
+
   saveMax(): void {
-    if (!this.centro) return;
-    this.centroService.updateCapacidadMax(this.centro.id, this.newMax).subscribe({
+    const c = this.centro();
+    if (!c) return;
+    this.saving.set(true);
+    this.successMsg.set('');
+    this.centroService.updateCapacidadMax(c.id, this.newMax).subscribe({
       next: (res) => {
-        this.centro = res;
-        this.successMsg = 'Capacidad máxima actualizada.';
+        this.centro.set(res);
+        this.newMax = res.capacity_max;
+        this.newCurrent = res.capacity_current;
+        this.successMsg.set('Capacidad máxima actualizada correctamente.');
+        this.saving.set(false);
+      },
+      error: () => {
+        this.errorMsg.set('Error al guardar. Intenta de nuevo.');
+        this.saving.set(false);
       }
     });
   }
 
   saveCurrent(): void {
-    if (!this.centro) return;
-    this.centroService.updateCapacidadActual(this.centro.id, this.newCurrent).subscribe({
+    const c = this.centro();
+    if (!c) return;
+    this.saving.set(true);
+    this.successMsg.set('');
+    this.centroService.updateCapacidadActual(c.id, this.newCurrent).subscribe({
       next: (res) => {
-        this.centro!.capacity_current = res.capacity_current;
-        this.centro!.capacity_pct = res.capacity_pct;
-        this.centro!.status = res.status;
-        this.successMsg = 'Capacidad actualizada correctamente.';
+        this.centro.update(prev => prev ? {
+          ...prev,
+          capacity_current: res.capacity_current,
+          capacity_pct: res.capacity_pct,
+          status: res.status
+        } : null);
+        this.successMsg.set('Capacidad actual registrada. Estado actualizado a: ' + res.status);
+        this.saving.set(false);
+      },
+      error: () => {
+        this.errorMsg.set('Error al actualizar la capacidad.');
+        this.saving.set(false);
       }
     });
   }

@@ -1,0 +1,67 @@
+<div class="ca-page">
+  <div class="ca-header">
+    <div>
+      <h1>🔄 Estado Operativo</h1>
+      <p class="subtitle" *ngIf="centro()">{{ centro()!.name }}</p>
+    </div>
+  </div>
+
+  <div class="ca-loading" *ngIf="loading()">
+    <div class="spinner"></div>
+    <span>Cargando estado del centro...</span>
+  </div>
+
+  <div class="ca-alert ca-alert--error" *ngIf="errorMsg() && !centro()">⚠️ {{ errorMsg() }}</div>
+
+  <div class="ca-content" *ngIf="!loading() && centro()">
+    <!-- Estado actual -->
+    <div class="current-status">
+      <span class="cs-label">Estado actual</span>
+      <div class="cs-badge" [style.background]="currentOption.color + '22'" [style.color]="currentOption.color" [style.border-color]="currentOption.color + '55'">
+        {{ currentOption.icon }} {{ currentOption.label }}
+      </div>
+    </div>
+
+    <p class="page-desc">Selecciona el nuevo estado operativo. Los recicladores serán notificados automáticamente del cambio.</p>
+
+    <!-- Opciones de estado -->
+    <div class="status-options">
+      <label
+        *ngFor="let opt of statusOptions"
+        class="status-option"
+        [class.status-option--selected]="selectedStatus === opt.value"
+        [for]="'status-' + opt.value"
+        [style.--accent]="opt.color"
+      >
+        <input
+          type="radio"
+          [id]="'status-' + opt.value"
+          name="status"
+          [value]="opt.value"
+          [(ngModel)]="selectedStatus"
+          class="sr-only"
+        />
+        <div class="opt-icon">{{ opt.icon }}</div>
+        <div class="opt-info">
+          <strong>{{ opt.label }}</strong>
+          <p>{{ opt.description }}</p>
+        </div>
+        <div class="opt-check" *ngIf="selectedStatus === opt.value">✓</div>
+      </label>
+    </div>
+
+    <div class="action-row">
+      <button
+        class="btn btn--primary"
+        (click)="guardarEstado()"
+        [disabled]="saving() || selectedStatus === centro()!.status"
+      >
+        {{ saving() ? '⏳ Actualizando...' : '💾 Confirmar Cambio' }}
+      </button>
+      <span class="no-change" *ngIf="selectedStatus === centro()!.status">El estado seleccionado es el actual.</span>
+    </div>
+
+    <div class="ca-alert ca-alert--success" *ngIf="successMsg()">✅ {{ successMsg() }}</div>
+    <div class="ca-alert ca-alert--error"   *ngIf="errorMsg() && centro()">⚠️ {{ errorMsg() }}</div>
+  </div>
+</div>

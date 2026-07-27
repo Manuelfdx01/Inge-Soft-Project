@@ -1,0 +1,51 @@
+<div class="ca-page">
+  <div class="ca-header">
+    <div>
+      <h1>💰 Precios por Kilogramo</h1>
+      <p class="subtitle" *ngIf="centro()">{{ centro()!.name }}</p>
+    </div>
+  </div>
+
+  <div class="ca-loading" *ngIf="loading()">
+    <div class="spinner"></div>
+    <span>Cargando precios...</span>
+  </div>
+
+  <div class="ca-alert ca-alert--error" *ngIf="errorMsg() && !centro()">⚠️ {{ errorMsg() }}</div>
+
+  <div class="ca-content" *ngIf="!loading() && centro()">
+    <p class="page-desc">
+      Define el precio que pagas por kilogramo de cada material. Esta información es visible para los recicladores que visitan tu centro.
+    </p>
+
+    <div class="materials-grid">
+      <div class="material-card" *ngFor="let m of materiales">
+        <div class="mat-top">
+          <span class="mat-icon">{{ m.icon }}</span>
+          <span class="mat-name">{{ m.label }}</span>
+        </div>
+        <div class="price-row">
+          <span class="currency">$</span>
+          <input
+            type="number"
+            [(ngModel)]="precios[m.key]"
+            min="0"
+            step="50"
+            placeholder="0"
+            [id]="'price-' + m.key"
+          />
+          <span class="per-kg">/ kg</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button class="btn btn--primary" (click)="guardarPrecios()" [disabled]="saving()">
+        {{ saving() ? '⏳ Guardando...' : '💾 Guardar Precios' }}
+      </button>
+    </div>
+
+    <div class="ca-alert ca-alert--success" *ngIf="successMsg()">✅ {{ successMsg() }}</div>
+    <div class="ca-alert ca-alert--error"   *ngIf="errorMsg() && centro()">⚠️ {{ errorMsg() }}</div>
+  </div>
+</div>

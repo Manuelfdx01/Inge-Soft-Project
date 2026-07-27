@@ -1,0 +1,54 @@
+<div class="ca-page">
+  <div class="ca-header">
+    <div>
+      <h1>♻️ Materiales Aceptados</h1>
+      <p class="subtitle" *ngIf="centro()">{{ centro()!.name }}</p>
+    </div>
+  </div>
+
+  <div class="ca-loading" *ngIf="loading()">
+    <div class="spinner"></div>
+    <span>Cargando materiales...</span>
+  </div>
+
+  <div class="ca-alert ca-alert--error" *ngIf="errorMsg() && !centro()">⚠️ {{ errorMsg() }}</div>
+
+  <div class="ca-content" *ngIf="!loading() && centro()">
+    <p class="page-desc">
+      Selecciona los tipos de material que tu centro acepta actualmente. Esta lista guía a ciudadanos y recicladores.
+    </p>
+
+    <div class="mat-counter">
+      <strong>{{ selectedIds().length }}</strong> de {{ allWasteTypes().length }} tipos seleccionados
+    </div>
+
+    <div class="waste-grid">
+      <label
+        *ngFor="let type of allWasteTypes()"
+        class="waste-card"
+        [class.waste-card--selected]="isAccepted(type.id)"
+        [for]="'wt-' + type.id"
+      >
+        <input
+          type="checkbox"
+          [id]="'wt-' + type.id"
+          [checked]="isAccepted(type.id)"
+          (change)="toggle(type.id)"
+          class="sr-only"
+        />
+        <span class="wt-icon">{{ type.icon }}</span>
+        <span class="wt-name">{{ type.name }}</span>
+        <span class="wt-check" *ngIf="isAccepted(type.id)">✓</span>
+      </label>
+    </div>
+
+    <div class="action-row">
+      <button class="btn btn--primary" (click)="guardarMateriales()" [disabled]="saving()">
+        {{ saving() ? '⏳ Guardando...' : '💾 Guardar Materiales' }}
+      </button>
+    </div>
+
+    <div class="ca-alert ca-alert--success" *ngIf="successMsg()">✅ {{ successMsg() }}</div>
+    <div class="ca-alert ca-alert--error"   *ngIf="errorMsg() && centro()">⚠️ {{ errorMsg() }}</div>
+  </div>
+</div>

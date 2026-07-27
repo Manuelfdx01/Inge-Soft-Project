@@ -1,71 +1,100 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CentroAcopioService } from '../../core/services/centro-acopio.service';
 import { CollectionPoint } from '../../core/services/collection-points.service';
 
+interface StatusOption {
+  value: string;
+  label: string;
+  icon: string;
+  description: string;
+  color: string;
+}
+
 @Component({
   selector: 'app-centro-estado',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  template: `
-    <div class="page-container">
-      <h2>🔄 Cambiar Estado del Centro</h2>
-      <div *ngIf="loading">Cargando centro...</div>
-      <div *ngIf="!loading && centro" class="card">
-        <h3>{{ centro.name }}</h3>
-        <p><strong>Estado Actual:</strong> <span class="badge">{{ centro.status }}</span></p>
-
-        <div class="form-group">
-          <label>Selecciona nuevo estado:</label>
-          <select [(ngModel)]="selectedStatus">
-            <option value="DISPONIBLE">🟢 Disponible</option>
-            <option value="LLENO">🔴 Lleno</option>
-            <option value="MANTENIMIENTO">🛠️ Mantenimiento</option>
-            <option value="NORMAL">🟡 Normal</option>
-          </select>
-        </div>
-
-        <button class="btn btn-primary" (click)="guardarEstado()">Actualizar Estado</button>
-        <p class="success" *ngIf="successMsg">✅ {{ successMsg }}</p>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .page-container { padding: 24px; font-family: sans-serif; }
-    .card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; max-width: 500px; }
-    .badge { background: #10b981; color: #fff; padding: 4px 10px; border-radius: 12px; font-weight: bold; }
-    .form-group { margin: 16px 0; display: flex; flex-direction: column; gap: 8px; }
-    select { padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1; }
-    .btn-primary { padding: 10px 18px; border-radius: 8px; border: none; background: #10b981; color: #fff; cursor: pointer; }
-    .success { color: #10b981; font-weight: bold; margin-top: 10px; }
-  `]
+  templateUrl: './estado.component.html',
+  styleUrl: './estado.component.scss'
 })
 export class EstadoComponent implements OnInit {
-  centro: CollectionPoint | null = null;
+  readonly centro = signal<CollectionPoint | null>(null);
+  readonly loading = signal(true);
+  readonly saving = signal(false);
+  readonly successMsg = signal('');
+  readonly errorMsg = signal('');
+
   selectedStatus = 'DISPONIBLE';
-  loading = true;
-  successMsg = '';
+
+  readonly statusOptions: StatusOption[] = [
+    {
+      value: 'DISPONIBLE',
+      label: 'Disponible',
+      icon: '🟢',
+      description: 'El centro está abierto y recibe material normalmente.',
+      color: '#10b981'
+    },
+    {
+      value: 'LLENO',
+      label: 'Lleno',
+      icon: '🔴',
+      description: 'Capacidad al máximo. No se recibe material hasta liberar espacio.',
+      color: '#ef4444'
+    },
+    {
+      value: 'MANTENIMIENTO',
+      label: 'Mantenimiento',
+      icon: '🛠️',
+      description: 'Temporalmente fuera de servicio por tareas de mantenimiento.',
+      color: '#f59e0b'
+    },
+    {
+      value: 'NORMAL',
+      label: 'Normal',
+      icon: '🟡',
+      description: 'Operación normal con capacidad parcial disponible.',
+      color: '#3b82f6'
+    },
+  ];
 
   constructor(private centroService: CentroAcopioService) {}
 
   ngOnInit(): void {
     this.centroService.getMiCentro().subscribe({
       next: (data) => {
-        this.centro = data;
+        this.centro.set(data);
         this.selectedStatus = data.status;
-        this.loading = false;
+        this.loading.set(false);
       },
-      error: () => this.loading = false
+      error: () => {
+        this.errorMsg.set('No se pudo cargar el estado del centro.');
+        this.loading.set(false);
+      }
     });
   }
 
+  get currentOption(): StatusOption {
+    return this.statusOptions.find(o => o.value === this.selectedStatus)
+      ?? this.statusOptions[0];
+  }
+
   guardarEstado(): void {
-    if (!this.centro) return;
-    this.centroService.updateEstado(this.centro.id, this.selectedStatus).subscribe({
+    const c = this.centro();
+    if (!c) return;
+    this.saving.set(true);
+    this.successMsg.set('');
+    this.errorMsg.set('');
+    this.centroService.updateEstado(c.id, this.selectedStatus).subscribe({
       next: (res) => {
-        this.centro!.status = res.status;
-        this.successMsg = 'Estado cambiado y recicladores notificados.';
+        this.centro.update(prev => prev ? { ...prev, status: res.status } : null);
+        this.successMsg.set('Estado actualizado a "' + res.status + '". Los recicladores han sido notificados.');
+        this.saving.set(false);
+      },
+      error: () => {
+        this.errorMsg.set('Error al actualizar el estado.');
+        this.saving.set(false);
       }
     });
   }

@@ -1,51 +1,38 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CentroAcopioService } from '../../core/services/centro-acopio.service';
 import { CollectionPoint } from '../../core/services/collection-points.service';
 
+interface MaterialRow {
+  key: string;
+  label: string;
+  icon: string;
+}
+
 @Component({
   selector: 'app-centro-precios',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  template: `
-    <div class="page-container">
-      <h2>💰 Gestionar Precios por Kilogramo</h2>
-      <div *ngIf="loading">Cargando precios...</div>
-      <div *ngIf="!loading && centro" class="card">
-        <h3>{{ centro.name }}</h3>
-        
-        <div class="material-row" *ngFor="let item of materiales">
-          <label><strong>{{ item.name }}:</strong></label>
-          <input type="number" [(ngModel)]="precios[item.name]" placeholder="Precio en $" />
-        </div>
-
-        <button class="btn btn-primary" (click)="guardarPrecios()">Guardar Precios</button>
-        <p class="success" *ngIf="successMsg">✅ {{ successMsg }}</p>
-      </div>
-    </div>
-  `,
-  styles: [`
-    .page-container { padding: 24px; font-family: sans-serif; }
-    .card { background: #fff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; max-width: 500px; }
-    .material-row { display: flex; justify-content: space-between; align-items: center; margin: 12px 0; }
-    input { width: 120px; padding: 6px 10px; border-radius: 6px; border: 1px solid #cbd5e1; }
-    .btn-primary { padding: 10px 18px; border-radius: 8px; border: none; background: #10b981; color: #fff; cursor: pointer; margin-top: 12px; }
-    .success { color: #10b981; font-weight: bold; margin-top: 10px; }
-  `]
+  templateUrl: './precios.component.html',
+  styleUrl: './precios.component.scss'
 })
 export class PreciosComponent implements OnInit {
-  centro: CollectionPoint | null = null;
-  loading = true;
-  precios: Record<string, number> = {};
-  successMsg = '';
+  readonly centro = signal<CollectionPoint | null>(null);
+  readonly loading = signal(true);
+  readonly saving = signal(false);
+  readonly successMsg = signal('');
+  readonly errorMsg = signal('');
 
-  materiales = [
-    { name: 'PLASTICO' },
-    { name: 'VIDRIO' },
-    { name: 'PAPEL' },
-    { name: 'METAL' },
-    { name: 'ORGANICO' }
+  precios: Record<string, number> = {};
+
+  readonly materiales: MaterialRow[] = [
+    { key: 'PLASTICO',  label: 'Plástico',    icon: '🧴' },
+    { key: 'VIDRIO',    label: 'Vidrio',       icon: '🫙' },
+    { key: 'PAPEL',     label: 'Papel / Cartón', icon: '📄' },
+    { key: 'METAL',     label: 'Metal',        icon: '⚙️' },
+    { key: 'ORGANICO',  label: 'Orgánico',     icon: '🌿' },
+    { key: 'ELECTRONICO', label: 'Electrónico', icon: '💻' },
   ];
 
   constructor(private centroService: CentroAcopioService) {}
@@ -53,20 +40,40 @@ export class PreciosComponent implements OnInit {
   ngOnInit(): void {
     this.centroService.getMiCentro().subscribe({
       next: (data) => {
-        this.centro = data;
-        this.precios = data.precio_kg || {};
-        this.loading = false;
+        this.centro.set(data);
+        // Inicializar todos los materiales con 0 o el valor guardado
+        for (const m of this.materiales) {
+          this.precios[m.key] = data.precio_kg?.[m.key] ?? 0;
+        }
+        this.loading.set(false);
       },
-      error: () => this.loading = false
+      error: () => {
+        this.errorMsg.set('No se pudo cargar la información del centro.');
+        this.loading.set(false);
+      }
     });
   }
 
   guardarPrecios(): void {
-    if (!this.centro) return;
-    this.centroService.updatePrecios(this.centro.id, this.precios).subscribe({
+    const c = this.centro();
+    if (!c) return;
+    this.saving.set(true);
+    this.successMsg.set('');
+    this.errorMsg.set('');
+    // Solo enviar materiales con precio > 0
+    const payload: Record<string, number> = {};
+    for (const [key, val] of Object.entries(this.precios)) {
+      if (val > 0) payload[key] = val;
+    }
+    this.centroService.updatePrecios(c.id, payload).subscribe({
       next: (res) => {
-        this.centro!.precio_kg = res.precio_kg;
-        this.successMsg = 'Precios actualizados y recicladores notificados.';
+        this.centro.update(prev => prev ? { ...prev, precio_kg: res.precio_kg } : null);
+        this.successMsg.set('Precios actualizados. Los recicladores verán las tarifas actualizadas.');
+        this.saving.set(false);
+      },
+      error: () => {
+        this.errorMsg.set('Error al guardar los precios. Intenta de nuevo.');
+        this.saving.set(false);
       }
     });
   }

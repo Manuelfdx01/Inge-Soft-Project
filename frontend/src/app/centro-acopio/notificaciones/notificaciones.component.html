@@ -1,0 +1,57 @@
+<div class="ca-page">
+  <div class="ca-header">
+    <div>
+      <h1>🔔 Notificaciones</h1>
+      <p class="subtitle" *ngIf="!loading()">
+        <span *ngIf="unreadCount() > 0" class="unread-badge">{{ unreadCount() }} no leídas</span>
+        <span *ngIf="unreadCount() === 0" class="all-read">Todas leídas ✓</span>
+      </p>
+    </div>
+    <div class="header-actions">
+      <button
+        class="btn btn--secondary"
+        (click)="cargar()"
+        [disabled]="loading()"
+      >🔄 Actualizar</button>
+      <button
+        class="btn btn--primary"
+        (click)="marcarTodas()"
+        [disabled]="markingAll() || unreadCount() === 0"
+      >
+        {{ markingAll() ? '⏳...' : '✓ Marcar todas leídas' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="ca-loading" *ngIf="loading()">
+    <div class="spinner"></div>
+    <span>Cargando notificaciones...</span>
+  </div>
+
+  <div class="ca-alert ca-alert--error" *ngIf="errorMsg()">⚠️ {{ errorMsg() }}</div>
+
+  <div class="ca-content" *ngIf="!loading()">
+    <div class="notif-list" *ngIf="notifications().length > 0">
+      <div
+        *ngFor="let item of notifications()"
+        class="notif-card"
+        [class.notif-card--unread]="!item.is_read"
+        (click)="marcarLeida(item)"
+      >
+        <div class="notif-icon">{{ typeIcon(item.type) }}</div>
+        <div class="notif-body">
+          <p class="notif-msg">{{ item.message }}</p>
+          <span class="notif-date">{{ item.created_at | date:'short' }}</span>
+        </div>
+        <div class="notif-dot" *ngIf="!item.is_read"></div>
+      </div>
+    </div>
+
+    <!-- Estado vacío -->
+    <div class="empty-state" *ngIf="notifications().length === 0">
+      <div class="empty-icon">🔔</div>
+      <h3>Sin notificaciones</h3>
+      <p>Aquí aparecerán alertas de capacidad, nuevos reportes y cambios de estado.</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,65 @@
+<div class="ca-page">
+  <div class="ca-header">
+    <div>
+      <h1>📋 Reportes del Centro</h1>
+      <p class="subtitle">Gestiona los reportes asignados</p>
+    </div>
+  </div>
+
+  <div class="ca-loading" *ngIf="loading()">
+    <div class="spinner"></div>
+    <span>Cargando reportes...</span>
+  </div>
+
+  <div class="ca-alert ca-alert--error" *ngIf="errorMsg()">⚠️ {{ errorMsg() }}</div>
+
+  <div class="ca-content" *ngIf="!loading()">
+
+    <!-- Filtros -->
+    <div class="filter-bar">
+      <button
+        *ngFor="let s of statusOptions"
+        class="filter-btn"
+        [class.filter-btn--active]="filter() === s"
+        (click)="setFilter(s)"
+      >
+        {{ s === 'TODOS' ? 'Todos' : statusLabel(s) }}
+  
+      </button>
+    </div>
+
+    <!-- Lista de reportes -->
+    <div class="reports-list" *ngIf="filteredReports().length > 0">
+      <div class="report-card" *ngFor="let item of filteredReports()">
+        <div class="rp-header">
+          <div class="rp-type">
+            <strong>📢 {{ item.type }}</strong>
+            <span class="badge" [ngClass]="statusClass(item.status)">{{ statusLabel(item.status) }}</span>
+          </div>
+          <select
+            [ngModel]="item.status"
+            (ngModelChange)="changeStatus(item.id, $event)"
+            class="status-select"
+          >
+            <option value="PENDIENTE">Pendiente</option>
+            <option value="EN_REVISION">En revisión</option>
+            <option value="RESUELTO">Resuelto</option>
+          </select>
+        </div>
+        <p class="rp-desc">{{ item.description }}</p>
+        <div class="rp-footer">
+          <span class="rp-user">👤 {{ item.user || 'Ciudadano' }}</span>
+          <span class="rp-date">{{ item.created_at | date:'short' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estado vacío -->
+    <div class="empty-state" *ngIf="filteredReports().length === 0">
+      <div class="empty-icon">📋</div>
+      <h3>Sin reportes {{ filter() !== 'TODOS' ? 'en este estado' : '' }}</h3>
+      <p>Cuando tu centro reciba reportes, aparecerán aquí para gestionarlos.</p>
+    </div>
+
+  </div>
+</div>
