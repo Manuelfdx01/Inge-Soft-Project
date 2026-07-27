@@ -22,7 +22,7 @@ El sistema está dividido en módulos estratégicos para atender a tres tipos de
 
 ---
 
-## 🛠️ Stack Tecnológico
+## Stack Tecnológico
 
 Para garantizar un desarrollo escalable, mantenible y robusto, el proyecto adopta una **Arquitectura de Tres Capas** (Frontend, Backend y Datos) con las siguientes tecnologías:
 
