@@ -11,7 +11,6 @@ import {
 } from '../../core/services/collection-points.service';
 import { GamificationService } from '../../core/services/gamification.service';
 
-// Fix de íconos de Leaflet cuando se usa con Webpack/Angular
 const iconRetinaUrl = 'assets/marker-icon-2x.png';
 const iconUrl       = 'assets/marker-icon.png';
 const shadowUrl     = 'assets/marker-shadow.png';
@@ -25,13 +24,13 @@ const defaultIcon   = L.icon({
 L.Marker.prototype.options.icon = defaultIcon;
 
 @Component({
-  selector: 'app-map',
+  selector: 'app-recycler-mapa',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './map.component.html',
-  styleUrl: './map.component.scss',
+  templateUrl: './mapa.component.html',
+  styleUrl: './mapa.component.scss',
 })
-export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
+export class MapaComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('mapCanvas', { static: false }) mapCanvasRef!: ElementRef;
 
   // ── Datos ──
@@ -48,12 +47,21 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   loading   = true;
   mobileTab: 'MAP' | 'LIST' = 'MAP';
 
-  // ── Reporte modal ──
+  // ── Modal Reporte ──
   isReportModalOpen = false;
   reportNotes       = '';
   reportWasteType   = 'PLASTICO';
   reportSuccess     = false;
   reporting         = false;
+
+  // ── Modal Calificación ──
+  isReviewModalOpen = false;
+  reviewRating = 5;
+  reviewComment = '';
+  reviewSuccess = false;
+  submittingReview = false;
+  pointReviews: any[] = [];
+  loadingReviews = false;
 
   // ── Leaflet internos ──
   private map!: L.Map;
@@ -77,9 +85,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     { label: '🟢 Disponible', value: 'DISPONIBLE' },
     { label: '🟡 Normal (<61%)', value: 'NORMAL'  },
     { label: '🟠 Alerta (61-85%)', value: 'ALERTA' },
-    { label: '🔴 Crítico / Lleno', value: 'CRITICO' },
+    { label: '🔴 Lleno / Crítico', value: 'CRITICO' },
     { label: '🛠️ Mantenimiento', value: 'MANTENIMIENTO' },
-    { label: '⚪ Inactivo', value: 'INACTIVO' },
   ];
 
   constructor(
@@ -92,7 +99,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    // Inicializar mapa de Leaflet
     setTimeout(() => {
       this.initMap();
       this.setupResizeObserver();
@@ -119,27 +125,20 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // ════════════════════════════════════════
-  // MAPA
-  // ════════════════════════════════════════
-
   private initMap(): void {
     if (!this.mapCanvasRef?.nativeElement) return;
 
-    // Centro por defecto: Bogotá
     this.map = L.map(this.mapCanvasRef.nativeElement, {
       center:    [4.6580, -74.0721],
       zoom:      13,
       zoomControl: true,
     });
 
-    // Capa OpenStreetMap — 100% libre y profesional
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       maxZoom: 19,
     }).addTo(this.map);
 
-    // Event listener para acciones dentro de popups de Leaflet
     this.map.on('popupopen', (e: L.PopupEvent) => {
       const popupEl = e.popup.getElement();
       if (!popupEl) return;
@@ -163,9 +162,18 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
           if (point) this.openReportModal(point);
         });
       }
+
+      const reviewBtn = popupEl.querySelector('.popup-btn-review');
+      if (reviewBtn) {
+        reviewBtn.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          const pId = reviewBtn.getAttribute('data-point-id');
+          const point = this.points.find(p => p.id.toString() === pId?.toString());
+          if (point) this.openReviewModal(point);
+        });
+      }
     });
 
-    // Renderizar markers cuando la vista esté lista
     this.map.whenReady(() => {
       this.renderMarkers();
       if (this.userLocation) {
@@ -177,7 +185,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   private renderMarkers(): void {
     if (!this.map) return;
 
-    // Limpiar markers anteriores
     this.markers.forEach(m => m.remove());
     this.markers = [];
 
@@ -185,12 +192,11 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       const color = this.getPinColor(point);
       const isCritical = point.status === 'CRITICO' || point.status === 'LLENO';
       const alertIndicator = isCritical
-        ? `<span class="alert-indicator" title="¡Punto crítico o lleno por alta ocupación!">⚠️</span>`
+        ? `<span class="alert-indicator" title="¡Punto lleno/crítico!">⚠️</span>`
         : '';
 
       const pinClass = `leaflet-pin ${isCritical ? 'critical-alert' : ''}`;
 
-      // SVG/HTML personalizado para ícono de pin Leaflet
       const svgIcon = L.divIcon({
         className: 'leaflet-pin-wrapper',
         html: `
@@ -215,6 +221,14 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         ? `<div class="popup-distance">📏 <strong>${point.distance_km} km</strong> de tu ubicación</div>`
         : '';
 
+      let pricesHtml = '';
+      if (point.precio_kg && Object.keys(point.precio_kg).length > 0) {
+        const pList = Object.entries(point.precio_kg)
+          .map(([mat, price]) => `<span><strong>${mat}:</strong> $${price}/kg</span>`)
+          .join(', ');
+        pricesHtml = `<div class="popup-prices">💰 <strong>Precios:</strong> ${pList}</div>`;
+      }
+
       const popupHtml = `
         <div class="leaflet-custom-popup">
           <div class="popup-header">
@@ -223,9 +237,10 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
           </div>
           <p class="popup-address">📍 ${point.address}</p>
           ${distanceHtml}
+          ${pricesHtml}
           <div class="popup-capacity">
             <div class="popup-capacity-label">
-              <span>Nivel de ocupación</span>
+              <span>Capacidad (${point.capacity_current}/${point.capacity_max} kg)</span>
               <strong style="color: ${this.getBarColor(point.capacity_pct)}">${point.capacity_pct}%</strong>
             </div>
             <div class="popup-progress-bar">
@@ -234,7 +249,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
           </div>
           <div class="popup-waste-tags">${wasteTagsHtml}</div>
           <div class="popup-actions">
-            <button class="popup-btn popup-btn-osm" data-point-id="${point.id}">🗺️ Cómo llegar</button>
+            <button class="popup-btn popup-btn-osm" data-point-id="${point.id}">🗺️ Ruta</button>
+            <button class="popup-btn popup-btn-review" data-point-id="${point.id}">⭐ Calificar</button>
             <button class="popup-btn popup-btn-report" data-point-id="${point.id}">📢 Reportar</button>
           </div>
         </div>
@@ -246,7 +262,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       );
 
       marker.bindPopup(popupHtml, {
-        maxWidth: 300,
+        maxWidth: 320,
         className: 'gomi-leaflet-popup'
       });
 
@@ -258,7 +274,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       this.markers.push(marker);
     });
 
-    // Ajustar vista a los markers si no hay ubicación de usuario y hay puntos
     if (this.filteredPoints.length > 0 && !this.userLocation && this.map) {
       const bounds = L.latLngBounds(
         this.filteredPoints.map(p => [Number(p.latitude), Number(p.longitude)])
@@ -266,10 +281,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       this.map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
     }
   }
-
-  // ════════════════════════════════════════
-  // DATOS backend
-  // ════════════════════════════════════════
 
   loadData(): void {
     this.loading = true;
@@ -287,15 +298,11 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         this.renderMarkers();
       },
       error: (err) => {
-        console.error('Error al cargar puntos de recolección desde backend Django:', err);
+        console.error('Error al cargar centros de acopio:', err);
         this.loading = false;
       },
     });
   }
-
-  // ════════════════════════════════════════
-  // GEOLOCALIZACIÓN
-  // ════════════════════════════════════════
 
   getCurrentLocation(): void {
     if (!navigator.geolocation) {
@@ -314,15 +321,14 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         this.loadData();
       },
       (error) => {
-        console.warn('Geolocalización denegada o con error:', error);
-        alert('No se pudo acceder a tu ubicación. Verifica los permisos de tu navegador.');
+        console.warn('Geolocalización denegada:', error);
+        alert('No se pudo acceder a tu ubicación.');
       }
     );
   }
 
   private renderUserMarker(): void {
     if (!this.map || !this.userLocation) return;
-
     if (this.userMarker) this.userMarker.remove();
 
     const userIcon = L.divIcon({
@@ -344,13 +350,10 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // ════════════════════════════════════════
-  // SELECCIÓN DE PUNTO
-  // ════════════════════════════════════════
-
   selectPoint(point: CollectionPoint, openPopup = true): void {
     this.selectedPoint = point;
     this.centerMapOn(Number(point.latitude), Number(point.longitude), 15);
+    this.loadReviews(point.id);
 
     if (openPopup) {
       const targetMarker = this.markers.find(m => {
@@ -384,10 +387,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       setTimeout(() => this.map.invalidateSize(), 100);
     }
   }
-
-  // ════════════════════════════════════════
-  // FILTROS
-  // ════════════════════════════════════════
 
   applyWasteFilter(value: string): void {
     this.activeWasteFilter = value;
@@ -428,10 +427,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.renderMarkers();
   }
 
-  // ════════════════════════════════════════
-  // MODAL REPORTE DE NOVEDADES
-  // ════════════════════════════════════════
-
+  // ── Modal Reporte ──
   openReportModal(point: CollectionPoint): void {
     this.selectedPoint     = point;
     this.isReportModalOpen = true;
@@ -457,9 +453,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         this.reporting     = false;
         this.reportSuccess = true;
         
-        // Record gamification action
         this.gamificationService.recordAction('reportar_punto_mapa').subscribe({
-          next: () => console.log('Gamification: points for map report'),
+          next: () => console.log('Gamification action recorded'),
           error: (err) => console.error('Gamification error:', err)
         });
 
@@ -475,10 +470,59 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  // ════════════════════════════════════════
-  // HELPERS
-  // ════════════════════════════════════════
+  // ── Modal Calificaciones/Comentarios ──
+  openReviewModal(point: CollectionPoint): void {
+    this.selectedPoint = point;
+    this.isReviewModalOpen = true;
+    this.reviewRating = 5;
+    this.reviewComment = '';
+    this.reviewSuccess = false;
+    this.loadReviews(point.id);
+  }
 
+  closeReviewModal(): void {
+    this.isReviewModalOpen = false;
+  }
+
+  loadReviews(pointId: string): void {
+    this.loadingReviews = true;
+    this.pointsService.getReviews(pointId).subscribe({
+      next: (data) => {
+        this.pointReviews = data;
+        this.loadingReviews = false;
+      },
+      error: (err) => {
+        console.error('Error cargando comentarios:', err);
+        this.loadingReviews = false;
+      }
+    });
+  }
+
+  submitReview(): void {
+    if (!this.selectedPoint) return;
+    this.submittingReview = true;
+
+    this.pointsService.addReview(
+      this.selectedPoint.id.toString(),
+      this.reviewRating,
+      this.reviewComment
+    ).subscribe({
+      next: () => {
+        this.submittingReview = false;
+        this.reviewSuccess = true;
+        this.loadReviews(this.selectedPoint!.id);
+        setTimeout(() => {
+          this.closeReviewModal();
+        }, 1500);
+      },
+      error: (err) => {
+        console.error('Error enviando calificación:', err);
+        this.submittingReview = false;
+      }
+    });
+  }
+
+  // ── Helpers ──
   getPinColor(point: CollectionPoint): string {
     return {
       DISPONIBLE:    '#2E7D32',
@@ -504,5 +548,9 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       }
       return b.capacity_pct - a.capacity_pct;
     });
+  }
+
+  get ObjectKeys(): typeof Object.keys {
+    return Object.keys;
   }
 }

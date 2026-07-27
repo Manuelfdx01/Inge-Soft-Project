@@ -16,6 +16,11 @@ class IsAdminGomi(permissions.BasePermission):
         return request.user.is_authenticated and request.user.role == 'ADMIN'
 
 
+class IsAdminOrCentroAcopio(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role in ('ADMIN', 'CENTRO_ACOPIO')
+
+
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
@@ -33,6 +38,20 @@ class ReviewViewSet(viewsets.ModelViewSet):
             otorgar_puntos_y_xp(self.request.user, 'crear_opinion')
         except Exception as e:
             logger.error(f'Error al otorgar puntos por opinión: {e}')
+
+        # Notificar al Centro de Acopio
+        try:
+            from apps.collection_points.models import CollectionPoint
+            point = CollectionPoint.objects.get(pk=point_id)
+            if point.admin and point.admin.role == 'CENTRO_ACOPIO':
+                from apps.users.notifications import crear_notificacion
+                crear_notificacion(
+                    user=point.admin,
+                    type='GENERAL',
+                    message=f'⭐ {self.request.user.username} calificó tu centro con {serializer.instance.rating} estrellas.',
+                )
+        except Exception as e:
+            logger.error(f'Error al notificar calificación al centro: {e}')
 
 
 class ProposalViewSet(viewsets.ModelViewSet):
@@ -62,7 +81,6 @@ class ProposalViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             serializer.save()
 
-            # ── NUEVO: notificar al usuario ──
             try:
                 from apps.users.notifications import notificar_propuesta_actualizada
                 notificar_propuesta_actualizada(proposal)
@@ -80,7 +98,14 @@ class ReportViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'ADMIN':
+        if user.role in ('ADMIN', 'CENTRO_ACOPIO'):
+            if user.role == 'CENTRO_ACOPIO':
+                from apps.collection_points.models import CollectionPoint
+                try:
+                    point = CollectionPoint.objects.get(admin=user)
+                    return Report.objects.filter(point=point).order_by('-created_at')
+                except CollectionPoint.DoesNotExist:
+                    return Report.objects.none()
             return Report.objects.all().order_by('-created_at')
         return Report.objects.filter(user=user).order_by('-created_at')
 
@@ -94,8 +119,15 @@ class ReportViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.error(f'Error al otorgar puntos por reporte: {e}')
 
+        # Notificar al Centro de Acopio
+        try:
+            from apps.users.notifications import notificar_reporte_nuevo_a_centro
+            notificar_reporte_nuevo_a_centro(report)
+        except Exception as e:
+            logger.error(f'Error al notificar reporte al centro: {e}')
+
     @action(detail=True, methods=['patch'], url_path='estado',
-            permission_classes=[IsAdminGomi])
+            permission_classes=[IsAdminOrCentroAcopio])
     def estado(self, request, pk=None):
         report = self.get_object()
         new_status = request.data.get('status')

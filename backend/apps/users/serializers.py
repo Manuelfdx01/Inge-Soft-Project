@@ -21,6 +21,18 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username', 'email', 'password', 'role', 'phone']
 
+    def validate_role(self, value):
+        allowed = [
+            User.Role.CIUDADANO,
+            User.Role.RECICLADOR,
+            User.Role.CENTRO_ACOPIO,
+        ]
+        if value not in allowed:
+            raise serializers.ValidationError(
+                f'Rol no permitido en el registro. Roles válidos: {allowed}'
+            )
+        return value
+
     def validate_email(self, value):
         if value and User.objects.filter(email=value).exists():
             raise serializers.ValidationError('Este correo electrónico ya está registrado.')

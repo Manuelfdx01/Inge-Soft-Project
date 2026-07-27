@@ -55,3 +55,19 @@ def notificar_alerta_asignada(alert):
             f'→ {alert.target_point.name}.'
         ),
     )
+
+
+def notificar_reporte_nuevo_a_centro(report):
+    """Notifica al centro de acopio cuando recibe un nuevo reporte."""
+    from apps.users.models import User
+    centro_user = None
+    try:
+        centro_user = report.point.admin
+    except Exception:
+        return
+    if centro_user and centro_user.role == 'CENTRO_ACOPIO':
+        crear_notificacion(
+            user=centro_user,
+            type='REPORTE_NUEVO',
+            message=f'📝 Nuevo reporte en tu centro "{report.point.name}": {report.get_type_display()}.',
+        )

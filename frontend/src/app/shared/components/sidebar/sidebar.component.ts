@@ -63,9 +63,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   menuReciclador: NavItem[] = [
     {
-      icon: '📊',
-      label: 'Dashboard',
-      route: '/reciclador/dashboard'
+      icon: '🗺️',
+      label: 'Centros de Acopio',
+      route: '/reciclador/mapa'
     },
     {
       icon: '🚨',
@@ -74,20 +74,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
       badge: 0
     },
     {
-      icon: '🗺️',
-      label: 'Mi zona',
-      route: '/reciclador/mi-zona'
-    },
-    {
       icon: '📝',
-      label: 'Reportar capacidad',
+      label: 'Reportar',
       route: '/reciclador/reportar'
     },
-    {
-      icon: '🚚',
-      label: 'Traslados',
-      route: '/reciclador/traslados'
-    }
   ];
 
   // ===========================
@@ -100,6 +90,53 @@ export class SidebarComponent implements OnInit, OnDestroy {
       label: 'Dashboard',
       route: '/admin/dashboard'
     }
+  ];
+
+  // ===========================
+  // MENÚ CENTRO DE ACOPIO
+  // ===========================
+
+  menuCentroAcopio: NavItem[] = [
+    {
+      icon: '📊',
+      label: 'Dashboard',
+      route: '/centro-acopio/dashboard'
+    },
+    {
+      icon: '⚖️',
+      label: 'Gestionar Capacidad',
+      route: '/centro-acopio/capacidad'
+    },
+    {
+      icon: '💰',
+      label: 'Precios por Kg',
+      route: '/centro-acopio/precios'
+    },
+    {
+      icon: '♻️',
+      label: 'Materiales',
+      route: '/centro-acopio/materiales'
+    },
+    {
+      icon: '🔄',
+      label: 'Estado del Centro',
+      route: '/centro-acopio/estado'
+    },
+    {
+      icon: '⭐',
+      label: 'Calificaciones',
+      route: '/centro-acopio/calificaciones'
+    },
+    {
+      icon: '📋',
+      label: 'Reportes',
+      route: '/centro-acopio/reportes'
+    },
+    {
+      icon: '🔔',
+      label: 'Notificaciones',
+      route: '/centro-acopio/notificaciones'
+    },
   ];
 
   constructor(
@@ -126,6 +163,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
           this.navItems = this.menuAdmin;
           break;
 
+        case 'CENTRO_ACOPIO':
+          this.navItems = this.menuCentroAcopio;
+          break;
+
         default:
           this.navItems = [];
       }
@@ -141,9 +182,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
   get sidebarColor(): string {
 
     const colors: Record<string, string> = {
-      CIUDADANO: '#2E7D32',
-      RECICLADOR: '#0F6E56',
-      ADMIN: '#202124'
+      CIUDADANO:     '#2E7D32',
+      RECICLADOR:    '#0F6E56',
+      ADMIN:         '#202124',
+      CENTRO_ACOPIO: '#1565C0',
     };
 
     return colors[this.user?.role ?? 'CIUDADANO'];

@@ -104,8 +104,16 @@ export const routes: Routes = [
 
       {
         path: '',
-        redirectTo: 'alertas',
+        redirectTo: 'mapa',
         pathMatch: 'full'
+      },
+
+      {
+        // Mapa de centros de acopio (visualmente igual al del ciudadano)
+        path: 'mapa',
+        loadComponent: () =>
+          import('./recycler/mapa/mapa.component')
+            .then(c => c.MapaComponent)
       },
 
       {
@@ -116,32 +124,11 @@ export const routes: Routes = [
       },
 
       {
-        path: 'dashboard',
-        loadComponent: () =>
-          import('./recycler/dashboard/dashboard.component')
-            .then(c => c.DashboardComponent)
-      },
-
-      {
-        path: 'mi-zona',
-        loadComponent: () =>
-          import('./recycler/my-zone/my-zone.component')
-            .then(c => c.MyZoneComponent)
-      },
-
-      {
         path: 'reportar',
         loadComponent: () =>
           import('./recycler/report/report.component')
             .then(c => c.ReportComponent)
       },
-
-      {
-        path: 'traslados',
-        loadComponent: () =>
-          import('./recycler/transfers/transfers.component')
-            .then(c => c.TransfersComponent)
-      }
 
     ]
 
@@ -178,6 +165,91 @@ export const routes: Routes = [
           import('./admin/dashboard/dashboard.component')
             .then(c => c.DashboardComponent)
       }
+
+    ]
+
+  },
+
+  // ===============================
+  // CENTRO DE ACOPIO
+  // ===============================
+
+  {
+    path: 'centro-acopio',
+
+    canActivate: [AuthGuard, RoleGuard],
+
+    data: {
+      roles: ['CENTRO_ACOPIO']
+    },
+
+    loadComponent: () =>
+      import('./shared/components/shell/shell.component')
+        .then(c => c.ShellComponent),
+
+    children: [
+
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      },
+
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./centro-acopio/dashboard/dashboard.component')
+            .then(c => c.CentroDashboardComponent)
+      },
+
+      {
+        path: 'capacidad',
+        loadComponent: () =>
+          import('./centro-acopio/capacidad/capacidad.component')
+            .then(c => c.CapacidadComponent)
+      },
+
+      {
+        path: 'precios',
+        loadComponent: () =>
+          import('./centro-acopio/precios/precios.component')
+            .then(c => c.PreciosComponent)
+      },
+
+      {
+        path: 'materiales',
+        loadComponent: () =>
+          import('./centro-acopio/materiales/materiales.component')
+            .then(c => c.MaterialesComponent)
+      },
+
+      {
+        path: 'estado',
+        loadComponent: () =>
+          import('./centro-acopio/estado/estado.component')
+            .then(c => c.EstadoComponent)
+      },
+
+      {
+        path: 'calificaciones',
+        loadComponent: () =>
+          import('./centro-acopio/calificaciones/calificaciones.component')
+            .then(c => c.CalificacionesComponent)
+      },
+
+      {
+        path: 'reportes',
+        loadComponent: () =>
+          import('./centro-acopio/reportes/reportes.component')
+            .then(c => c.ReportesComponent)
+      },
+
+      {
+        path: 'notificaciones',
+        loadComponent: () =>
+          import('./centro-acopio/notificaciones/notificaciones.component')
+            .then(c => c.NotificacionesComponent)
+      },
 
     ]
 

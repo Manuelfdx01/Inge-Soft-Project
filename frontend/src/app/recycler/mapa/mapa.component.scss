@@ -1,0 +1,155 @@
+@import '../../citizen/map/map.component.scss';
+
+.point-popup-card {
+  .phone, .schedule {
+    font-size: 12px;
+    color: #475569;
+    margin-bottom: 4px;
+  }
+
+  .prices-section {
+    background: #f8fafc;
+    padding: 10px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+
+    h4 {
+      font-size: 12px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0 0 6px 0;
+    }
+
+    .price-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+
+      .price-pill {
+        font-size: 11px;
+        background: #e0f2fe;
+        color: #0369a1;
+        padding: 3px 8px;
+        border-radius: 8px;
+      }
+    }
+  }
+}
+
+.prices-mini {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-left: 18px;
+  margin-bottom: 4px;
+
+  .price-mini-tag {
+    font-size: 10px;
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 1px 6px;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+}
+
+.modal-large {
+  max-width: 520px !important;
+}
+
+.btn-warning {
+  background: #f59e0b !important;
+  color: #ffffff !important;
+
+  &:hover {
+    background: #d97706 !important;
+  }
+}
+
+.review-form {
+  h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 8px 0;
+  }
+
+  .star-rating {
+    display: flex;
+    gap: 6px;
+    font-size: 24px;
+    margin-bottom: 12px;
+
+    .star {
+      cursor: pointer;
+      color: #cbd5e1;
+      transition: color 0.15s;
+
+      &.filled, &:hover {
+        color: #f59e0b;
+      }
+    }
+  }
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid #e2e8f0;
+  margin: 16px 0;
+}
+
+.reviews-list-section {
+  h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 10px 0;
+  }
+
+  .reviews-scroll {
+    max-height: 180px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .review-item-card {
+      background: #f8fafc;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+
+      .review-user-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: #0f172a;
+        margin-bottom: 4px;
+
+        .stars {
+          color: #f59e0b;
+          font-weight: bold;
+        }
+      }
+
+      .review-comment {
+        font-size: 12px;
+        color: #475569;
+        margin: 0 0 4px 0;
+      }
+
+      .review-date {
+        font-size: 10px;
+        color: #94a3b8;
+      }
+    }
+
+    .no-reviews {
+      font-size: 12px;
+      color: #94a3b8;
+      font-style: italic;
+      text-align: center;
+      padding: 12px;
+    }
+  }
+}
