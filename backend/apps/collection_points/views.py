@@ -288,105 +288,49 @@ class CollectionPointViewSet(viewsets.ModelViewSet):
                 point=point,
                 recorded_at__range=(dia_inicio, dia_fin)
             ) if point else []
+            logs_list = list(logs)
             promedio = (
-                sum(float(l.capacity_pct) for l in logs) / len(logs)
-                if logs else ([45.0, 52.0, 60.0, 68.0, 75.0, 80.0, float(point.capacity_pct if point else 70)][i])
+                round(sum(float(l.capacity_pct) for l in logs_list) / len(logs_list), 1)
+                if logs_list else 0.0
             )
             ocupacion_semanal.append({
                 'dia': dia.strftime('%a'),
-                'promedio_pct': round(promedio, 1),
+                'promedio_pct': promedio,
             })
 
         all_reviews = Review.objects.filter(point=point) if point else Review.objects.none()
-        calificaciones = list(all_reviews.order_by('-created_at')[:5])
-        
-        if not calificaciones:
-            calificaciones_mock = [
-                {
-                    'id': 1,
-                    'user': 'ciudadano_verde',
-                    'rating': 5,
-                    'comment': 'Excelente servicio de acopio, atención rápida y pesaje justo.',
-                    'created_at': (ahora - timedelta(hours=3)).isoformat(),
-                },
-                {
-                    'id': 2,
-                    'user': 'reciclador_pro',
-                    'rating': 4,
-                    'comment': 'Buenos precios por el plástico PET y aluminio.',
-                    'created_at': (ahora - timedelta(days=1)).isoformat(),
-                },
-                {
-                    'id': 3,
-                    'user': 'eco_bogota',
-                    'rating': 5,
-                    'comment': 'Lugar muy limpio y organizado.',
-                    'created_at': (ahora - timedelta(days=2)).isoformat(),
-                }
-            ]
-            calificaciones_data = calificaciones_mock
-            avg_rating = 4.7
-            total_reviews = 3
-        else:
-            avg_rating = round(sum(r.rating for r in all_reviews) / all_reviews.count(), 1)
-            total_reviews = all_reviews.count()
-            calificaciones_data = [
-                {
-                    'id': r.id,
-                    'user': r.user.username,
-                    'rating': r.rating,
-                    'comment': r.comment,
-                    'created_at': r.created_at,
-                }
-                for r in calificaciones
-            ]
+        total_reviews = all_reviews.count()
+        avg_rating = round(sum(r.rating for r in all_reviews) / total_reviews, 1) if total_reviews > 0 else None
+        calificaciones_data = [
+            {
+                'id': r.id,
+                'user': r.user.username,
+                'rating': r.rating,
+                'comment': r.comment,
+                'created_at': r.created_at,
+            }
+            for r in all_reviews.order_by('-created_at')[:5]
+        ]
 
         all_reports = Report.objects.filter(point=point) if point else Report.objects.none()
-        reportes = list(all_reports.order_by('-created_at')[:5])
-        if not reportes:
-            reportes_data = [
-                {
-                    'id': 1,
-                    'type': 'DESBORDAMIENTO',
-                    'description': 'Contenedor de plástico alcanzando límite.',
-                    'status': 'PENDIENTE',
-                    'created_at': (ahora - timedelta(hours=5)).isoformat(),
-                },
-                {
-                    'id': 2,
-                    'type': 'MAL_USO',
-                    'description': 'Residuos no clasificados depositados en área de vidrio.',
-                    'status': 'EN_REVISION',
-                    'created_at': (ahora - timedelta(days=1)).isoformat(),
-                }
-            ]
-        else:
-            reportes_data = [
-                {
-                    'id': r.id,
-                    'type': r.type,
-                    'description': r.description,
-                    'status': r.status,
-                    'created_at': r.created_at,
-                }
-                for r in reportes
-            ]
+        reportes_data = [
+            {
+                'id': r.id,
+                'type': r.type,
+                'description': r.description,
+                'status': r.status,
+                'user': r.user.username,
+                'created_at': r.created_at,
+            }
+            for r in all_reports.order_by('-created_at')[:5]
+        ]
 
         alertas_activas = LogisticsAlert.objects.filter(
             origin_point=point,
             status__in=['PENDIENTE', 'ACEPTADA', 'EN_PROCESO']
-        ).count() if point else 1
-
-        precio_kg = point.precio_kg if (point and point.precio_kg) else {
-            "PLASTICO": 1200,
-            "VIDRIO": 450,
-            "PAPEL": 800,
-            "METAL": 3500,
-            "ORGANICO": 200
-        }
+        ).count() if point else 0
 
         centro_data = CollectionPointSerializer(point).data
-        centro_data["precio_kg"] = precio_kg
 
         return Response({
             'centro': centro_data,
@@ -406,16 +350,7 @@ class CollectionPointViewSet(viewsets.ModelViewSet):
     )
     def mi_centro(self, request):
         point = _get_or_create_user_collection_point(request.user)
-        data = CollectionPointSerializer(point).data
-        if not data.get("precio_kg"):
-            data["precio_kg"] = {
-                "PLASTICO": 1200,
-                "VIDRIO": 450,
-                "PAPEL": 800,
-                "METAL": 3500,
-                "ORGANICO": 200
-            }
-        return Response(data)
+        return Response(CollectionPointSerializer(point).data)
 
     @action(
         detail=False,
@@ -426,31 +361,6 @@ class CollectionPointViewSet(viewsets.ModelViewSet):
     def mi_centro_calificaciones(self, request):
         point = _get_or_create_user_collection_point(request.user)
         reviews = Review.objects.filter(point=point).order_by('-created_at')
-        if not reviews:
-            ahora = timezone.now()
-            return Response([
-                {
-                    'id': 1,
-                    'user': 'ciudadano_verde',
-                    'rating': 5,
-                    'comment': 'Excelente servicio de acopio, atención rápida y pesaje justo.',
-                    'created_at': (ahora - timedelta(hours=3)).isoformat(),
-                },
-                {
-                    'id': 2,
-                    'user': 'reciclador_pro',
-                    'rating': 4,
-                    'comment': 'Buenos precios por el plástico PET y aluminio.',
-                    'created_at': (ahora - timedelta(days=1)).isoformat(),
-                },
-                {
-                    'id': 3,
-                    'user': 'eco_bogota',
-                    'rating': 5,
-                    'comment': 'Lugar muy limpio y organizado.',
-                    'created_at': (ahora - timedelta(days=2)).isoformat(),
-                }
-            ])
         return Response([
             {
                 'id': r.id,
@@ -471,26 +381,6 @@ class CollectionPointViewSet(viewsets.ModelViewSet):
     def mi_centro_reportes(self, request):
         point = _get_or_create_user_collection_point(request.user)
         reports = Report.objects.filter(point=point).order_by('-created_at')
-        if not reports:
-            ahora = timezone.now()
-            return Response([
-                {
-                    'id': 1,
-                    'type': 'DESBORDAMIENTO',
-                    'description': 'Contenedor de plástico alcanzando límite.',
-                    'status': 'PENDIENTE',
-                    'user': 'ciudadano_activo',
-                    'created_at': (ahora - timedelta(hours=5)).isoformat(),
-                },
-                {
-                    'id': 2,
-                    'type': 'MAL_USO',
-                    'description': 'Residuos no clasificados depositados en área de vidrio.',
-                    'status': 'EN_REVISION',
-                    'user': 'reciclador_exp',
-                    'created_at': (ahora - timedelta(days=1)).isoformat(),
-                }
-            ])
         return Response([
             {
                 'id': r.id,
@@ -527,6 +417,7 @@ def _notificar_recicladores_precios(point):
     try:
         from apps.users.models import User
         from apps.users.notifications import crear_notificacion
+        # Notificar a recicladores
         recicladores = User.objects.filter(role='RECICLADOR', is_active=True)
         for user in recicladores:
             crear_notificacion(
@@ -542,8 +433,11 @@ def _notificar_recicladores_centro_lleno(point):
     try:
         from apps.users.models import User
         from apps.users.notifications import crear_notificacion
-        recicladores = User.objects.filter(role='RECICLADOR', is_active=True)
-        for user in recicladores:
+        # Notificar a recicladores y ciudadanos
+        usuarios = User.objects.filter(
+            role__in=['RECICLADOR', 'CIUDADANO'], is_active=True
+        )
+        for user in usuarios:
             crear_notificacion(
                 user=user,
                 type='CENTRO_LLENO',
@@ -557,8 +451,11 @@ def _notificar_recicladores_centro_disponible(point):
     try:
         from apps.users.models import User
         from apps.users.notifications import crear_notificacion
-        recicladores = User.objects.filter(role='RECICLADOR', is_active=True)
-        for user in recicladores:
+        # Notificar a recicladores y ciudadanos
+        usuarios = User.objects.filter(
+            role__in=['RECICLADOR', 'CIUDADANO'], is_active=True
+        )
+        for user in usuarios:
             crear_notificacion(
                 user=user,
                 type='CENTRO_DISPONIBLE',

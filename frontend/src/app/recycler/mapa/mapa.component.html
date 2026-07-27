@@ -215,37 +215,33 @@
     <div class="modal-card">
       <button class="btn-close-modal" (click)="closeReportModal()">✕</button>
 
-      <h3>Reportar Novedad en Centro</h3>
+      <h3>Reportar Incidencia en Centro</h3>
       <p class="modal-subtitle">{{ selectedPoint?.name }}</p>
 
       <div class="form-group">
-        <label>Tipo de Residuo / Material Afectado</label>
-        <select [(ngModel)]="reportWasteType">
-          <option value="PLASTICO">🟠 Plástico</option>
-          <option value="VIDRIO">🔵 Vidrio</option>
-          <option value="PAPEL">🟣 Papel</option>
-          <option value="METAL">⚪ Metal</option>
-          <option value="ORGANICO">🟢 Orgánico</option>
+        <label>Tipo de incidencia</label>
+        <select [(ngModel)]="reportType">
+          <option *ngFor="let t of reportTypes" [value]="t.value">{{ t.label }}</option>
         </select>
       </div>
 
       <div class="form-group">
-        <label>Descripción de la novedad o estado</label>
+        <label>Descripción del problema</label>
         <textarea
           rows="4"
-          placeholder="Ej: El centro está cerrado temporalmente, capacidad completa, etc."
+          placeholder="Describe con detalle el problema observado en el centro…"
           [(ngModel)]="reportNotes"
         ></textarea>
       </div>
 
       <div class="success-msg" *ngIf="reportSuccess">
-        ✅ Novedad reportada correctamente.
+        ✅ Reporte enviado. El centro ha sido notificado.
       </div>
 
       <div class="modal-actions">
         <button class="btn btn-secondary" (click)="closeReportModal()">Cancelar</button>
         <button class="btn btn-primary" [disabled]="reporting" (click)="submitReport()">
-          {{ reporting ? 'Enviando...' : 'Enviar Reporte' }}
+          {{ reporting ? 'Enviando...' : '📢 Enviar Reporte' }}
         </button>
       </div>
     </div>

@@ -64,11 +64,14 @@ export class NotificacionesComponent implements OnInit {
 
   typeIcon(type: string): string {
     const map: Record<string, string> = {
-      ALERTA: '🚨',
-      CAPACIDAD: '⚖️',
-      REPORTE: '📋',
-      CALIFICACION: '⭐',
-      SISTEMA: '🔧',
+      PUNTO_CRITICO:      '⚠️',
+      PROPUESTA:          '📋',
+      ALERTA_ASIGNADA:    '🚛',
+      GENERAL:            '⭐',
+      PRECIO_ACTUALIZADO: '💰',
+      CENTRO_LLENO:       '🔴',
+      CENTRO_DISPONIBLE:  '🟢',
+      REPORTE_NUEVO:      '📝',
     };
     return map[type?.toUpperCase()] ?? '🔔';
   }

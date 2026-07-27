@@ -82,8 +82,8 @@ export class CentroAcopioService {
     return this.http.get<CentroReporte[]>(`${this.base}/mi-centro/reportes/`);
   }
 
-  /** Cambiar estado de un reporte */
+  /** Cambiar estado de un reporte (usa el endpoint real del ReportViewSet) */
   updateReporteEstado(reportId: number, status: string): Observable<any> {
-    return this.http.patch(`${this.base}/mi-centro/reportes/${reportId}/estado/`, { status });
+    return this.http.patch(`${environment.apiUrl}/reports/${reportId}/estado/`, { status });
   }
 }

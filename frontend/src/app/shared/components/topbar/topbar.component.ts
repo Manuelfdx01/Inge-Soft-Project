@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import {
@@ -15,7 +15,7 @@ import {
   templateUrl: './topbar.component.html',
   styleUrl: './topbar.component.scss'
 })
-export class TopbarComponent implements OnInit {
+export class TopbarComponent implements OnInit, OnDestroy {
 
   @Input() title = '';
 
@@ -34,8 +34,13 @@ export class TopbarComponent implements OnInit {
     this.notificationsService.unreadCount$
       .subscribe(count => this.unreadCount = count);
 
-    this.notificationsService.getUnreadCount();
+    // Start polling every 30s so badge updates automatically
+    this.notificationsService.startPolling(30000);
 
+  }
+
+  ngOnDestroy(): void {
+    this.notificationsService.stopPolling();
   }
 
   toggleDropdown(): void {

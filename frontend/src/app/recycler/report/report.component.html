@@ -6,8 +6,8 @@
   <div class="page-hero">
     <div class="hero-text">
       <span class="eyebrow">Panel de reciclador</span>
-      <h1>Reportar capacidad</h1>
-      <p>Actualiza el nivel de ocupación de un punto de reciclaje en tiempo real.</p>
+      <h1>Reportar incidencia</h1>
+      <p>Reporta problemas en un centro de acopio: daños, mal uso o desbordamiento.</p>
     </div>
   </div>
 
@@ -18,12 +18,13 @@
 
     <form (ngSubmit)="submit()">
 
-      <!-- Punto -->
+      <!-- Centro de acopio -->
       <div class="field">
-        <label>Punto de reciclaje</label>
+        <label>Centro de acopio</label>
         <select
           name="point"
           [(ngModel)]="report.point">
+          <option *ngIf="!points.length" value="" disabled>Cargando centros…</option>
           <option
             *ngFor="let point of points"
             [ngValue]="point.id">
@@ -32,55 +33,34 @@
         </select>
       </div>
 
-      <!-- Tipo -->
+      <!-- Tipo de incidencia -->
       <div class="field">
-        <label>Tipo de residuo</label>
+        <label>Tipo de incidencia</label>
         <select
-          name="waste_type"
-          [(ngModel)]="report.waste_type">
+          name="type"
+          [(ngModel)]="report.type">
           <option
-            *ngFor="let type of wasteTypes"
-            [value]="type.value">
-            {{ type.label }}
+            *ngFor="let t of reportTypes"
+            [value]="t.value">
+            {{ t.label }}
           </option>
         </select>
       </div>
 
-      <!-- Capacidad -->
+      <!-- Descripción -->
       <div class="field">
-        <label>
-          Capacidad actual
-          <strong [style.color]="capacityColor">{{ report.capacity_current }}%</strong>
-        </label>
-        <input
-          type="range"
-          min="0"
-          max="100"
-          name="capacity_current"
-          [(ngModel)]="report.capacity_current">
-        <div class="capacity-bar">
-          <div
-            class="capacity-fill"
-            [style.width.%]="report.capacity_current"
-            [style.background]="capacityColor">
-          </div>
-        </div>
-      </div>
-
-      <!-- Observaciones -->
-      <div class="field">
-        <label>Observaciones / Novedades</label>
+        <label>Descripción del problema</label>
         <textarea
           rows="4"
-          name="notes"
-          [(ngModel)]="report.notes"
-          placeholder="Añade detalles sobre el estado del punto o residuos sobrantes…">
+          name="description"
+          [(ngModel)]="report.description"
+          placeholder="Describe con detalle el problema observado en el centro…">
         </textarea>
       </div>
 
       <!-- Mensajes -->
       <div class="msg-alert success" *ngIf="success">
-        ✅ Reporte enviado correctamente. El estado del punto ha sido actualizado.
+        ✅ Reporte enviado correctamente. El centro de acopio ha sido notificado.
       </div>
 
       <div class="msg-alert error" *ngIf="error">
@@ -92,7 +72,7 @@
         class="btn btn-primary"
         type="submit"
         [disabled]="loading">
-        {{ loading ? 'Enviando…' : '📊 Actualizar capacidad' }}
+        {{ loading ? 'Enviando…' : '📢 Enviar reporte' }}
       </button>
 
     </form>

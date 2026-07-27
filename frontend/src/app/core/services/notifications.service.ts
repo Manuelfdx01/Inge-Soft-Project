@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, interval } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 export interface Notification {
   id: string;
@@ -14,13 +15,38 @@ export interface Notification {
 @Injectable({
   providedIn: 'root'
 })
-export class NotificationsService {
-  private apiUrl = 'https://gomi-backend.onrender.com/api/users/notifications';
+export class NotificationsService implements OnDestroy {
+  private readonly apiUrl = `${environment.apiUrl}/users/notifications`;
 
   private unreadCount = new BehaviorSubject<number>(0);
   unreadCount$ = this.unreadCount.asObservable();
 
+  private pollingSubscription?: Subscription;
+
   constructor(private http: HttpClient) {}
+
+  /**
+   * Inicia el polling automático de notificaciones no leídas.
+   * Llámalo desde el topbar o shell una única vez por sesión.
+   */
+  startPolling(intervalMs = 30000): void {
+    this.stopPolling();
+    // Carga inmediata al iniciar
+    this.getUnreadCount();
+    // Polling cada intervalMs ms
+    this.pollingSubscription = interval(intervalMs).subscribe(() => {
+      this.getUnreadCount();
+    });
+  }
+
+  stopPolling(): void {
+    this.pollingSubscription?.unsubscribe();
+    this.pollingSubscription = undefined;
+  }
+
+  ngOnDestroy(): void {
+    this.stopPolling();
+  }
 
   getAll(): Observable<Notification[]> {
     return this.http.get<Notification[]>(`${this.apiUrl}/`);
@@ -31,7 +57,13 @@ export class NotificationsService {
       .get<{ unread_count: number }>(`${this.apiUrl}/no-leidas/`)
       .subscribe({
         next: (res) => this.unreadCount.next(res.unread_count),
+        error: () => {} // silenciar errores de red en polling
       });
+  }
+
+  /** Actualiza el contador localmente (uso interno) */
+  setUnreadCount(count: number): void {
+    this.unreadCount.next(count);
   }
 
   markAsRead(id: string): Observable<Notification> {

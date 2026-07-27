@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-register',
@@ -46,7 +47,7 @@ export class RegisterComponent {
     this.loading = true;
     this.errorMsg = '';
 
-    this.http.post('https://gomi-backend.onrender.com/api/users/register/', this.form.value)
+    this.http.post(`${environment.apiUrl}/users/register/`, this.form.value)
       .subscribe({
         next: () => {
           this.loading = false;

@@ -93,16 +93,25 @@ class ReportViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+        point_filter = self.request.query_params.get('point')
+
         if user.role == 'CENTRO_ACOPIO':
             from apps.collection_points.models import CollectionPoint
             try:
                 points = CollectionPoint.objects.filter(admin=user)
                 if points.exists():
-                    return Report.objects.filter(point__in=points).order_by('-created_at')
+                    qs = Report.objects.filter(point__in=points).order_by('-created_at')
+                    if point_filter:
+                        qs = qs.filter(point_id=point_filter)
+                    return qs
             except Exception:
                 pass
             return Report.objects.all().order_by('-created_at')
-        return Report.objects.filter(user=user).order_by('-created_at')
+
+        qs = Report.objects.filter(user=user).order_by('-created_at')
+        if point_filter:
+            qs = qs.filter(point_id=point_filter)
+        return qs
 
     def perform_create(self, serializer):
         report = serializer.save(user=self.request.user)

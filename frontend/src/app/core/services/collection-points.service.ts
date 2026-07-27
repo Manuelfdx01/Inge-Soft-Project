@@ -102,4 +102,32 @@ export class CollectionPointsService {
       `${environment.apiUrl}/collection-points/${pointId}/reviews/`
     );
   }
+
+  /**
+   * Crear un reporte de incidencia real en un centro.
+   * type: 'DANO' | 'MAL_USO' | 'DESBORDAMIENTO' | 'OTRO'
+   */
+  createReport(pointId: string, type: string, description: string): Observable<any> {
+    return this.http.post(
+      `${environment.apiUrl}/reports/`,
+      { point: pointId, type, description }
+    );
+  }
+
+  /** Obtener reportes de un centro (para centro de acopio) */
+  getReports(pointId?: string): Observable<any[]> {
+    let params = new HttpParams();
+    if (pointId) {
+      params = params.set('point', pointId);
+    }
+    return this.http.get<any[]>(`${environment.apiUrl}/reports/`, { params });
+  }
+
+  /** Cambiar estado de un reporte de incidencia (Centro de Acopio) */
+  updateReporteEstado(reportId: number, newStatus: string): Observable<any> {
+    return this.http.patch(
+      `${environment.apiUrl}/reports/${reportId}/estado/`,
+      { status: newStatus }
+    );
+  }
 }

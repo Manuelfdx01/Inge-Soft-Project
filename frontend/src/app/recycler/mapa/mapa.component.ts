@@ -49,10 +49,17 @@ export class MapaComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // ── Modal Reporte ──
   isReportModalOpen = false;
+  reportType        = 'OTRO';
   reportNotes       = '';
-  reportWasteType   = 'PLASTICO';
   reportSuccess     = false;
   reporting         = false;
+
+  readonly reportTypes = [
+    { value: 'DANO',           label: '🔨 Daño en contenedor' },
+    { value: 'MAL_USO',        label: '⚠️ Mal uso' },
+    { value: 'DESBORDAMIENTO', label: '🌊 Desbordamiento' },
+    { value: 'OTRO',           label: '📋 Otro' },
+  ];
 
   // ── Modal Calificación ──
   isReviewModalOpen = false;
@@ -433,6 +440,7 @@ export class MapaComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isReportModalOpen = true;
     this.reportSuccess     = false;
     this.reportNotes       = '';
+    this.reportType        = 'OTRO';
   }
 
   closeReportModal(): void {
@@ -443,24 +451,22 @@ export class MapaComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.selectedPoint) return;
     this.reporting = true;
 
-    this.pointsService.updateCapacity(
+    this.pointsService.createReport(
       this.selectedPoint.id.toString(),
-      this.selectedPoint.capacity_current,
-      this.reportWasteType,
+      this.reportType,
       this.reportNotes,
     ).subscribe({
       next: () => {
         this.reporting     = false;
         this.reportSuccess = true;
-        
+
         this.gamificationService.recordAction('reportar_punto_mapa').subscribe({
-          next: () => console.log('Gamification action recorded'),
-          error: (err) => console.error('Gamification error:', err)
+          next: () => {},
+          error: () => {}
         });
 
         setTimeout(() => {
           this.closeReportModal();
-          this.loadData();
         }, 1500);
       },
       error: (err) => {

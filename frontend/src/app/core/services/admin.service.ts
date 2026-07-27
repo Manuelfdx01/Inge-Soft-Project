@@ -1,24 +1,19 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { MOCK_METRICS } from '../mocks/admin.mock';
+import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
-  private apiUrl = 'https://gomi-backend.onrender.com/api';
-  private useMock = false;
+  private apiUrl = `${environment.apiUrl}`;
 
   constructor(private http: HttpClient) {}
 
   getMetrics(): Observable<any> {
-    if (this.useMock) return of(MOCK_METRICS);
-
     return this.http.get(`${this.apiUrl}/admin/metrics/`);
   }
 
   getUsers(role?: string): Observable<any[]> {
-    if (this.useMock) return of([]);
-
     let url = `${this.apiUrl}/users/`;
 
     if (role) {

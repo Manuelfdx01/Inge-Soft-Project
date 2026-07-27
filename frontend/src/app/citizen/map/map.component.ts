@@ -48,12 +48,28 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   loading   = true;
   mobileTab: 'MAP' | 'LIST' = 'MAP';
 
-  // ── Reporte modal ──
+  // ── Modal Reporte ──
   isReportModalOpen = false;
+  reportType        = 'OTRO';
   reportNotes       = '';
-  reportWasteType   = 'PLASTICO';
   reportSuccess     = false;
   reporting         = false;
+
+  // ── Modal Calificación ──
+  isReviewModalOpen = false;
+  reviewRating      = 5;
+  reviewComment     = '';
+  reviewSuccess     = false;
+  submittingReview  = false;
+  pointReviews: any[] = [];
+  loadingReviews    = false;
+
+  readonly reportTypes = [
+    { value: 'DANO',           label: '🔨 Daño en contenedor' },
+    { value: 'MAL_USO',        label: '⚠️ Mal uso' },
+    { value: 'DESBORDAMIENTO', label: '🌊 Desbordamiento' },
+    { value: 'OTRO',           label: '📋 Otro' },
+  ];
 
   // ── Leaflet internos ──
   private map!: L.Map;
@@ -163,6 +179,16 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
           if (point) this.openReportModal(point);
         });
       }
+
+      const reviewBtn = popupEl.querySelector('.popup-btn-review');
+      if (reviewBtn) {
+        reviewBtn.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          const pId = reviewBtn.getAttribute('data-point-id');
+          const point = this.points.find(p => p.id.toString() === pId?.toString());
+          if (point) this.openReviewModal(point);
+        });
+      }
     });
 
     // Renderizar markers cuando la vista esté lista
@@ -215,6 +241,14 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         ? `<div class="popup-distance">📏 <strong>${point.distance_km} km</strong> de tu ubicación</div>`
         : '';
 
+      let pricesHtml = '';
+      if (point.precio_kg && Object.keys(point.precio_kg).length > 0) {
+        const pList = Object.entries(point.precio_kg)
+          .map(([mat, price]) => `<span><strong>${mat}:</strong> $${price}/kg</span>`)
+          .join(', ');
+        pricesHtml = `<div class="popup-prices">💰 <strong>Precios:</strong> ${pList}</div>`;
+      }
+
       const popupHtml = `
         <div class="leaflet-custom-popup">
           <div class="popup-header">
@@ -223,9 +257,10 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
           </div>
           <p class="popup-address">📍 ${point.address}</p>
           ${distanceHtml}
+          ${pricesHtml}
           <div class="popup-capacity">
             <div class="popup-capacity-label">
-              <span>Nivel de ocupación</span>
+              <span>Nivel de ocupación (${point.capacity_current}/${point.capacity_max} kg)</span>
               <strong style="color: ${this.getBarColor(point.capacity_pct)}">${point.capacity_pct}%</strong>
             </div>
             <div class="popup-progress-bar">
@@ -235,6 +270,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
           <div class="popup-waste-tags">${wasteTagsHtml}</div>
           <div class="popup-actions">
             <button class="popup-btn popup-btn-osm" data-point-id="${point.id}">🗺️ Cómo llegar</button>
+            <button class="popup-btn popup-btn-review" data-point-id="${point.id}">⭐ Calificar</button>
             <button class="popup-btn popup-btn-report" data-point-id="${point.id}">📢 Reportar</button>
           </div>
         </div>
@@ -437,6 +473,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isReportModalOpen = true;
     this.reportSuccess     = false;
     this.reportNotes       = '';
+    this.reportType        = 'OTRO';
   }
 
   closeReportModal(): void {
@@ -447,31 +484,75 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.selectedPoint) return;
     this.reporting = true;
 
-    this.pointsService.updateCapacity(
+    this.pointsService.createReport(
       this.selectedPoint.id.toString(),
-      this.selectedPoint.capacity_current,
-      this.reportWasteType,
+      this.reportType,
       this.reportNotes,
     ).subscribe({
       next: () => {
         this.reporting     = false;
         this.reportSuccess = true;
-        
-        // Record gamification action
+
         this.gamificationService.recordAction('reportar_punto_mapa').subscribe({
-          next: () => console.log('Gamification: points for map report'),
-          error: (err) => console.error('Gamification error:', err)
+          next: () => {},
+          error: () => {}
         });
 
         setTimeout(() => {
           this.closeReportModal();
-          this.loadData();
         }, 1500);
       },
       error: (err) => {
         console.error('Error al enviar reporte:', err);
         this.reporting = false;
       },
+    });
+  }
+
+  // ── Modal Calificaciones/Comentarios ──
+  openReviewModal(point: CollectionPoint): void {
+    this.selectedPoint    = point;
+    this.isReviewModalOpen = true;
+    this.reviewRating     = 5;
+    this.reviewComment    = '';
+    this.reviewSuccess    = false;
+    this.loadReviews(point.id);
+  }
+
+  closeReviewModal(): void {
+    this.isReviewModalOpen = false;
+  }
+
+  loadReviews(pointId: string): void {
+    this.loadingReviews = true;
+    this.pointsService.getReviews(pointId).subscribe({
+      next: (data) => {
+        this.pointReviews   = data;
+        this.loadingReviews = false;
+      },
+      error: () => { this.loadingReviews = false; }
+    });
+  }
+
+  submitReview(): void {
+    if (!this.selectedPoint) return;
+    this.submittingReview = true;
+
+    this.pointsService.addReview(
+      this.selectedPoint.id.toString(),
+      this.reviewRating,
+      this.reviewComment
+    ).subscribe({
+      next: () => {
+        this.submittingReview = false;
+        this.reviewSuccess    = true;
+        this.loadReviews(this.selectedPoint!.id);
+        setTimeout(() => { this.closeReviewModal(); }, 1500);
+      },
+      error: (err) => {
+        console.error('Error enviando calificación:', err);
+        this.submittingReview = false;
+      }
     });
   }
 

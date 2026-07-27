@@ -120,10 +120,30 @@
           </span>
         </div>
 
+        <!-- Precios -->
+        <div class="prices-box" *ngIf="selectedPoint.precio_kg && (selectedPoint.precio_kg | keyvalue).length > 0">
+          <strong>💰 Precios por kg:</strong>
+          <div class="prices-list">
+            <span *ngFor="let entry of (selectedPoint.precio_kg | keyvalue)" class="price-item">
+              {{ entry.key }}: ${{ entry.value }}/kg
+            </span>
+          </div>
+        </div>
+
+        <p class="phone" *ngIf="selectedPoint.phone">
+          📞 <strong>{{ selectedPoint.phone }}</strong>
+        </p>
+        <p class="schedule" *ngIf="selectedPoint.schedule">
+          🕒 {{ selectedPoint.schedule }}
+        </p>
+
         <!-- Acciones -->
         <div class="card-actions">
           <button class="btn btn-primary" (click)="openInOSM(selectedPoint)">
             🗺️ Cómo llegar
+          </button>
+          <button class="btn btn-success" (click)="openReviewModal(selectedPoint)">
+            ⭐ Calificar
           </button>
           <button class="btn btn-secondary" (click)="openReportModal(selectedPoint)">
             📢 Reportar
@@ -179,45 +199,104 @@
 
   </div>
 
-  <!-- ══════════════════════════════════════════════ -->
-  <!-- MODAL DE REPORTE                              -->
-  <!-- ══════════════════════════════════════════════ -->
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- MODAL DE REPORTE DE INCIDENCIA                -->
+  <!-- ════════════════════════════════════════════════ -->
   <div class="modal-overlay" *ngIf="isReportModalOpen">
     <div class="modal-card">
       <button class="btn-close-modal" (click)="closeReportModal()">✕</button>
 
-      <h3>Reportar Novedad</h3>
+      <h3>Reportar Incidencia</h3>
       <p class="modal-subtitle">{{ selectedPoint?.name }}</p>
 
       <div class="form-group">
-        <label>Tipo de Residuo Afectado</label>
-        <select [(ngModel)]="reportWasteType">
-          <option value="PLASTICO">🟠 Plástico</option>
-          <option value="VIDRIO">🔵 Vidrio</option>
-          <option value="PAPEL">🟣 Papel</option>
-          <option value="METAL">⚪ Metal</option>
-          <option value="ORGANICO">🟢 Orgánico</option>
+        <label>Tipo de incidencia</label>
+        <select [(ngModel)]="reportType">
+          <option *ngFor="let t of reportTypes" [value]="t.value">{{ t.label }}</option>
         </select>
       </div>
 
       <div class="form-group">
-        <label>Descripción del estado</label>
+        <label>Descripción del problema</label>
         <textarea
           rows="4"
-          placeholder="Ej: Contenedor lleno, residuos fuera de lugar, daño físico..."
+          placeholder="Describe con detalle el problema observado…"
           [(ngModel)]="reportNotes"
         ></textarea>
       </div>
 
       <div class="success-msg" *ngIf="reportSuccess">
-        ✅ Novedad reportada correctamente.
+        ✅ Reporte enviado. El centro de acopio ha sido notificado.
       </div>
 
       <div class="modal-actions">
         <button class="btn btn-secondary" (click)="closeReportModal()">Cancelar</button>
         <button class="btn btn-primary" [disabled]="reporting" (click)="submitReport()">
-          {{ reporting ? 'Enviando...' : 'Enviar Reporte' }}
+          {{ reporting ? 'Enviando...' : '📢 Enviar Reporte' }}
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!-- MODAL DE CALIFICACIÓN                           -->
+  <!-- ════════════════════════════════════════════════ -->
+  <div class="modal-overlay" *ngIf="isReviewModalOpen">
+    <div class="modal-card modal-large">
+      <button class="btn-close-modal" (click)="closeReviewModal()">✕</button>
+
+      <h3>Calificar Centro</h3>
+      <p class="modal-subtitle">{{ selectedPoint?.name }}</p>
+
+      <div class="review-form">
+        <h4>Tu calificación:</h4>
+        <div class="star-rating">
+          <span
+            *ngFor="let star of [1, 2, 3, 4, 5]"
+            class="star"
+            [class.filled]="star <= reviewRating"
+            (click)="reviewRating = star">
+            ★
+          </span>
+          <span class="rating-label">{{ reviewRating }}/5</span>
+        </div>
+
+        <div class="form-group">
+          <label>Comentario (opcional)</label>
+          <textarea
+            rows="3"
+            placeholder="Escribe tu opinión sobre este centro de acopio…"
+            [(ngModel)]="reviewComment"
+          ></textarea>
+        </div>
+
+        <div class="success-msg" *ngIf="reviewSuccess">
+          ✅ ¡Gracias por tu calificación!
+        </div>
+
+        <button class="btn btn-primary" [disabled]="submittingReview" (click)="submitReview()">
+          {{ submittingReview ? 'Enviando...' : '⭐ Publicar Calificación' }}
+        </button>
+      </div>
+
+      <hr class="divider">
+
+      <div class="reviews-list-section">
+        <h4>Comentarios recientes:</h4>
+        <div class="reviews-spinner" *ngIf="loadingReviews">Cargando…</div>
+        <div class="reviews-scroll" *ngIf="!loadingReviews">
+          <div *ngFor="let rev of pointReviews" class="review-item-card">
+            <div class="review-user-row">
+              <strong>👤 {{ rev.username || 'Ciudadano' }}</strong>
+              <span class="stars">★ {{ rev.rating }}/5</span>
+            </div>
+            <p class="review-comment" *ngIf="rev.comment">{{ rev.comment }}</p>
+            <span class="review-date">{{ rev.created_at | date:'short' }}</span>
+          </div>
+          <div *ngIf="pointReviews.length === 0" class="no-reviews">
+            Nadie ha calificado este centro aún. ¡Sé el primero!
+          </div>
+        </div>
       </div>
     </div>
   </div>
