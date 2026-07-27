@@ -10,10 +10,10 @@ import { AuthService } from '../../core/services/auth.service';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    RouterLink, // necesario para routerLink="/login/registro" en el template
+    RouterLink,
   ],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss', // <-- única línea nueva: conecta el diseño
+  styleUrl: './login.component.scss',
 })
 export class LoginComponent {
   form: FormGroup;
@@ -41,9 +41,10 @@ export class LoginComponent {
       next: (res) => {
         this.loading = false;
         const role = res.user?.role;
-        if (role === 'CIUDADANO')  this.router.navigate(['/ciudadano/mapa']);
-        if (role === 'RECICLADOR') this.router.navigate(['/reciclador/alertas']);
-        if (role === 'ADMIN')      this.router.navigate(['/admin/dashboard']);
+        if (role === 'CIUDADANO')      this.router.navigate(['/ciudadano/mapa']);
+        if (role === 'RECICLADOR')     this.router.navigate(['/reciclador/mapa']);
+        if (role === 'ADMIN')          this.router.navigate(['/admin/dashboard']);
+        if (role === 'CENTRO_ACOPIO') this.router.navigate(['/centro-acopio/dashboard']);
       },
       error: () => {
         this.loading = false;

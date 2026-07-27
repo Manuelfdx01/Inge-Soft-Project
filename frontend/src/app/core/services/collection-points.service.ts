@@ -21,8 +21,11 @@ export interface CollectionPoint {
   capacity_current: number;
   capacity_pct: number;
   waste_types: WasteType[];
-  status: 'NORMAL' | 'ALERTA' | 'CRITICO' | 'INACTIVO';
+  status: 'NORMAL' | 'ALERTA' | 'CRITICO' | 'INACTIVO' | 'DISPONIBLE' | 'LLENO' | 'MANTENIMIENTO';
   distance_km?: number | null;
+  precio_kg?: Record<string, number>;
+  schedule?: string;
+  phone?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -82,6 +85,21 @@ export class CollectionPointsService {
     return this.http.patch(
       `${this.apiUrl}/${id}/capacidad/`,
       { capacity_current, waste_type, notes }
+    );
+  }
+
+  /** Calificar/comentar un centro (ciudadanos y recicladores) */
+  addReview(pointId: string, rating: number, comment: string): Observable<any> {
+    return this.http.post(
+      `${environment.apiUrl}/collection-points/${pointId}/reviews/`,
+      { rating, comment }
+    );
+  }
+
+  /** Obtener calificaciones de un centro */
+  getReviews(pointId: string): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${environment.apiUrl}/collection-points/${pointId}/reviews/`
     );
   }
 }

@@ -5,9 +5,10 @@ from django.db import models
 class User(AbstractUser):
 
     class Role(models.TextChoices):
-        CIUDADANO  = 'CIUDADANO',  'Ciudadano'
-        RECICLADOR = 'RECICLADOR', 'Reciclador'
-        ADMIN      = 'ADMIN',      'Administrador'
+        CIUDADANO     = 'CIUDADANO',     'Ciudadano'
+        RECICLADOR    = 'RECICLADOR',    'Reciclador'
+        ADMIN         = 'ADMIN',         'Administrador'
+        CENTRO_ACOPIO = 'CENTRO_ACOPIO', 'Centro de Acopio'
 
     role = models.CharField(
         max_length=20,
@@ -41,6 +42,10 @@ class User(AbstractUser):
     @property
     def is_admin_gomi(self):
         return self.role == self.Role.ADMIN
+
+    @property
+    def is_centro_acopio(self):
+        return self.role == self.Role.CENTRO_ACOPIO
 
     @property
     def level_info(self):
@@ -87,17 +92,21 @@ class User(AbstractUser):
 
 class Notification(models.Model):
     class Type(models.TextChoices):
-        PUNTO_CRITICO = 'PUNTO_CRITICO', 'Punto crítico'
-        PROPUESTA = 'PROPUESTA', 'Propuesta actualizada'
-        ALERTA_ASIGNADA = 'ALERTA_ASIGNADA', 'Alerta asignada'
-        GENERAL = 'GENERAL', 'General'
+        PUNTO_CRITICO    = 'PUNTO_CRITICO',    'Punto crítico'
+        PROPUESTA        = 'PROPUESTA',        'Propuesta actualizada'
+        ALERTA_ASIGNADA  = 'ALERTA_ASIGNADA',  'Alerta asignada'
+        GENERAL          = 'GENERAL',          'General'
+        PRECIO_ACTUALIZADO = 'PRECIO_ACTUALIZADO', 'Precio actualizado'
+        CENTRO_LLENO     = 'CENTRO_LLENO',     'Centro lleno'
+        CENTRO_DISPONIBLE = 'CENTRO_DISPONIBLE', 'Centro disponible'
+        REPORTE_NUEVO    = 'REPORTE_NUEVO',    'Reporte nuevo'
 
     user = models.ForeignKey(
         'users.User',
         on_delete=models.CASCADE,
         related_name='notifications',
     )
-    type = models.CharField(max_length=20, choices=Type.choices)
+    type = models.CharField(max_length=25, choices=Type.choices)
     message = models.TextField()
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

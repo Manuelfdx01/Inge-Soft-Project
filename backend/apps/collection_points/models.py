@@ -19,10 +19,14 @@ class WasteType(models.Model):
 class CollectionPoint(models.Model):
 
     class Status(models.TextChoices):
-        NORMAL   = 'NORMAL',   'Normal'
-        ALERTA   = 'ALERTA',   'Alerta'
-        CRITICO  = 'CRITICO',  'Crítico'
-        INACTIVO = 'INACTIVO', 'Inactivo'
+        NORMAL       = 'NORMAL',       'Normal'
+        ALERTA       = 'ALERTA',       'Alerta'
+        CRITICO      = 'CRITICO',      'Crítico'
+        INACTIVO     = 'INACTIVO',     'Inactivo'
+        # Nuevos estados para Centro de Acopio
+        DISPONIBLE   = 'DISPONIBLE',   'Disponible'
+        LLENO        = 'LLENO',        'Lleno'
+        MANTENIMIENTO = 'MANTENIMIENTO', 'Mantenimiento'
 
     name             = models.CharField(max_length=100)
     address          = models.TextField()
@@ -30,9 +34,9 @@ class CollectionPoint(models.Model):
     longitude        = models.DecimalField(max_digits=9, decimal_places=6)
     capacity_max     = models.IntegerField(default=100)
     capacity_current = models.IntegerField(default=0)
-    waste_types      = models.ManyToManyField(WasteType, related_name='points')
+    waste_types      = models.ManyToManyField(WasteType, related_name='points', blank=True)
     status           = models.CharField(
-        max_length=10,
+        max_length=15,
         choices=Status.choices,
         default=Status.NORMAL,
     )
@@ -42,6 +46,10 @@ class CollectionPoint(models.Model):
         null=True, blank=True,
         related_name='managed_points',
     )
+    # Campos nuevos para Centro de Acopio
+    precio_kg        = models.JSONField(default=dict, blank=True)  # {"PLASTICO": 500, "PAPEL": 300, ...}
+    schedule         = models.CharField(max_length=200, blank=True)
+    phone            = models.CharField(max_length=30, blank=True)
     created_at  = models.DateTimeField(auto_now_add=True)
     updated_at  = models.DateTimeField(auto_now=True)
 

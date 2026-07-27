@@ -10,10 +10,10 @@ import { HttpClient } from '@angular/common/http';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    RouterLink, // necesario para routerLink="/login" en el template
+    RouterLink,
   ],
   templateUrl: './register.component.html',
-  styleUrl: './register.component.scss', // <-- única línea nueva: conecta el diseño
+  styleUrl: './register.component.scss',
 })
 export class RegisterComponent {
   form: FormGroup;
@@ -22,8 +22,9 @@ export class RegisterComponent {
   successMsg = '';
 
   roles = [
-    { value: 'CIUDADANO',  label: 'Ciudadano' },
-    { value: 'RECICLADOR', label: 'Reciclador' },
+    { value: 'CIUDADANO',     label: '🏙️ Ciudadano' },
+    { value: 'RECICLADOR',    label: '♻️ Reciclador' },
+    { value: 'CENTRO_ACOPIO', label: '🏭 Centro de Acopio' },
   ];
 
   constructor(
@@ -54,7 +55,12 @@ export class RegisterComponent {
         },
         error: (err) => {
           this.loading = false;
-          this.errorMsg = err.error?.email?.[0] ?? 'Error al registrarse.';
+          const errors = err.error;
+          this.errorMsg =
+            errors?.email?.[0] ??
+            errors?.role?.[0] ??
+            errors?.username?.[0] ??
+            'Error al registrarse.';
         },
       });
   }
