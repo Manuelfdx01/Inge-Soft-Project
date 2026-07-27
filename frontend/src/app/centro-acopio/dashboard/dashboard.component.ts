@@ -17,17 +17,26 @@ export class CentroDashboardComponent implements OnInit {
   constructor(private centroService: CentroAcopioService) {}
 
   ngOnInit(): void {
-    this.centroService.getDashboard().subscribe({
-      next: (data) => {
-        this.dashboardData = data;
-        this.loading = false;
-      },
-      error: (err) => {
-        console.error('Error cargando dashboard:', err);
-        this.loading = false;
-      }
-    });
-  }
+
+  console.log('🚀 CentroDashboardComponent iniciado');
+
+  this.centroService.getDashboard().subscribe({
+    next: (data) => {
+      console.log('✅ Respuesta del dashboard:', data);
+
+      this.dashboardData = data;
+      this.loading = false;
+
+      console.log('loading =', this.loading);
+      console.log('dashboardData =', this.dashboardData);
+    },
+    error: (err) => {
+      console.error('❌ Error cargando dashboard:', err);
+      this.loading = false;
+    }
+  });
+
+}
 
   getBarColor(pct: number): string {
     if (pct >= 86) return '#EF5350';
