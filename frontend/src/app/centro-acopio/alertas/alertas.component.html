@@ -1,0 +1,81 @@
+<div class="ca-page">
+  <div class="ca-header">
+    <div>
+      <h1>🚨 Alertas y Avisos a Recicladores</h1>
+      <p class="subtitle">Publica actualizaciones importantes de tu centro para la comunidad de recicladores</p>
+    </div>
+  </div>
+
+  <div class="ca-content">
+
+    <!-- Formulario para publicar nueva alerta -->
+    <div class="publish-card">
+      <h2>📢 Publicar Nuevo Aviso</h2>
+      <p class="card-desc">Los avisos publicados llegarán de inmediato a las notificaciones de los recicladores y ciudadanos.</p>
+
+      <div class="tipos-grid">
+        <div
+          *ngFor="let t of tipos"
+          class="tipo-option"
+          [class.tipo-option--active]="tipoSeleccionado === t.value"
+          (click)="tipoSeleccionado = t.value"
+        >
+          <div class="tipo-header">
+            <strong>{{ t.label }}</strong>
+          </div>
+          <span class="tipo-desc">{{ t.desc }}</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="alertMsg">Mensaje de la Alerta</label>
+        <textarea
+          id="alertMsg"
+          rows="3"
+          [(ngModel)]="mensajeAlerta"
+          placeholder="Ej: A partir de hoy aumentamos el precio del plástico a $1.500/kg..."
+        ></textarea>
+      </div>
+
+      <div class="action-row">
+        <button
+          class="btn btn--primary"
+          (click)="publicar()"
+          [disabled]="publishing() || !mensajeAlerta.trim()"
+        >
+          {{ publishing() ? '⏳ Publicando...' : '🚀 Publicar Alerta' }}
+        </button>
+      </div>
+
+      <div class="ca-alert ca-alert--success" *ngIf="successMsg()">✅ {{ successMsg() }}</div>
+      <div class="ca-alert ca-alert--error" *ngIf="errorMsg()">⚠️ {{ errorMsg() }}</div>
+    </div>
+
+    <!-- Historial de alertas publicadas -->
+    <div class="history-section">
+      <h3>📜 Historial de Avisos Publicados</h3>
+
+      <div class="ca-loading" *ngIf="loading()">
+        <div class="spinner"></div>
+        <span>Cargando historial...</span>
+      </div>
+
+      <div class="alerts-list" *ngIf="!loading() && alertas().length > 0">
+        <div class="alert-item" *ngFor="let item of alertas()">
+          <div class="alert-icon">{{ tipoIcon(item.message) }}</div>
+          <div class="alert-body">
+            <p class="alert-text">{{ item.message }}</p>
+            <span class="alert-date">{{ item.created_at | date:'medium' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="!loading() && alertas().length === 0">
+        <div class="empty-icon">📢</div>
+        <h3>No has publicado avisos aún</h3>
+        <p>Utiliza el formulario superior para notificar a los recicladores sobre cambios en tu centro.</p>
+      </div>
+    </div>
+
+  </div>
+</div>

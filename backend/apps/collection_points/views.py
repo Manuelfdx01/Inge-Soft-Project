@@ -350,26 +350,6 @@ class CollectionPointViewSet(viewsets.ModelViewSet):
         """Dashboard completo del Centro de Acopio autenticado."""
         point = _get_or_create_user_collection_point(request.user)
 
-        ahora = timezone.now()
-        ocupacion_semanal = []
-        for i in range(6, -1, -1):
-            dia = ahora - timedelta(days=i)
-            dia_inicio = dia.replace(hour=0, minute=0, second=0, microsecond=0)
-            dia_fin = dia.replace(hour=23, minute=59, second=59, microsecond=999999)
-            logs = CapacityLog.objects.filter(
-                point=point,
-                recorded_at__range=(dia_inicio, dia_fin)
-            ) if point else []
-            logs_list = list(logs)
-            promedio = (
-                round(sum(float(l.capacity_pct) for l in logs_list) / len(logs_list), 1)
-                if logs_list else 0.0
-            )
-            ocupacion_semanal.append({
-                'dia': dia.strftime('%a'),
-                'promedio_pct': promedio,
-            })
-
         all_reviews = Review.objects.filter(point=point) if point else Review.objects.none()
         total_reviews = all_reviews.count()
         avg_rating = round(sum(r.rating for r in all_reviews) / total_reviews, 1) if total_reviews > 0 else None
@@ -384,17 +364,20 @@ class CollectionPointViewSet(viewsets.ModelViewSet):
             for r in all_reviews.order_by('-created_at')[:5]
         ]
 
-        all_reports = Report.objects.filter(point=point) if point else Report.objects.none()
-        reportes_data = [
+        # Alertas o avisos publicados por el centro
+        from apps.users.models import Notification
+        alertas_publicadas = Notification.objects.filter(
+            user=request.user,
+            message__startswith='Publicaste alerta'
+        ).order_by('-created_at')[:5]
+
+        alertas_data = [
             {
-                'id': r.id,
-                'type': r.type,
-                'description': r.description,
-                'status': r.status,
-                'user': r.user.username,
-                'created_at': r.created_at,
+                'id': a.id,
+                'message': a.message.replace('Publicaste alerta ', ''),
+                'created_at': a.created_at,
             }
-            for r in all_reports.order_by('-created_at')[:5]
+            for a in alertas_publicadas
         ]
 
         alertas_activas = LogisticsAlert.objects.filter(
@@ -402,27 +385,103 @@ class CollectionPointViewSet(viewsets.ModelViewSet):
             status__in=['PENDIENTE', 'ACEPTADA', 'EN_PROCESO']
         ).count() if point else 0
 
-        centro_data = CollectionPointSerializer(point).data
+        centro_data = CollectionPointSerializer(point, context={'request': request}).data
 
         return Response({
             'centro': centro_data,
-            'ocupacion_semanal': ocupacion_semanal,
             'avg_rating': avg_rating,
             'total_reviews': total_reviews,
             'calificaciones_recientes': calificaciones_data,
-            'reportes_recientes': reportes_data,
+            'alertas_recientes': alertas_data,
             'alertas_activas': alertas_activas,
         })
 
     @action(
         detail=False,
-        methods=["get"],
+        methods=["get", "patch", "put"],
         url_path="mi-centro",
         permission_classes=[IsCentroAcopio],
     )
     def mi_centro(self, request):
         point = _get_or_create_user_collection_point(request.user)
-        return Response(CollectionPointSerializer(point).data)
+        if request.method in ["PATCH", "PUT"]:
+            serializer = CollectionPointSerializer(
+                point, data=request.data, partial=True, context={'request': request}
+            )
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(CollectionPointSerializer(point, context={'request': request}).data)
+
+    @action(
+        detail=False,
+        methods=["get", "post"],
+        url_path="mi-centro/alertas",
+        permission_classes=[IsCentroAcopio],
+    )
+    def mi_centro_alertas(self, request):
+        point = _get_or_create_user_collection_point(request.user)
+        if request.method == "POST":
+            tipo = request.data.get("tipo", "AVISO")
+            mensaje = request.data.get("message") or request.data.get("mensaje", "")
+            if not mensaje:
+                return Response({"error": "El mensaje de la alerta es requerido."}, status=status.HTTP_400_BAD_REQUEST)
+
+            from apps.users.models import User, Notification
+            recicladores = User.objects.filter(role__in=['RECICLADOR', 'CIUDADANO'], is_active=True)
+
+            prefix_map = {
+                'PRECIO': '💰 Cambio de precios: ',
+                'HORARIO': '🕒 Cambio de horario: ',
+                'CIERRE': '🔴 Aviso de cierre/mantenimiento: ',
+                'AVISO': '📢 Aviso de centro: ',
+            }
+            prefix = prefix_map.get(tipo.upper(), '📢 Aviso: ')
+            full_message = f'[{point.name}] {prefix}{mensaje}'
+
+            notifs = [
+                Notification(
+                    user=u,
+                    type=Notification.Type.GENERAL,
+                    message=full_message
+                )
+                for u in recicladores
+            ]
+            Notification.objects.bulk_create(notifs)
+
+            centro_notif = Notification.objects.create(
+                user=request.user,
+                type=Notification.Type.GENERAL,
+                message=f'Publicaste alerta ({tipo}): {mensaje}'
+            )
+
+            logger.info("Alerta publicada por %s (%s): %s", request.user.username, tipo, mensaje)
+
+            return Response({
+                'status': 'Alerta publicada exitosamente y enviada a recicladores',
+                'alerta': {
+                    'id': centro_notif.id,
+                    'tipo': tipo,
+                    'mensaje': mensaje,
+                    'created_at': centro_notif.created_at
+                }
+            }, status=status.HTTP_201_CREATED)
+
+        from apps.users.models import Notification
+        alertas = Notification.objects.filter(
+            user=request.user,
+            message__startswith='Publicaste alerta'
+        ).order_by('-created_at')
+
+        return Response([
+            {
+                'id': a.id,
+                'message': a.message.replace('Publicaste alerta ', ''),
+                'created_at': a.created_at,
+            }
+            for a in alertas
+        ])
 
     @action(
         detail=False,

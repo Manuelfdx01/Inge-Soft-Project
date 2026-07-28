@@ -91,6 +91,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
       route: '/centro-acopio/dashboard'
     },
     {
+      icon: '🚨',
+      label: 'Alertas y Avisos',
+      route: '/centro-acopio/alertas'
+    },
+    {
       icon: '⚖️',
       label: 'Gestionar Capacidad',
       route: '/centro-acopio/capacidad'
@@ -114,16 +119,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
       icon: '⭐',
       label: 'Calificaciones',
       route: '/centro-acopio/calificaciones'
-    },
-    {
-      icon: '📋',
-      label: 'Reportes',
-      route: '/centro-acopio/reportes'
-    },
-    {
-      icon: '🔔',
-      label: 'Notificaciones',
-      route: '/centro-acopio/notificaciones'
     },
   ];
 

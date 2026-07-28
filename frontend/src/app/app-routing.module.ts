@@ -208,17 +208,10 @@ export const routes: Routes = [
       },
 
       {
-        path: 'reportes',
+        path: 'alertas',
         loadComponent: () =>
-          import('./centro-acopio/reportes/reportes.component')
-            .then(c => c.ReportesComponent)
-      },
-
-      {
-        path: 'notificaciones',
-        loadComponent: () =>
-          import('./centro-acopio/notificaciones/notificaciones.component')
-            .then(c => c.NotificacionesComponent)
+          import('./centro-acopio/alertas/alertas.component')
+            .then(c => c.CentroAlertasComponent)
       },
 
     ]

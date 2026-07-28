@@ -1,0 +1,218 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+.ca-page {
+  padding: 28px 32px;
+  font-family: 'Inter', sans-serif;
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+.ca-header {
+  margin-bottom: 28px;
+  h1 { font-size: 22px; font-weight: 700; color: #0f172a; margin: 0; }
+  .subtitle { font-size: 13px; color: #64748b; margin-top: 4px; }
+}
+
+.publish-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  max-width: 720px;
+  margin-bottom: 32px;
+
+  h2 { font-size: 16px; font-weight: 700; color: #0f172a; margin: 0 0 4px 0; }
+  .card-desc { font-size: 12px; color: #64748b; margin: 0 0 20px 0; }
+}
+
+.tipos-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tipo-option {
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+  }
+
+  &--active {
+    border-color: #3b82f6;
+    background: #dbeafe;
+    box-shadow: 0 0 0 1px #3b82f6;
+  }
+
+  .tipo-header {
+    font-size: 13px;
+    color: #0f172a;
+    margin-bottom: 4px;
+  }
+
+  .tipo-desc {
+    font-size: 11px;
+    color: #64748b;
+    line-height: 1.4;
+    display: block;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+  }
+
+  textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    color: #0f172a;
+    outline: none;
+    resize: vertical;
+    box-sizing: border-box;
+
+    &:focus {
+      border-color: #3b82f6;
+    }
+  }
+}
+
+.action-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btn {
+  padding: 10px 24px;
+  border-radius: 10px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: opacity 0.2s;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &--primary {
+    background: #2563eb;
+    color: #fff;
+
+    &:hover:not(:disabled) {
+      background: #1d4ed8;
+    }
+  }
+}
+
+.ca-alert {
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 16px;
+
+  &--success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+  &--error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+}
+
+.history-section {
+  max-width: 720px;
+
+  h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 16px 0;
+  }
+}
+
+.alerts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.alert-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 14px 18px;
+  border: 1px solid #e2e8f0;
+
+  .alert-icon {
+    font-size: 22px;
+  }
+
+  .alert-body {
+    flex: 1;
+
+    .alert-text {
+      font-size: 13px;
+      color: #0f172a;
+      margin: 0 0 6px 0;
+      line-height: 1.5;
+    }
+
+    .alert-date {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+  }
+}
+
+.ca-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #64748b;
+  font-size: 14px;
+  padding: 20px 0;
+
+  .spinner {
+    width: 20px; height: 20px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty-state {
+  text-align: center;
+  padding: 40px 24px;
+  color: #94a3b8;
+
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  h3 { font-size: 15px; font-weight: 700; color: #475569; margin: 0 0 6px 0; }
+  p  { font-size: 12px; line-height: 1.5; margin: 0; }
+}

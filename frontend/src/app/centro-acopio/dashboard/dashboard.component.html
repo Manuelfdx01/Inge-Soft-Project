@@ -1,86 +1,226 @@
 <div class="dashboard-page">
   <div class="header">
-    <h1>🏭 Dashboard - Centro de Acopio</h1>
-    <p class="subtitle" *ngIf="dashboardData()">{{ dashboardData()!.centro.name }}</p>
+    <div>
+      <h1>🏭 Dashboard - Centro de Acopio</h1>
+      <p class="subtitle" *ngIf="dashboardData()">{{ dashboardData()!.centro.name }} · {{ dashboardData()!.centro.address }}</p>
+    </div>
   </div>
 
-  <div class="loading-spinner" *ngIf="loading()">Cargando métricas...</div>
+  <div class="loading-spinner" *ngIf="loading()">
+    <div class="spinner"></div>
+    <span>Cargando dashboard del centro...</span>
+  </div>
 
-  <div class="dashboard-grid" *ngIf="!loading() && dashboardData()">
-    <!-- Card Ocupación Actual -->
-    <div class="card stat-card">
-      <h3>Capacidad Actual</h3>
-      <div class="big-number" [style.color]="getBarColor(dashboardData()!.centro.capacity_pct)">
-        {{ dashboardData()!.centro.capacity_pct }}%
+  <div class="dashboard-content" *ngIf="!loading() && dashboardData()">
+    <!-- Top Stat Cards -->
+    <div class="dashboard-grid stats-grid">
+      <!-- Card Capacidad Actual -->
+      <div class="card stat-card">
+        <h3>Capacidad Actual</h3>
+        <div class="big-number" [style.color]="getBarColor(capacityPct)">
+          {{ capacityPct }}%
+        </div>
+        <div class="progress-bar">
+          <div class="fill" [style.width.%]="capacityPct" [style.background]="getBarColor(capacityPct)"></div>
+        </div>
+        <p class="stat-detail">{{ formCapacityCurrent }} / {{ formCapacityMax }} kg · Estado: <strong>{{ formStatus }}</strong></p>
       </div>
-      <div class="progress-bar">
-        <div class="fill" [style.width.%]="dashboardData()!.centro.capacity_pct" [style.background]="getBarColor(dashboardData()!.centro.capacity_pct)"></div>
+
+      <!-- Card Calificación Promedio -->
+      <div class="card stat-card">
+        <h3>Calificación Promedio</h3>
+        <div class="big-number warning-color">
+          ★ {{ dashboardData()!.avg_rating || 'N/A' }}
+        </div>
+        <p class="stat-detail">Basado en {{ dashboardData()!.total_reviews }} comentarios</p>
       </div>
-      <p class="stat-detail">{{ dashboardData()!.centro.capacity_current }} / {{ dashboardData()!.centro.capacity_max }} kg</p>
+
+      <!-- Card Alertas / Traslados Activos -->
+      <div class="card stat-card">
+        <h3>Alertas / Traslados</h3>
+        <div class="big-number danger-color">
+          {{ dashboardData()!.alertas_activas }}
+        </div>
+        <p class="stat-detail">Operaciones logísticas activas</p>
+      </div>
     </div>
 
-    <!-- Card Calificación Promedio -->
-    <div class="card stat-card">
-      <h3>Calificación Promedio</h3>
-      <div class="big-number warning-color">
-        ★ {{ dashboardData()!.avg_rating || 'N/A' }}
+    <!-- PANEL DE ADMINISTRACIÓN DEL CENTRO DE ACOPIO (Reemplaza la Ocupación Semanal) -->
+    <div class="card admin-panel-card full-width">
+      <div class="panel-header">
+        <div>
+          <h2>🛠️ Administración Pública de Mi Centro</h2>
+          <p class="panel-subtitle">Edita toda la información visible para ciudadanos y recicladores en el mapa y demás módulos.</p>
+        </div>
+        <button class="btn btn--save" (click)="guardarTodo()" [disabled]="saving()">
+          {{ saving() ? '⏳ Guardando cambios...' : '💾 Guardar Todos los Cambios' }}
+        </button>
       </div>
-      <p class="stat-detail">Basado en {{ dashboardData()!.total_reviews }} comentarios</p>
-    </div>
 
-    <!-- Card Alertas Activas -->
-    <div class="card stat-card">
-      <h3>Alertas Activas</h3>
-      <div class="big-number danger-color">
-        {{ dashboardData()!.alertas_activas }}
+      <div class="ca-alert ca-alert--success" *ngIf="successMsg()">✅ {{ successMsg() }}</div>
+      <div class="ca-alert ca-alert--error" *ngIf="errorMsg()">⚠️ {{ errorMsg() }}</div>
+
+      <!-- Tabs de Edición -->
+      <div class="admin-tabs">
+        <button class="tab-btn" [class.tab-btn--active]="activeTab === 'general'" (click)="activeTab = 'general'">
+          📌 Datos Generales
+        </button>
+        <button class="tab-btn" [class.tab-btn--active]="activeTab === 'capacidad'" (click)="activeTab = 'capacidad'">
+          ⚖️ Capacidad y Estado
+        </button>
+        <button class="tab-btn" [class.tab-btn--active]="activeTab === 'materiales'" (click)="activeTab = 'materiales'">
+          ♻️ Materiales Aceptados
+        </button>
+        <button class="tab-btn" [class.tab-btn--active]="activeTab === 'precios'" (click)="activeTab = 'precios'">
+          💰 Tarifas ($/kg)
+        </button>
       </div>
-      <p class="stat-detail">Translados o alertas en proceso</p>
-    </div>
 
-    <!-- Ocupación Semanal -->
-    <div class="card chart-card full-width">
-      <h3>Ocupación Semanal Promedio</h3>
-      <div class="weekly-bars">
-        <div *ngFor="let dia of dashboardData()!.ocupacion_semanal" class="bar-col">
-          <div class="bar-fill-wrap">
-            <div class="bar-fill" [style.height.%]="dia.promedio_pct" [style.background]="getBarColor(dia.promedio_pct)"></div>
+      <!-- Tab Content: General -->
+      <div class="tab-content" *ngIf="activeTab === 'general'">
+        <div class="form-grid">
+          <div class="form-group span-2">
+            <label for="cName">Nombre del Centro</label>
+            <input id="cName" type="text" [(ngModel)]="formName" placeholder="Ej: Centro de Acopio Central" />
           </div>
-          <span class="bar-label">{{ dia.dia }}</span>
-          <span class="bar-val">{{ dia.promedio_pct }}%</span>
+
+          <div class="form-group span-2">
+            <label for="cAddress">Dirección Pública</label>
+            <input id="cAddress" type="text" [(ngModel)]="formAddress" placeholder="Ej: Carrera 15 #45-23, Bogotá" />
+          </div>
+
+          <div class="form-group">
+            <label for="cPhone">Teléfono de Contacto</label>
+            <input id="cPhone" type="text" [(ngModel)]="formPhone" placeholder="Ej: +57 300 123 4567" />
+          </div>
+
+          <div class="form-group">
+            <label for="cSchedule">Horarios de Atención</label>
+            <input id="cSchedule" type="text" [(ngModel)]="formSchedule" placeholder="Ej: Lun - Sáb: 7:00 AM - 6:00 PM" />
+          </div>
+
+          <div class="form-group">
+            <label for="cLat">Latitud (Ubicación Mapa)</label>
+            <input id="cLat" type="number" step="0.0001" [(ngModel)]="formLat" placeholder="Ej: 4.6097" />
+          </div>
+
+          <div class="form-group">
+            <label for="cLng">Longitud (Ubicación Mapa)</label>
+            <input id="cLng" type="number" step="0.0001" [(ngModel)]="formLng" placeholder="Ej: -74.0817" />
+          </div>
         </div>
       </div>
+
+      <!-- Tab Content: Capacidad y Estado -->
+      <div class="tab-content" *ngIf="activeTab === 'capacidad'">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="cStatus">Estado Actual del Centro</label>
+            <select id="cStatus" [(ngModel)]="formStatus" class="select-input">
+              <option *ngFor="let s of statusOptions" [value]="s.value">{{ s.label }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="cMax">Capacidad Máxima (kg)</label>
+            <input id="cMax" type="number" min="1" [(ngModel)]="formCapacityMax" placeholder="2000" />
+          </div>
+
+          <div class="form-group">
+            <label for="cCurrent">Capacidad Actual (kg)</label>
+            <input id="cCurrent" type="number" min="0" [max]="formCapacityMax" [(ngModel)]="formCapacityCurrent" placeholder="0" />
+          </div>
+
+          <div class="form-group">
+            <label>Porcentaje de Ocupación</label>
+            <div class="pct-box" [style.color]="getBarColor(capacityPct)">
+              <strong>{{ capacityPct }}%</strong>
+              <div class="small-bar">
+                <div class="fill" [style.width.%]="capacityPct" [style.background]="getBarColor(capacityPct)"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content: Materiales -->
+      <div class="tab-content" *ngIf="activeTab === 'materiales'">
+        <p class="tab-desc">Selecciona los materiales que tu centro de acopio está preparado para recibir:</p>
+        <div class="waste-types-chips">
+          <button
+            type="button"
+            *ngFor="let type of allWasteTypes()"
+            class="chip-btn"
+            [class.chip-btn--selected]="isWasteTypeSelected(type.id)"
+            (click)="toggleWasteType(type.id)"
+          >
+            <span>{{ type.icon }}</span>
+            <span>{{ type.name }}</span>
+            <span class="check-icon" *ngIf="isWasteTypeSelected(type.id)">✓</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Content: Precios -->
+      <div class="tab-content" *ngIf="activeTab === 'precios'">
+        <p class="tab-desc">Configura las tarifas por kilogramo pagadas a los recicladores:</p>
+        <div class="precios-grid">
+          <div class="price-card" *ngFor="let m of materialesList">
+            <div class="price-header">
+              <span class="m-icon">{{ m.icon }}</span>
+              <span class="m-label">{{ m.label }}</span>
+            </div>
+            <div class="price-input-wrap">
+              <span class="currency">$</span>
+              <input type="number" min="0" step="50" [(ngModel)]="precios[m.key]" placeholder="0" />
+              <span class="unit">/ kg</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <!-- Calificaciones Recientes -->
-    <div class="card list-card">
-      <h3>Calificaciones y Comentarios Recientes</h3>
-      <div class="list-container">
-        <div *ngFor="let c of dashboardData()!.calificaciones_recientes" class="list-item">
-          <div class="item-header">
-            <strong>👤 {{ c.user }}</strong>
-            <span class="stars">★ {{ c.rating }}/5</span>
-          </div>
-          <p class="comment">{{ c.comment || 'Sin comentario.' }}</p>
-          <span class="date">{{ c.created_at | date:'short' }}</span>
-        </div>
-        <div *ngIf="dashboardData()!.calificaciones_recientes.length === 0" class="empty-list">No hay calificaciones.</div>
-      </div>
-    </div>
+    <!-- Bottom Lists: Calificaciones y Avisos Publicados -->
+    <div class="dashboard-grid bottom-lists-grid">
 
-    <!-- Reportes Recientes -->
-    <div class="card list-card">
-      <h3>Reportes Recientes</h3>
-      <div class="list-container">
-        <div *ngFor="let r of dashboardData()!.reportes_recientes" class="list-item">
-          <div class="item-header">
-            <strong>📢 {{ r.type }}</strong>
-            <span class="badge" [class.badge-pending]="r.status === 'PENDIENTE'">{{ r.status }}</span>
-          </div>
-          <p class="comment">{{ r.description }}</p>
-          <span class="date">{{ r.created_at | date:'short' }}</span>
+      <!-- Calificaciones Recientes -->
+      <div class="card list-card">
+        <div class="list-card-header">
+          <h3>⭐ Calificaciones y Comentarios Recientes</h3>
+          <a routerLink="/centro-acopio/calificaciones" class="see-all-link">Ver todas →</a>
         </div>
-        <div *ngIf="dashboardData()!.reportes_recientes.length === 0" class="empty-list">No hay reportes recientes.</div>
+        <div class="list-container">
+          <div *ngFor="let c of dashboardData()!.calificaciones_recientes" class="list-item">
+            <div class="item-header">
+              <strong>👤 {{ c.user }}</strong>
+              <span class="stars">★ {{ c.rating }}/5</span>
+            </div>
+            <p class="comment">{{ c.comment || 'Sin comentario.' }}</p>
+            <span class="date">{{ c.created_at | date:'short' }}</span>
+          </div>
+          <div *ngIf="dashboardData()!.calificaciones_recientes.length === 0" class="empty-list">No hay calificaciones registradas aún.</div>
+        </div>
       </div>
+
+      <!-- Avisos y Alertas Publicadas -->
+      <div class="card list-card">
+        <div class="list-card-header">
+          <h3>🚨 Avisos Publicados a Recicladores</h3>
+          <a routerLink="/centro-acopio/alertas" class="see-all-link">Publicar aviso →</a>
+        </div>
+        <div class="list-container">
+          <div *ngFor="let a of dashboardData()!.alertas_recientes" class="list-item">
+            <div class="item-header">
+              <strong>📢 Alerta Publicada</strong>
+            </div>
+            <p class="comment">{{ a.message }}</p>
+            <span class="date">{{ a.created_at | date:'short' }}</span>
+          </div>
+          <div *ngIf="dashboardData()!.alertas_recientes.length === 0" class="empty-list">No has publicado avisos recientes.</div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>

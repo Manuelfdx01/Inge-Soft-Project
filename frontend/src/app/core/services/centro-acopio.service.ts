@@ -6,11 +6,10 @@ import { CollectionPoint } from './collection-points.service';
 
 export interface CentroDashboard {
   centro: CollectionPoint;
-  ocupacion_semanal: { dia: string; promedio_pct: number }[];
   avg_rating: number | null;
   total_reviews: number;
   calificaciones_recientes: CentroCalificacion[];
-  reportes_recientes: CentroReporte[];
+  alertas_recientes: { id: number; message: string; created_at: string }[];
   alertas_activas: number;
 }
 
@@ -22,12 +21,9 @@ export interface CentroCalificacion {
   created_at: string;
 }
 
-export interface CentroReporte {
+export interface CentroAlerta {
   id: number;
-  type: string;
-  description: string;
-  status: string;
-  user?: string;
+  message: string;
   created_at: string;
 }
 
@@ -47,28 +43,33 @@ export class CentroAcopioService {
     return this.http.get<CollectionPoint>(`${this.base}/mi-centro/`);
   }
 
+  /** Actualizar información completa del centro */
+  updateMiCentro(data: Partial<CollectionPoint> & { waste_type_ids?: number[] }): Observable<CollectionPoint> {
+    return this.http.patch<CollectionPoint>(`${this.base}/mi-centro/`, data);
+  }
+
   /** Actualizar capacidad máxima del centro */
-  updateCapacidadMax(id: string, capacity_max: number): Observable<any> {
+  updateCapacidadMax(id: string | number, capacity_max: number): Observable<any> {
     return this.http.patch(`${this.base}/${id}/`, { capacity_max });
   }
 
   /** Actualizar capacidad actual */
-  updateCapacidadActual(id: string, capacity_current: number, notes = ''): Observable<any> {
+  updateCapacidadActual(id: string | number, capacity_current: number, notes = ''): Observable<any> {
     return this.http.patch(`${this.base}/${id}/capacidad/`, { capacity_current, notes });
   }
 
   /** Cambiar estado del centro (DISPONIBLE / LLENO / MANTENIMIENTO) */
-  updateEstado(id: string, status: string): Observable<any> {
+  updateEstado(id: string | number, status: string): Observable<any> {
     return this.http.patch(`${this.base}/${id}/estado/`, { status });
   }
 
   /** Actualizar precios por kilogramo */
-  updatePrecios(id: string, precio_kg: Record<string, number>): Observable<any> {
+  updatePrecios(id: string | number, precio_kg: Record<string, number>): Observable<any> {
     return this.http.patch(`${this.base}/${id}/precios/`, { precio_kg });
   }
 
   /** Actualizar materiales aceptados */
-  updateMateriales(id: string, waste_type_ids: number[]): Observable<any> {
+  updateMateriales(id: string | number, waste_type_ids: number[]): Observable<any> {
     return this.http.patch(`${this.base}/${id}/materiales/`, { waste_type_ids });
   }
 
@@ -77,13 +78,13 @@ export class CentroAcopioService {
     return this.http.get<CentroCalificacion[]>(`${this.base}/mi-centro/calificaciones/`);
   }
 
-  /** Consultar reportes del centro */
-  getReportes(): Observable<CentroReporte[]> {
-    return this.http.get<CentroReporte[]>(`${this.base}/mi-centro/reportes/`);
+  /** Consultar alertas del centro */
+  getAlertas(): Observable<CentroAlerta[]> {
+    return this.http.get<CentroAlerta[]>(`${this.base}/mi-centro/alertas/`);
   }
 
-  /** Cambiar estado de un reporte (usa el endpoint real del ReportViewSet) */
-  updateReporteEstado(reportId: number, status: string): Observable<any> {
-    return this.http.patch(`${environment.apiUrl}/reports/${reportId}/estado/`, { status });
+  /** Publicar nueva alerta/aviso a los recicladores */
+  publicarAlerta(tipo: string, message: string): Observable<any> {
+    return this.http.post(`${this.base}/mi-centro/alertas/`, { tipo, message });
   }
 }
