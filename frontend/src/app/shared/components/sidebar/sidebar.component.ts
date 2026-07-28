@@ -170,6 +170,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   }
 
+  get avatarUrl(): string | null {
+    return this.auth.getAvatarUrl(this.user?.avatar);
+  }
+
   get initials(): string {
 
     if (!this.user) {

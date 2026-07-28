@@ -44,7 +44,8 @@
     <div class="user-card">
 
       <div class="avatar">
-        {{ initials }}
+        <img *ngIf="avatarUrl" [src]="avatarUrl" [alt]="user?.username || 'Usuario'" class="avatar-img" />
+        <span *ngIf="!avatarUrl">{{ initials }}</span>
       </div>
 
       <div class="user-data">

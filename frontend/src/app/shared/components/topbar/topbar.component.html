@@ -66,10 +66,16 @@
 
     </div>
 
-    <div class="profile-avatar">
-      👤
-    </div>
+    <button class="profile-avatar" (click)="openProfileModal()" title="Ver y editar perfil">
+      <img *ngIf="avatarUrl" [src]="avatarUrl" [alt]="user?.username || 'Usuario'" class="avatar-img" />
+      <span *ngIf="!avatarUrl">{{ initials }}</span>
+    </button>
 
   </div>
 
 </div>
+
+<app-profile-modal
+  *ngIf="showProfileModal"
+  (close)="closeProfileModal()">
+</app-profile-modal>

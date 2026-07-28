@@ -3,15 +3,36 @@ from .models import User
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class UserSerializer(serializers.ModelSerializer):
+    level_info = serializers.ReadOnlyField()
+
     class Meta:
         model = User
         fields = [
             'id', 'username', 'email',
             'first_name', 'last_name',
             'role', 'phone', 'avatar',
-            'points', 'is_available',
+            'points', 'xp', 'level_info', 'is_available',
         ]
-        read_only_fields = ['id', 'points', 'role']
+        read_only_fields = ['id', 'points', 'xp', 'role', 'level_info']
+
+    def validate_username(self, value):
+        if not value or not value.strip():
+            raise serializers.ValidationError('El nombre de usuario no puede estar vacío.')
+        qs = User.objects.filter(username=value)
+        if self.instance:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError('Este nombre de usuario ya está en uso por otro usuario.')
+        return value
+
+    def validate_email(self, value):
+        if value:
+            qs = User.objects.filter(email=value)
+            if self.instance:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise serializers.ValidationError('Este correo electrónico ya está registrado por otro usuario.')
+        return value
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -73,14 +94,5 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
         data = super().validate(attrs)
-
-        data['user'] = {
-            'id': self.user.id,
-            'username': self.user.username,
-            'email': self.user.email,
-            'role': self.user.role,
-            'points': self.user.points,
-            'is_available': self.user.is_available,
-        }
-
+        data['user'] = UserSerializer(self.user, context=self.context).data
         return data

@@ -33,12 +33,15 @@ class UserViewSet(viewsets.ModelViewSet):
         logger.warning(f'Intento de registro fallido: {serializer.errors}')
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['get', 'patch'], url_path='me')
+    @action(detail=False, methods=['get', 'patch', 'put'], url_path='me')
     def me(self, request):
         if request.method == 'GET':
-            return Response(UserSerializer(request.user).data)
+            return Response(UserSerializer(request.user, context={'request': request}).data)
         serializer = UserSerializer(
-            request.user, data=request.data, partial=True
+            request.user,
+            data=request.data,
+            partial=(request.method == 'PATCH'),
+            context={'request': request}
         )
         if serializer.is_valid():
             serializer.save()

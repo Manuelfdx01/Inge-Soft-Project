@@ -98,3 +98,35 @@ class AuthTestCase(TestCase):
         from apps.collection_points.models import CollectionPoint
         point = CollectionPoint.objects.filter(admin__username='centrotest').first()
         self.assertIsNotNone(point)
+
+    def test_actualizar_perfil(self):
+        """Un usuario puede actualizar su información personal (nombre, apellido, email, teléfono)."""
+        self.client.force_authenticate(user=self.ciudadano)
+        res = self.client.patch('/api/users/me/', {
+            'first_name': 'Juan',
+            'last_name': 'Pérez',
+            'phone': '+57 311 999 8877',
+            'email': 'nuevo_email@test.com'
+        })
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data['first_name'], 'Juan')
+        self.assertEqual(res.data['last_name'], 'Pérez')
+        self.assertEqual(res.data['phone'], '+57 311 999 8877')
+        self.assertEqual(res.data['email'], 'nuevo_email@test.com')
+
+    def test_perfil_campos_readonly(self):
+        """Los campos role, points y xp no pueden ser alterados al actualizar perfil."""
+        self.ciudadano.points = 50
+        self.ciudadano.xp = 120
+        self.ciudadano.save()
+
+        self.client.force_authenticate(user=self.ciudadano)
+        res = self.client.patch('/api/users/me/', {
+            'role': 'RECICLADOR',
+            'points': 9999,
+            'xp': 9999
+        })
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data['role'], 'CIUDADANO')
+        self.assertEqual(res.data['points'], 50)
+        self.assertEqual(res.data['xp'], 120)
