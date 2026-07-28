@@ -311,10 +311,10 @@
   }
   .mr-chute__box { font-size: 22px; opacity: 0.5; }
 
-  .mr-conveyor-wrap { position: relative; width: 100%; height: 108px; margin: 6px 0 22px; }
+  .mr-conveyor-wrap { position: relative; width: 100%; height: 128px; margin: 6px 0 22px; }
   .mr-conveyor-track {
     position: relative; height: 100%;
-    display: flex; align-items: flex-end; gap: 24px;
+    display: flex; align-items: flex-end; gap: 20px;
     padding: 0 10px 30px; overflow: visible; z-index: 2;
   }
   .mr-conveyor-belt {
@@ -333,10 +333,11 @@
 
   /* Paquete */
   .mr-package {
-    width: 66px; height: 60px;
+    width: 82px; height: 82px;
     background: linear-gradient(160deg, #C9A26B, #A9814E);
-    border-radius: 6px;
-    display: flex; align-items: center; justify-content: center;
+    border-radius: 10px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 3px;
     font-size: 26px;
     box-shadow: 0 6px 14px rgba(0,0,0,0.35), inset 0 0 0 2px rgba(255,255,255,0.08);
     position: relative; cursor: grab; touch-action: none;
@@ -345,23 +346,35 @@
     &::before {
       content: "";
       position: absolute; inset: 0;
-      border: 2px dashed rgba(0,0,0,0.25);
-      border-radius: 6px; margin: 4px; pointer-events: none;
+      border: 2px dashed rgba(0,0,0,0.22);
+      border-radius: 10px; margin: 5px; pointer-events: none;
     }
   }
+  .mr-pkg-emoji {
+    font-size: 30px; line-height: 1; display: block;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  }
+  .mr-pkg-name {
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.04em; color: rgba(255,255,255,0.82);
+    text-align: center; max-width: 68px; line-height: 1.1;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  }
   .mr-package--active {
-    box-shadow: 0 8px 18px rgba(242,183,5,0.35), inset 0 0 0 2px rgba(242,183,5,0.6);
+    box-shadow: 0 8px 22px rgba(242,183,5,0.4), inset 0 0 0 2.5px rgba(242,183,5,0.7);
     animation: mr-bob 1.6s ease-in-out infinite;
   }
   @keyframes mr-bob {
     0%, 100% { transform: translateY(0); }
-    50%       { transform: translateY(-4px); }
+    50%       { transform: translateY(-5px); }
   }
-  .mr-package--pending { opacity: 0.55; filter: grayscale(0.4); cursor: default; }
+  .mr-package--pending { opacity: 0.5; filter: grayscale(0.5); cursor: default; }
   .mr-package--used    { opacity: 0; transform: scale(0.6); pointer-events: none; }
   .mr-package--dragging {
     position: fixed; z-index: 500; cursor: grabbing; pointer-events: none;
-    box-shadow: 0 14px 28px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(242,183,5,0.8);
+    box-shadow: 0 18px 36px rgba(0,0,0,0.6), inset 0 0 0 2.5px rgba(242,183,5,0.9);
+    transform: scale(1.12) rotate(-3deg);
   }
   .mr-package--falling {
     transition: transform 0.42s cubic-bezier(.55,-0.1,.9,.4), opacity 0.42s ease 0.15s;
@@ -516,12 +529,15 @@
   @media (max-width: 600px) {
     border-radius: 0;
     min-height: 100vh;
-    .mr-conveyor-track { gap: 14px; justify-content: center; }
-    .mr-package { width: 58px; height: 52px; font-size: 22px; }
-    .mr-bins { gap: 8px; padding: 0 4px; }
-    .mr-bin { max-width: 110px; padding: 4px; }
-    .mr-bin__body { font-size: 24px; aspect-ratio: 1 / 0.9; }
-    .mr-bin__label { font-size: 10px; line-height: 1.1; }
+    .mr-conveyor-wrap { height: 102px; }
+    .mr-conveyor-track { gap: 10px; justify-content: center; padding: 0 6px 28px; }
+    .mr-package { width: 68px; height: 68px; }
+    .mr-pkg-emoji { font-size: 26px; }
+    .mr-pkg-name { font-size: 8px; max-width: 58px; }
+    .mr-bins { gap: 6px; padding: 0 4px; }
+    .mr-bin { max-width: 110px; padding: 3px; }
+    .mr-bin__body { font-size: 22px; aspect-ratio: 1 / 0.9; }
+    .mr-bin__label { font-size: 9px; line-height: 1.1; }
     .mr-gameover-actions { flex-direction: column; }
     .mr-audio-control { top: 8px; right: 8px; }
     .mr-hud { padding: 10px 8px 4px; gap: 8px; }
