@@ -333,12 +333,12 @@
 
   /* Paquete */
   .mr-package {
-    width: 90px; height: 90px;
+    width: 82px; height: 82px;
     background: linear-gradient(160deg, #C9A26B, #A9814E);
-    border-radius: 12px;
+    border-radius: 10px;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 2px;
-    font-size: 28px;
+    gap: 3px;
+    font-size: 26px;
     box-shadow: 0 6px 14px rgba(0,0,0,0.35), inset 0 0 0 2px rgba(255,255,255,0.08);
     position: relative; cursor: grab; touch-action: none;
     user-select: none; flex-shrink: 0;
@@ -347,47 +347,34 @@
       content: "";
       position: absolute; inset: 0;
       border: 2px dashed rgba(0,0,0,0.22);
-      border-radius: 12px; margin: 5px; pointer-events: none;
+      border-radius: 10px; margin: 5px; pointer-events: none;
     }
   }
-  .mr-pkg-cue {
-    position: absolute; top: -14px;
-    background: var(--mr-safety); color: #1a1300;
-    font-size: 9px; font-weight: 800; padding: 2px 6px;
-    border-radius: 10px; text-transform: uppercase;
-    letter-spacing: 0.04em; white-space: nowrap;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.4);
-    animation: mr-cue-bounce 1.2s ease-in-out infinite alternate;
-  }
-  @keyframes mr-cue-bounce {
-    from { transform: translateY(0); }
-    to   { transform: translateY(-4px); }
-  }
   .mr-pkg-emoji {
-    font-size: 32px; line-height: 1; display: block;
+    font-size: 30px; line-height: 1; display: block;
     filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
   }
   .mr-pkg-name {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.04em; color: rgba(255,255,255,0.9);
-    text-align: center; max-width: 76px; line-height: 1.1;
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.04em; color: rgba(255,255,255,0.82);
+    text-align: center; max-width: 68px; line-height: 1.1;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     text-shadow: 0 1px 2px rgba(0,0,0,0.5);
   }
   .mr-package--active {
-    box-shadow: 0 8px 24px rgba(242,183,5,0.45), inset 0 0 0 2.5px rgba(242,183,5,0.8);
+    box-shadow: 0 8px 22px rgba(242,183,5,0.4), inset 0 0 0 2.5px rgba(242,183,5,0.7);
     animation: mr-bob 1.6s ease-in-out infinite;
   }
   @keyframes mr-bob {
     0%, 100% { transform: translateY(0); }
     50%       { transform: translateY(-5px); }
   }
-  .mr-package--pending { opacity: 0.45; filter: grayscale(0.5); cursor: default; }
+  .mr-package--pending { opacity: 0.5; filter: grayscale(0.5); cursor: default; }
   .mr-package--used    { opacity: 0; transform: scale(0.6); pointer-events: none; }
   .mr-package--dragging {
     position: fixed; z-index: 500; cursor: grabbing; pointer-events: none;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.65), inset 0 0 0 3px rgba(242,183,5,0.95);
-    transform: scale(1.15) rotate(-4deg);
+    box-shadow: 0 18px 36px rgba(0,0,0,0.6), inset 0 0 0 2.5px rgba(242,183,5,0.9);
+    transform: scale(1.12) rotate(-3deg);
   }
   .mr-package--falling {
     transition: transform 0.42s cubic-bezier(.55,-0.1,.9,.4), opacity 0.42s ease 0.15s;
@@ -405,14 +392,6 @@
     display: flex; flex-direction: column; align-items: center;
     gap: 8px; padding: 6px; border-radius: var(--mr-radius-m);
     transition: transform 0.15s ease, box-shadow 0.15s ease;
-  }
-  .mr-bin-bounce {
-    animation: mr-bin-pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-  @keyframes mr-bin-pop {
-    0%   { transform: scale(1); }
-    40%  { transform: scale(1.12) translateY(-4px); }
-    100% { transform: scale(1); }
   }
   .mr-bin__body {
     width: 100%; aspect-ratio: 1 / 0.85;
@@ -436,10 +415,10 @@
     color: var(--mr-ink-muted); text-align: center;
   }
   .mr-bin.mr-drop-hover {
-    transform: translateY(-10px) scale(1.1);
+    transform: translateY(-8px) scale(1.08);
     .mr-bin__body {
       border-color: var(--mr-safety);
-      box-shadow: 0 0 0 6px rgba(242, 183, 5, 0.45), 0 0 30px rgba(242, 183, 5, 0.6), 0 14px 28px rgba(0, 0, 0, 0.45);
+      box-shadow: 0 0 0 5px rgba(242, 183, 5, 0.4), 0 0 25px rgba(242, 183, 5, 0.5), 0 12px 24px rgba(0, 0, 0, 0.4);
     }
   }
 

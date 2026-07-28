@@ -365,11 +365,7 @@ function initMemoriaReciclable(gamificationService: GamificationService): () => 
       pkg.className = 'mr-package ' + (isActive ? 'mr-package--active' : 'mr-package--pending');
       pkg.dataset['index'] = String(i);
       if (isActive) {
-        pkg.innerHTML = `
-          <span class="mr-pkg-cue">👇 ARRASTRA</span>
-          <span class="mr-pkg-emoji">${residuo.emoji}</span>
-          <span class="mr-pkg-name">${residuo.nombre}</span>
-        `;
+        pkg.innerHTML = `<span class="mr-pkg-emoji">${residuo.emoji}</span><span class="mr-pkg-name">${residuo.nombre}</span>`;
         pkg.title = residuo.nombre;
       } else {
         pkg.innerHTML = `<span class="mr-pkg-emoji">📦</span>`;
@@ -389,11 +385,7 @@ function initMemoriaReciclable(gamificationService: GamificationService): () => 
       if (idx === state.currentIndex) {
         pkg.classList.add('mr-package--active');
         if (residuo) {
-          pkg.innerHTML = `
-            <span class="mr-pkg-cue">👇 ARRASTRA</span>
-            <span class="mr-pkg-emoji">${residuo.emoji}</span>
-            <span class="mr-pkg-name">${residuo.nombre}</span>
-          `;
+          pkg.innerHTML = `<span class="mr-pkg-emoji">${residuo.emoji}</span><span class="mr-pkg-name">${residuo.nombre}</span>`;
           (pkg as HTMLElement).title = residuo.nombre;
         }
       } else if (idx > state.currentIndex) {
@@ -464,7 +456,7 @@ function initMemoriaReciclable(gamificationService: GamificationService): () => 
 
   function getBinAtPoint(x: number, y: number): HTMLElement | null {
     const bins = document.querySelectorAll('.mr-bin');
-    const margin = 35; // 35px generous tolerance buffer for smooth mobile touch drop
+    const margin = 25; // 25px tolerance buffer for smooth mobile touch drop
     for (const bin of Array.from(bins)) {
       const r = bin.getBoundingClientRect();
       if (x >= (r.left - margin) && x <= (r.right + margin) && y >= (r.top - margin) && y <= (r.bottom + margin))
@@ -534,9 +526,6 @@ function initMemoriaReciclable(gamificationService: GamificationService): () => 
   function dropOnBin(pkg: HTMLElement, category: string, binEl: HTMLElement) {
     state.busy = true;
     audio.play('drop');
-    binEl.classList.add('mr-bin-bounce');
-    setTimeout(() => binEl.classList.remove('mr-bin-bounce'), 450);
-
     const residuo = state.queue[state.currentIndex];
     const correcto = residuo.categoria === category;
 
