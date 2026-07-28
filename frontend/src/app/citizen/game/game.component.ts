@@ -361,15 +361,9 @@ function initMemoriaReciclable(gamificationService: GamificationService): () => 
 
     state.queue.forEach((residuo, i) => {
       const pkg = document.createElement('div');
-      const isActive = i === 0;
-      pkg.className = 'mr-package ' + (isActive ? 'mr-package--active' : 'mr-package--pending');
+      pkg.className = 'mr-package ' + (i === 0 ? 'mr-package--active' : 'mr-package--pending');
       pkg.dataset['index'] = String(i);
-      if (isActive) {
-        pkg.innerHTML = `<span class="mr-pkg-emoji">${residuo.emoji}</span><span class="mr-pkg-name">${residuo.nombre}</span>`;
-        pkg.title = residuo.nombre;
-      } else {
-        pkg.innerHTML = `<span class="mr-pkg-emoji">📦</span>`;
-      }
+      pkg.textContent = '📦';
       conveyorTrack.appendChild(pkg);
     });
 
@@ -380,18 +374,9 @@ function initMemoriaReciclable(gamificationService: GamificationService): () => 
   function refreshActivePackage() {
     conveyorTrack.querySelectorAll('.mr-package').forEach(pkg => {
       const idx = parseInt((pkg as HTMLElement).dataset['index'] || '0', 10);
-      const residuo = state.queue[idx];
       pkg.classList.remove('mr-package--active', 'mr-package--pending');
-      if (idx === state.currentIndex) {
-        pkg.classList.add('mr-package--active');
-        if (residuo) {
-          pkg.innerHTML = `<span class="mr-pkg-emoji">${residuo.emoji}</span><span class="mr-pkg-name">${residuo.nombre}</span>`;
-          (pkg as HTMLElement).title = residuo.nombre;
-        }
-      } else if (idx > state.currentIndex) {
-        pkg.classList.add('mr-package--pending');
-        pkg.innerHTML = `<span class="mr-pkg-emoji">📦</span>`;
-      }
+      if (idx === state.currentIndex) pkg.classList.add('mr-package--active');
+      else if (idx > state.currentIndex) pkg.classList.add('mr-package--pending');
     });
   }
 

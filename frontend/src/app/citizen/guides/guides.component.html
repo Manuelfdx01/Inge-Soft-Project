@@ -144,22 +144,14 @@
             <div *ngFor="let q of getQuizForGuide(guide); let qIdx = index" class="quiz-q-card">
               <p class="quiz-question-text"><strong>{{ qIdx + 1 }}.</strong> {{ q.q }}</p>
               <div class="quiz-options">
-                <label
-                  *ngFor="let opt of q.opts; let oIdx = index"
-                  class="quiz-option-label"
-                  [class.opt-correct]="quizSubmitted && oIdx === q.ans"
-                  [class.opt-wrong]="quizSubmitted && quizAnswers[qIdx] === oIdx && oIdx !== q.ans"
-                >
+                <label *ngFor="let opt of q.opts; let oIdx = index" class="quiz-option-label">
                   <input
                     type="radio"
                     [name]="'guide-' + guide.id + '-q-' + qIdx"
                     [value]="oIdx"
                     [(ngModel)]="quizAnswers[qIdx]"
-                    [disabled]="quizSubmitted"
                   />
                   <span>{{ opt }}</span>
-                  <span *ngIf="quizSubmitted && oIdx === q.ans" class="opt-check">✓</span>
-                  <span *ngIf="quizSubmitted && quizAnswers[qIdx] === oIdx && oIdx !== q.ans" class="opt-x">✗</span>
                 </label>
               </div>
             </div>
@@ -169,15 +161,9 @@
             {{ quizMessage }}
           </div>
 
-          <div class="quiz-btn-row">
-            <button
-              class="btn btn-primary btn-sm"
-              (click)="submitQuiz(guide)"
-              [disabled]="quizSubmitted && quizSuccess"
-            >
-              📝 {{ quizSubmitted ? (quizSuccess ? '✅ Aprobado' : '🔄 Reintentar') : 'Enviar respuestas' }}
-            </button>
-          </div>
+          <button class="btn btn-primary btn-sm" (click)="submitQuiz(guide)">
+            📝 Enviar respuestas
+          </button>
         </div>
 
         <!-- Footer metadata -->

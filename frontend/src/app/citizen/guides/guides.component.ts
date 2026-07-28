@@ -204,16 +204,6 @@ export class GuidesComponent implements OnInit, OnDestroy {
   }
 
   submitQuiz(guide: RecyclingGuide): void {
-    // Reintentar si ya se envió pero no se aprobó
-    if (this.quizSubmitted && !this.quizSuccess) {
-      this.quizAnswers = {};
-      this.quizSubmitted = false;
-      this.quizMessage = '';
-      return;
-    }
-    // Bloquear si ya aprobó
-    if (this.quizSubmitted && this.quizSuccess) return;
-
     const questions = this.getQuizForGuide(guide);
     let correctCount = 0;
     questions.forEach((q, idx) => {
@@ -239,7 +229,7 @@ export class GuidesComponent implements OnInit, OnDestroy {
       });
     } else {
       this.quizSuccess = false;
-      this.quizMessage = `⚠️ Tuviste ${correctCount} de ${questions.length} respuestas correctas. Revisa las opciones resaltadas e inténtalo de nuevo.`;
+      this.quizMessage = `⚠️ Tuviste ${correctCount} de ${questions.length} respuestas correctas. ¡Repasa la guía e inténtalo de nuevo!`;
     }
   }
 
