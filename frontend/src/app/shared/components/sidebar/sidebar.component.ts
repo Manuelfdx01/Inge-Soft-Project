@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -24,164 +24,81 @@ interface NavItem {
 })
 export class SidebarComponent implements OnInit, OnDestroy {
 
-  user: User | null = null;
-
-  navItems: NavItem[] = [];
+  readonly user = signal<User | null>(null);
+  readonly navItems = signal<NavItem[]>([]);
 
   private subscription?: Subscription;
 
-  // ===========================
-  // MENÚ CIUDADANO
-  // ===========================
-
   menuCiudadano: NavItem[] = [
-    {
-      icon: '🗺️',
-      label: 'Mapa',
-      route: '/ciudadano/mapa'
-    },
-    {
-      icon: '📚',
-      label: 'Guía de reciclaje',
-      route: '/ciudadano/guias'
-    },
-    {
-      icon: '🏆',
-      label: 'Mis logros',
-      route: '/ciudadano/logros'
-    },
-    {
-      icon: '🎮',
-      label: 'Juego de reciclaje',
-      route: '/ciudadano/juego'
-    }
+    { icon: '🗺️', label: 'Mapa', route: '/ciudadano/mapa' },
+    { icon: '📚', label: 'Guía de reciclaje', route: '/ciudadano/guias' },
+    { icon: '🏆', label: 'Mis logros', route: '/ciudadano/logros' },
+    { icon: '🎮', label: 'Juego de reciclaje', route: '/ciudadano/juego' }
   ];
-
-  // ===========================
-  // MENÚ RECICLADOR
-  // ===========================
 
   menuReciclador: NavItem[] = [
-    {
-      icon: '🗺️',
-      label: 'Centros de Acopio',
-      route: '/reciclador/mapa'
-    },
-    {
-      icon: '🚨',
-      label: 'Alertas',
-      route: '/reciclador/alertas',
-      badge: 0
-    },
-    {
-      icon: '🌐',
-      label: 'Comunidad',
-      route: '/reciclador/comunidad'
-    },
+    { icon: '🗺️', label: 'Centros de Acopio', route: '/reciclador/mapa' },
+    { icon: '🚨', label: 'Alertas', route: '/reciclador/alertas', badge: 0 },
+    { icon: '🌐', label: 'Comunidad', route: '/reciclador/comunidad' }
   ];
-
-  // ===========================
-  // MENÚ CENTRO DE ACOPIO
-  // ===========================
 
   menuCentroAcopio: NavItem[] = [
-    {
-      icon: '📊',
-      label: 'Dashboard',
-      route: '/centro-acopio/dashboard'
-    },
-    {
-      icon: '🚨',
-      label: 'Alertas y Avisos',
-      route: '/centro-acopio/alertas'
-    },
-    {
-      icon: '⚖️',
-      label: 'Gestionar Capacidad',
-      route: '/centro-acopio/capacidad'
-    },
-    {
-      icon: '💰',
-      label: 'Precios por Kg',
-      route: '/centro-acopio/precios'
-    },
-    {
-      icon: '♻️',
-      label: 'Materiales',
-      route: '/centro-acopio/materiales'
-    },
-    {
-      icon: '🔄',
-      label: 'Estado del Centro',
-      route: '/centro-acopio/estado'
-    },
-    {
-      icon: '⭐',
-      label: 'Calificaciones',
-      route: '/centro-acopio/calificaciones'
-    },
+    { icon: '📊', label: 'Dashboard', route: '/centro-acopio/dashboard' },
+    { icon: '🚨', label: 'Alertas y Avisos', route: '/centro-acopio/alertas' },
+    { icon: '⚖️', label: 'Gestionar Capacidad', route: '/centro-acopio/capacidad' },
+    { icon: '💰', label: 'Precios por Kg', route: '/centro-acopio/precios' },
+    { icon: '♻️', label: 'Materiales', route: '/centro-acopio/materiales' },
+    { icon: '🔄', label: 'Estado del Centro', route: '/centro-acopio/estado' },
+    { icon: '⭐', label: 'Calificaciones', route: '/centro-acopio/calificaciones' }
   ];
+
+  readonly sidebarColor = computed(() => {
+    const u = this.user();
+    const colors: Record<string, string> = {
+      CIUDADANO:     '#2E7D32',
+      RECICLADOR:    '#0F6E56',
+      CENTRO_ACOPIO: '#1565C0',
+    };
+    return colors[u?.role ?? 'CIUDADANO'];
+  });
+
+  readonly avatarUrl = computed(() => {
+    const u = this.user();
+    return this.auth.getAvatarUrl(u?.avatar);
+  });
+
+  readonly initials = computed(() => {
+    const u = this.user();
+    if (!u) return '?';
+    return u.username ? u.username.charAt(0).toUpperCase() : '?';
+  });
 
   constructor(
     private auth: AuthService
   ) {}
 
   ngOnInit(): void {
+    this.subscription = this.auth.currentUser$.subscribe(u => {
+      this.user.set(u);
 
-    this.subscription = this.auth.currentUser$.subscribe(user => {
-
-      this.user = user;
-
-      switch (user?.role) {
-
+      switch (u?.role) {
         case 'CIUDADANO':
-          this.navItems = this.menuCiudadano;
+          this.navItems.set(this.menuCiudadano);
           break;
-
         case 'RECICLADOR':
-          this.navItems = this.menuReciclador;
+          this.navItems.set(this.menuReciclador);
           break;
-
         case 'CENTRO_ACOPIO':
-          this.navItems = this.menuCentroAcopio;
+          this.navItems.set(this.menuCentroAcopio);
           break;
-
         default:
-          this.navItems = [];
+          this.navItems.set([]);
       }
-
     });
-
   }
 
   ngOnDestroy(): void {
     this.subscription?.unsubscribe();
-  }
-
-  get sidebarColor(): string {
-
-    const colors: Record<string, string> = {
-      CIUDADANO:     '#2E7D32',
-      RECICLADOR:    '#0F6E56',
-      CENTRO_ACOPIO: '#1565C0',
-    };
-
-    return colors[this.user?.role ?? 'CIUDADANO'];
-
-  }
-
-  get avatarUrl(): string | null {
-    return this.auth.getAvatarUrl(this.user?.avatar);
-  }
-
-  get initials(): string {
-
-    if (!this.user) {
-      return '?';
-    }
-
-    return this.user.username.charAt(0).toUpperCase();
-
   }
 
   logout(): void {

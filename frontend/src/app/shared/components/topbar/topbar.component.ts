@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 
@@ -23,14 +23,25 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
   @Input() title = '';
 
-  user: User | null = null;
-  notifications: Notification[] = [];
-  unreadCount = 0;
-  showDropdown = false;
-  showProfileModal = false;
+  readonly user = signal<User | null>(null);
+  readonly notifications = signal<Notification[]>([]);
+  readonly unreadCount = signal<number>(0);
+  readonly showDropdown = signal<boolean>(false);
+  readonly showProfileModal = signal<boolean>(false);
 
   private userSub?: Subscription;
   private notifSub?: Subscription;
+
+  readonly avatarUrl = computed(() => {
+    const u = this.user();
+    return this.authService.getAvatarUrl(u?.avatar);
+  });
+
+  readonly initials = computed(() => {
+    const u = this.user();
+    if (!u?.username) return '👤';
+    return u.username.charAt(0).toUpperCase();
+  });
 
   constructor(
     private notificationsService: NotificationsService,
@@ -39,11 +50,11 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.userSub = this.authService.currentUser$.subscribe(u => {
-      this.user = u;
+      this.user.set(u);
     });
 
     this.notifSub = this.notificationsService.unreadCount$
-      .subscribe(count => this.unreadCount = count);
+      .subscribe(count => this.unreadCount.set(count));
 
     // Start polling every 30s so badge updates automatically
     this.notificationsService.startPolling(30000);
@@ -55,26 +66,18 @@ export class TopbarComponent implements OnInit, OnDestroy {
     this.notificationsService.stopPolling();
   }
 
-  get avatarUrl(): string | null {
-    return this.authService.getAvatarUrl(this.user?.avatar);
-  }
-
-  get initials(): string {
-    if (!this.user?.username) return '👤';
-    return this.user.username.charAt(0).toUpperCase();
-  }
-
   openProfileModal(): void {
-    this.showProfileModal = true;
+    this.showProfileModal.set(true);
   }
 
   closeProfileModal(): void {
-    this.showProfileModal = false;
+    this.showProfileModal.set(false);
   }
 
   toggleDropdown(): void {
-    this.showDropdown = !this.showDropdown;
-    if (this.showDropdown) {
+    const current = this.showDropdown();
+    this.showDropdown.set(!current);
+    if (!current) {
       this.loadNotifications();
     }
   }
@@ -82,7 +85,7 @@ export class TopbarComponent implements OnInit, OnDestroy {
   loadNotifications(): void {
     this.notificationsService.getAll().subscribe({
       next: (notifications) => {
-        this.notifications = notifications.slice(0, 10);
+        this.notifications.set(notifications.slice(0, 10));
       },
       error: (err) => {
         console.error(err);
@@ -98,8 +101,9 @@ export class TopbarComponent implements OnInit, OnDestroy {
     this.notificationsService.markAsRead(notification.id).subscribe({
       next: () => {
         notification.is_read = true;
-        if (this.unreadCount > 0) {
-          this.unreadCount--;
+        const currentCount = this.unreadCount();
+        if (currentCount > 0) {
+          this.unreadCount.set(currentCount - 1);
         }
       }
     });
@@ -108,10 +112,10 @@ export class TopbarComponent implements OnInit, OnDestroy {
   markAllRead(): void {
     this.notificationsService.markAllAsRead().subscribe({
       next: () => {
-        this.notifications.forEach(notification => {
-          notification.is_read = true;
-        });
-        this.unreadCount = 0;
+        const list = this.notifications();
+        list.forEach(n => n.is_read = true);
+        this.notifications.set([...list]);
+        this.unreadCount.set(0);
       }
     });
   }

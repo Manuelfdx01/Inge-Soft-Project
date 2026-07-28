@@ -16,7 +16,7 @@
   <nav class="menu">
 
     <a
-      *ngFor="let item of navItems"
+      *ngFor="let item of navItems()"
       [routerLink]="item.route"
       routerLinkActive="active"
       class="menu-item">
@@ -44,21 +44,21 @@
     <div class="user-card">
 
       <div class="avatar">
-        <img *ngIf="avatarUrl" [src]="avatarUrl" [alt]="user?.username || 'Usuario'" class="avatar-img" />
-        <span *ngIf="!avatarUrl">{{ initials }}</span>
+        <img *ngIf="avatarUrl()" [src]="avatarUrl()" [alt]="user()?.username || 'Usuario'" class="avatar-img" />
+        <span *ngIf="!avatarUrl()">{{ initials() }}</span>
       </div>
 
       <div class="user-data">
         <div class="username">
-          {{ user?.username }}
+          {{ user()?.username }}
         </div>
 
         <div class="role">
-          {{ user?.role | titlecase }}
+          {{ user()?.role | titlecase }}
         </div>
 
         <div class="points">
-          {{ user?.points }} pts
+          {{ user()?.points }} pts
         </div>
       </div>
 

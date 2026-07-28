@@ -8,21 +8,21 @@
     </div>
 
     <!-- Spinner state -->
-    <div class="loading-state" *ngIf="loading">
+    <div class="loading-state" *ngIf="loading()">
       <div class="spinner"></div>
       <p>Cargando información del perfil...</p>
     </div>
 
     <!-- Profile content -->
-    <div class="modal-body" *ngIf="!loading">
+    <div class="modal-body" *ngIf="!loading()">
 
       <!-- Header Card: Avatar, Level, XP, Points -->
       <div class="profile-header-card">
 
         <div class="avatar-container">
           <div class="avatar-circle">
-            <img *ngIf="previewUrl" [src]="previewUrl" [alt]="username" class="avatar-image" />
-            <span *ngIf="!previewUrl" class="avatar-initials">{{ initials }}</span>
+            <img *ngIf="previewUrl()" [src]="previewUrl()" [alt]="username" class="avatar-image" />
+            <span *ngIf="!previewUrl()" class="avatar-initials">{{ initials() }}</span>
           </div>
 
           <label class="avatar-upload-btn" title="Cambiar foto de perfil">
@@ -34,10 +34,10 @@
         <div class="header-user-details">
           <div class="user-name-role">
             <h3>{{ username }}</h3>
-            <span class="role-badge" [class.badge-ciudadano]="user?.role === 'CIUDADANO'"
-                  [class.badge-reciclador]="user?.role === 'RECICLADOR'"
-                  [class.badge-centro]="user?.role === 'CENTRO_ACOPIO'">
-              {{ formattedRole }}
+            <span class="role-badge" [class.badge-ciudadano]="user()?.role === 'CIUDADANO'"
+                  [class.badge-reciclador]="user()?.role === 'RECICLADOR'"
+                  [class.badge-centro]="user()?.role === 'CENTRO_ACOPIO'">
+              {{ formattedRole() }}
             </span>
           </div>
 
@@ -46,39 +46,39 @@
             <div class="stat-pill">
               <span class="stat-icon">🪙</span>
               <div class="stat-info">
-                <span class="stat-value">{{ user?.points || 0 }}</span>
+                <span class="stat-value">{{ user()?.points || 0 }}</span>
                 <span class="stat-label">Puntos</span>
               </div>
             </div>
 
-            <div class="stat-pill" *ngIf="user?.xp !== undefined">
+            <div class="stat-pill" *ngIf="user()?.xp !== undefined">
               <span class="stat-icon">⭐</span>
               <div class="stat-info">
-                <span class="stat-value">{{ user?.xp || 0 }}</span>
+                <span class="stat-value">{{ user()?.xp || 0 }}</span>
                 <span class="stat-label">XP Total</span>
               </div>
             </div>
 
-            <div class="stat-pill" *ngIf="user?.level_info">
-              <span class="stat-icon">{{ user?.level_info?.icon || '🏆' }}</span>
+            <div class="stat-pill" *ngIf="user()?.level_info">
+              <span class="stat-icon">{{ user()?.level_info?.icon || '🏆' }}</span>
               <div class="stat-info">
-                <span class="stat-value">Nivel {{ user?.level_info?.level }}</span>
-                <span class="stat-label">{{ user?.level_info?.title }}</span>
+                <span class="stat-value">Nivel {{ user()?.level_info?.level }}</span>
+                <span class="stat-label">{{ user()?.level_info?.title }}</span>
               </div>
             </div>
           </div>
 
           <!-- Level Progress Bar -->
-          <div class="level-progress-box" *ngIf="user?.level_info">
+          <div class="level-progress-box" *ngIf="user()?.level_info">
             <div class="progress-labels">
-              <span>Progreso a {{ user?.level_info?.next_level_title }}</span>
-              <span>{{ user?.level_info?.progress_pct }}%</span>
+              <span>Progreso a {{ user()?.level_info?.next_level_title }}</span>
+              <span>{{ user()?.level_info?.progress_pct }}%</span>
             </div>
             <div class="progress-track">
-              <div class="progress-bar-fill" [style.width.%]="user?.level_info?.progress_pct"></div>
+              <div class="progress-bar-fill" [style.width.%]="user()?.level_info?.progress_pct"></div>
             </div>
-            <span class="xp-remaining" *ngIf="user?.level_info?.xp_to_next && user?.level_info?.xp_to_next! > 0">
-              Faltan {{ user?.level_info?.xp_to_next }} XP para el siguiente nivel
+            <span class="xp-remaining" *ngIf="user()?.level_info?.xp_to_next && user()?.level_info?.xp_to_next! > 0">
+              Faltan {{ user()?.level_info?.xp_to_next }} XP para el siguiente nivel
             </span>
           </div>
         </div>
@@ -86,12 +86,12 @@
       </div>
 
       <!-- Messages -->
-      <div class="alert alert-danger" *ngIf="errorMessage">
-        ⚠️ {{ errorMessage }}
+      <div class="alert alert-danger" *ngIf="errorMessage()">
+        ⚠️ {{ errorMessage() }}
       </div>
 
-      <div class="alert alert-success" *ngIf="successMessage">
-        ✅ {{ successMessage }}
+      <div class="alert alert-success" *ngIf="successMessage()">
+        ✅ {{ successMessage() }}
       </div>
 
       <!-- Form for Editable and Read-only Information -->
@@ -168,7 +168,7 @@
             <label>Rol asignado (Solo lectura)</label>
             <input
               type="text"
-              [value]="formattedRole"
+              [value]="formattedRole()"
               disabled
               readonly
             />
@@ -181,9 +181,9 @@
             Cancelar
           </button>
 
-          <button type="submit" class="btn btn-primary" [disabled]="saving">
-            <span *ngIf="saving" class="btn-spinner"></span>
-            {{ saving ? 'Guardando...' : 'Guardar Cambios' }}
+          <button type="submit" class="btn btn-primary" [disabled]="saving()">
+            <span *ngIf="saving()" class="btn-spinner"></span>
+            {{ saving() ? 'Guardando...' : 'Guardar Cambios' }}
           </button>
         </div>
 

@@ -19,14 +19,14 @@
         🔔
         <span
           class="notif-badge"
-          *ngIf="unreadCount > 0">
-          {{ unreadCount }}
+          *ngIf="unreadCount() > 0">
+          {{ unreadCount() }}
         </span>
       </button>
 
       <div
         class="notif-dropdown"
-        *ngIf="showDropdown">
+        *ngIf="showDropdown()">
 
         <div class="notif-header">
           <span>Notificaciones</span>
@@ -40,14 +40,14 @@
 
         <div
           class="notif-empty"
-          *ngIf="notifications.length === 0">
+          *ngIf="notifications().length === 0">
 
           No hay notificaciones.
 
         </div>
 
         <div
-          *ngFor="let notif of notifications"
+          *ngFor="let notif of notifications()"
           class="notif-item"
           [class.unread]="!notif.is_read"
           (click)="markRead(notif)">
@@ -67,8 +67,8 @@
     </div>
 
     <button class="profile-avatar" (click)="openProfileModal()" title="Ver y editar perfil">
-      <img *ngIf="avatarUrl" [src]="avatarUrl" [alt]="user?.username || 'Usuario'" class="avatar-img" />
-      <span *ngIf="!avatarUrl">{{ initials }}</span>
+      <img *ngIf="avatarUrl()" [src]="avatarUrl()" [alt]="user()?.username || 'Usuario'" class="avatar-img" />
+      <span *ngIf="!avatarUrl()">{{ initials() }}</span>
     </button>
 
   </div>
@@ -76,6 +76,6 @@
 </div>
 
 <app-profile-modal
-  *ngIf="showProfileModal"
+  *ngIf="showProfileModal()"
   (close)="closeProfileModal()">
 </app-profile-modal>

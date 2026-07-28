@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService, User } from '../../../core/services/auth.service';
@@ -17,7 +17,7 @@ export class ProfileModalComponent implements OnInit {
 
   @Output() close = new EventEmitter<void>();
 
-  user: User | null = null;
+  readonly user = signal<User | null>(null);
 
   // Form fields
   username = '';
@@ -28,13 +28,30 @@ export class ProfileModalComponent implements OnInit {
 
   // Avatar file handling
   selectedFile: File | null = null;
-  previewUrl: string | null = null;
+  readonly previewUrl = signal<string | null>(null);
 
   // UI state
-  loading = true;
-  saving = false;
-  successMessage: string | null = null;
-  errorMessage: string | null = null;
+  readonly loading = signal<boolean>(true);
+  readonly saving = signal<boolean>(false);
+  readonly successMessage = signal<string | null>(null);
+  readonly errorMessage = signal<string | null>(null);
+
+  readonly initials = computed(() => {
+    const u = this.user();
+    if (!u || !u.username) return 'U';
+    return u.username.charAt(0).toUpperCase();
+  });
+
+  readonly formattedRole = computed(() => {
+    const u = this.user();
+    if (!u?.role) return 'Usuario';
+    const roles: Record<string, string> = {
+      CIUDADANO: 'Ciudadano',
+      RECICLADOR: 'Reciclador',
+      CENTRO_ACOPIO: 'Centro de Acopio'
+    };
+    return roles[u.role] || u.role;
+  });
 
   constructor(private authService: AuthService) {}
 
@@ -43,21 +60,21 @@ export class ProfileModalComponent implements OnInit {
   }
 
   fetchProfile(): void {
-    this.loading = true;
+    this.loading.set(true);
     this.authService.getProfile().subscribe({
-      next: (user) => {
-        this.user = user;
-        this.populateForm(user);
-        this.loading = false;
+      next: (u) => {
+        this.user.set(u);
+        this.populateForm(u);
+        this.loading.set(false);
       },
       error: (err) => {
         console.error('Error al cargar perfil:', err);
-        // Fallback to local stored user if GET fails
-        this.user = this.authService.getUser();
-        if (this.user) {
-          this.populateForm(this.user);
+        const stored = this.authService.getUser();
+        if (stored) {
+          this.user.set(stored);
+          this.populateForm(stored);
         }
-        this.loading = false;
+        this.loading.set(false);
       }
     });
   }
@@ -68,22 +85,7 @@ export class ProfileModalComponent implements OnInit {
     this.last_name = user.last_name || '';
     this.email = user.email || '';
     this.phone = user.phone || '';
-    this.previewUrl = this.authService.getAvatarUrl(user.avatar);
-  }
-
-  get initials(): string {
-    if (!this.username) return 'U';
-    return this.username.charAt(0).toUpperCase();
-  }
-
-  get formattedRole(): string {
-    if (!this.user?.role) return 'Usuario';
-    const roles: Record<string, string> = {
-      CIUDADANO: 'Ciudadano',
-      RECICLADOR: 'Reciclador',
-      CENTRO_ACOPIO: 'Centro de Acopio'
-    };
-    return roles[this.user.role] || this.user.role;
+    this.previewUrl.set(this.authService.getAvatarUrl(user.avatar));
   }
 
   onFileSelected(event: Event): void {
@@ -91,44 +93,42 @@ export class ProfileModalComponent implements OnInit {
     if (input.files && input.files[0]) {
       const file = input.files[0];
       
-      // Validate image type
       if (!file.type.startsWith('image/')) {
-        this.errorMessage = 'Por favor selecciona un archivo de imagen válido (JPG, PNG, GIF, WEBP).';
+        this.errorMessage.set('Por favor selecciona un archivo de imagen válido (JPG, PNG, GIF, WEBP).');
         return;
       }
 
-      // Max size limit (5MB)
       if (file.size > 5 * 1024 * 1024) {
-        this.errorMessage = 'La imagen no debe superar los 5MB.';
+        this.errorMessage.set('La imagen no debe superar los 5MB.');
         return;
       }
 
-      this.errorMessage = null;
+      this.errorMessage.set(null);
       this.selectedFile = file;
 
       const reader = new FileReader();
       reader.onload = () => {
-        this.previewUrl = reader.result as string;
+        this.previewUrl.set(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
   }
 
   validate(): boolean {
-    this.errorMessage = null;
+    this.errorMessage.set(null);
 
     if (!this.username || !this.username.trim()) {
-      this.errorMessage = 'El nombre de usuario es obligatorio.';
+      this.errorMessage.set('El nombre de usuario es obligatorio.');
       return false;
     }
 
     if (this.username.trim().length < 3) {
-      this.errorMessage = 'El nombre de usuario debe tener al menos 3 caracteres.';
+      this.errorMessage.set('El nombre de usuario debe tener al menos 3 caracteres.');
       return false;
     }
 
     if (this.email && !this.isValidEmail(this.email)) {
-      this.errorMessage = 'Ingresa un correo electrónico válido.';
+      this.errorMessage.set('Ingresa un correo electrónico válido.');
       return false;
     }
 
@@ -143,9 +143,9 @@ export class ProfileModalComponent implements OnInit {
   saveProfile(): void {
     if (!this.validate()) return;
 
-    this.saving = true;
-    this.successMessage = null;
-    this.errorMessage = null;
+    this.saving.set(true);
+    this.successMessage.set(null);
+    this.errorMessage.set(null);
 
     const formData = new FormData();
     formData.append('username', this.username.trim());
@@ -160,17 +160,17 @@ export class ProfileModalComponent implements OnInit {
 
     this.authService.updateProfile(formData).subscribe({
       next: (updatedUser) => {
-        this.user = updatedUser;
-        this.saving = false;
-        this.successMessage = '¡Perfil actualizado con éxito!';
+        this.user.set(updatedUser);
+        this.saving.set(false);
+        this.successMessage.set('¡Perfil actualizado con éxito!');
         this.selectedFile = null;
         if (updatedUser.avatar) {
-          this.previewUrl = this.authService.getAvatarUrl(updatedUser.avatar);
+          this.previewUrl.set(this.authService.getAvatarUrl(updatedUser.avatar));
         }
       },
       error: (err) => {
         console.error('Error guardando perfil:', err);
-        this.saving = false;
+        this.saving.set(false);
 
         if (err.error && typeof err.error === 'object') {
           const messages: string[] = [];
@@ -182,9 +182,9 @@ export class ProfileModalComponent implements OnInit {
               messages.push(fieldError);
             }
           }
-          this.errorMessage = messages.length > 0 ? messages.join(' | ') : 'Error al guardar los datos.';
+          this.errorMessage.set(messages.length > 0 ? messages.join(' | ') : 'Error al guardar los datos.');
         } else {
-          this.errorMessage = 'Ocurrió un error al actualizar el perfil. Intenta nuevamente.';
+          this.errorMessage.set('Ocurrió un error al actualizar el perfil. Intenta nuevamente.');
         }
       }
     });
