@@ -126,124 +126,14 @@ export class GuidesComponent implements OnInit, OnDestroy {
     this.searchInput$.next(this.searchQuery);
   }
 
-  // ── Quiz Interactivo ──
-  quizAnswers: Record<number, number> = {};
-  quizSubmitted = false;
-  quizSuccess = false;
-  quizMessage = '';
-
-  getCompletedQuizzes(): number[] {
-    try {
-      const raw = localStorage.getItem('gomi_completed_quizzes');
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
-  }
-
-  isQuizCompleted(guideId: number): boolean {
-    return this.getCompletedQuizzes().includes(guideId);
-  }
-
-  getQuizForGuide(guide: RecyclingGuide) {
-    const type = (guide.waste_type || '').toUpperCase();
-    if (type === 'PLASTICO') {
-      return [
-        {
-          q: '¿Qué se debe hacer con una botella plástica antes de reciclarla?',
-          opts: ['Lavarla, secarla y aplastarla', 'Desecharla llena de líquido', 'Quemarla'],
-          ans: 0
-        },
-        {
-          q: '¿El plástico PET 1 es reciclabre en contenedores blancos?',
-          opts: ['Sí, totalmente', 'No, nunca', 'Solo en compost'],
-          ans: 0
-        }
-      ];
-    }
-    if (type === 'PAPEL') {
-      return [
-        {
-          q: '¿Las cajas de pizza grasosas se pueden reciclar con el papel limpio?',
-          opts: ['Solo las partes totalmente limpias', 'Sí, la grasa no importa', 'Sí, todo se recicla junto'],
-          ans: 0
-        },
-        {
-          q: '¿En qué caneca va el papel limpio y seco?',
-          opts: ['Blanca (Aprovechables)', 'Verde (Orgánicos)', 'Negra (No aprovechables)'],
-          ans: 0
-        }
-      ];
-    }
-    if (type === 'VIDRIO') {
-      return [
-        {
-          q: '¿Cómo debe entregarse el vidrio roto para proteger a los recicladores?',
-          opts: ['Empacado y marcado visiblemente', 'Suelto en bolsa plástica', 'Mezclado con comida'],
-          ans: 0
-        },
-        {
-          q: '¿Los espejos y cristales planos van en la misma caneca que las botellas de vidrio?',
-          opts: ['No, son tipos de vidrio distintos', 'Sí, es exactamente igual', 'No se recicla ningún vidrio'],
-          ans: 0
-        }
-      ];
-    }
-    return [
-      {
-        q: '¿Cuál es el propósito principal de separar en la fuente?',
-        opts: ['Dignificar el trabajo del reciclador y reaprovechar materia prima', 'Gastar bolsas de colores', 'Ninguno'],
-        ans: 0
-      },
-      {
-        q: '¿Cuál es el color del contenedor de residuos aprovechables secos?',
-        opts: ['Blanco', 'Negro', 'Verde'],
-        ans: 0
-      }
-    ];
-  }
-
-  submitQuiz(guide: RecyclingGuide): void {
-    const questions = this.getQuizForGuide(guide);
-    let correctCount = 0;
-    questions.forEach((q, idx) => {
-      if (this.quizAnswers[idx] === q.ans) {
-        correctCount++;
-      }
-    });
-
-    this.quizSubmitted = true;
-    if (correctCount === questions.length) {
-      this.quizSuccess = true;
-      this.quizMessage = '🎉 ¡Felicidades! Has aprobado el test con 100% de aciertos. (+50 pts | +50 XP)';
-
-      const completed = this.getCompletedQuizzes();
-      if (!completed.includes(guide.id)) {
-        completed.push(guide.id);
-        localStorage.setItem('gomi_completed_quizzes', JSON.stringify(completed));
-      }
-
-      this.gamificationService.recordAction('aprobar_quiz_guia', { guide_id: guide.id }).subscribe({
-        next: () => {},
-        error: () => {}
-      });
-    } else {
-      this.quizSuccess = false;
-      this.quizMessage = `⚠️ Tuviste ${correctCount} de ${questions.length} respuestas correctas. ¡Repasa la guía e inténtalo de nuevo!`;
-    }
-  }
-
   toggle(guide: RecyclingGuide): void {
     const isOpening = this.selectedGuide?.id !== guide.id;
     this.selectedGuide = isOpening ? guide : null;
-    this.quizAnswers = {};
-    this.quizSubmitted = false;
-    this.quizMessage = '';
-
+    
     if (isOpening) {
       this.gamificationService.recordAction('leer_guia').subscribe({
-        next: () => {},
-        error: () => {}
+        next: () => console.log('Gamification: points for reading guide'),
+        error: (err) => console.error('Gamification error:', err)
       });
     }
   }

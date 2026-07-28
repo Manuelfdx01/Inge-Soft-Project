@@ -54,31 +54,31 @@
          ════════════════════════════════════════ -->
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-icon">✅</div>
+        <div class="stat-icon">📊</div>
         <div class="stat-info">
-          <span class="stat-value">{{ approvedActivitiesCount }}</span>
-          <span class="stat-label">Actividades Aprobadas</span>
+          <span class="stat-value">{{ summary.statistics.total_actions }}</span>
+          <span class="stat-label">Acciones realizadas</span>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon">⭐</div>
+        <div class="stat-icon">♻️</div>
         <div class="stat-info">
-          <span class="stat-value">{{ summary.xp }} XP</span>
-          <span class="stat-label">Experiencia Total</span>
+          <span class="stat-value">{{ summary.statistics.kg_recycled }} kg</span>
+          <span class="stat-label">Material recuperado</span>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon">🪙</div>
+        <div class="stat-icon">🍃</div>
         <div class="stat-info">
-          <span class="stat-value">{{ summary.points }} pts</span>
-          <span class="stat-label">Puntos Acumulados</span>
+          <span class="stat-value">{{ summary.statistics.co2_saved_kg }} kg</span>
+          <span class="stat-label">CO₂ evitado</span>
         </div>
       </div>
       <div class="stat-card">
-        <div class="stat-icon">🎮</div>
+        <div class="stat-icon">🥇</div>
         <div class="stat-info">
-          <span class="stat-value">{{ gameHighScore }} pts</span>
-          <span class="stat-label">Récord en Juego</span>
+          <span class="stat-value">Puesto #{{ summary.statistics.ranking_position }}</span>
+          <span class="stat-label">Ranking ciudadano</span>
         </div>
       </div>
     </div>
