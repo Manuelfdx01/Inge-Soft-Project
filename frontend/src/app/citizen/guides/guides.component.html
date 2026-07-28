@@ -131,6 +131,41 @@
           </ul>
         </div>
 
+        <!-- Quiz Interactivo -->
+        <div class="quiz-section">
+          <div class="quiz-header">
+            <h3 class="quiz-title">🧪 Pon a prueba lo aprendido</h3>
+            <span class="quiz-badge" [class.passed]="isQuizCompleted(guide.id)">
+              {{ isQuizCompleted(guide.id) ? '✅ Test Aprobado (+50 pts)' : '⭐ 50 pts | 50 XP' }}
+            </span>
+          </div>
+
+          <div class="quiz-questions">
+            <div *ngFor="let q of getQuizForGuide(guide); let qIdx = index" class="quiz-q-card">
+              <p class="quiz-question-text"><strong>{{ qIdx + 1 }}.</strong> {{ q.q }}</p>
+              <div class="quiz-options">
+                <label *ngFor="let opt of q.opts; let oIdx = index" class="quiz-option-label">
+                  <input
+                    type="radio"
+                    [name]="'guide-' + guide.id + '-q-' + qIdx"
+                    [value]="oIdx"
+                    [(ngModel)]="quizAnswers[qIdx]"
+                  />
+                  <span>{{ opt }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="quizSubmitted" class="quiz-alert" [class.success]="quizSuccess" [class.error]="!quizSuccess">
+            {{ quizMessage }}
+          </div>
+
+          <button class="btn btn-primary btn-sm" (click)="submitQuiz(guide)">
+            📝 Enviar respuestas
+          </button>
+        </div>
+
         <!-- Footer metadata -->
         <div class="guide-footer">
           <span class="footer-item" *ngIf="guide.updated_at">

@@ -441,9 +441,10 @@ function initMemoriaReciclable(gamificationService: GamificationService): () => 
 
   function getBinAtPoint(x: number, y: number): HTMLElement | null {
     const bins = document.querySelectorAll('.mr-bin');
+    const margin = 25; // 25px tolerance buffer for smooth mobile touch drop
     for (const bin of Array.from(bins)) {
       const r = bin.getBoundingClientRect();
-      if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom)
+      if (x >= (r.left - margin) && x <= (r.right + margin) && y >= (r.top - margin) && y <= (r.bottom + margin))
         return bin as HTMLElement;
     }
     return null;
@@ -530,8 +531,16 @@ function initMemoriaReciclable(gamificationService: GamificationService): () => 
         <span class="mr-reveal-card__name">${residuo.nombre}</span>
       </div>
     `;
-    if (correcto) { audio.play('correct'); showToast('✅ ¡Correcto!', 'correct'); }
-    else          { audio.play('wrong');   showToast('❌ ¡Clasificación incorrecta!', 'incorrect'); }
+    if (correcto) {
+      if ('vibrate' in navigator) try { navigator.vibrate(40); } catch {}
+      audio.play('correct');
+      const earned = 10 + state.level * 2;
+      showToast(`✅ ¡Correcto! (+${earned} pts)`, 'correct');
+    } else {
+      if ('vibrate' in navigator) try { navigator.vibrate([100, 50, 100]); } catch {}
+      audio.play('wrong');
+      showToast('❌ ¡Clasificación incorrecta!', 'incorrect');
+    }
 
     setTimeout(() => {
       revealStage.innerHTML = '';

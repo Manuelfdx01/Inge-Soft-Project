@@ -142,4 +142,27 @@ export class AchievementsComponent implements OnInit {
     if (position === 3) return '🥉';
     return `#${position}`;
   }
+
+  get gameHighScore(): number {
+    try {
+      const raw = localStorage.getItem('memoriaReciclable.highScore');
+      return raw ? parseInt(raw, 10) || 0 : 0;
+    } catch {
+      return 0;
+    }
+  }
+
+  get approvedActivitiesCount(): number {
+    let count = 0;
+    try {
+      const quizzes = localStorage.getItem('gomi_completed_quizzes');
+      if (quizzes) {
+        count += JSON.parse(quizzes).length;
+      }
+    } catch {}
+    if (this.summary) {
+      count += (this.summary.unlocked_achievements_count || 0);
+    }
+    return Math.max(count, 1);
+  }
 }

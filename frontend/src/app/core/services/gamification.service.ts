@@ -242,6 +242,13 @@ export class GamificationService {
             condition_key: 'mapa_reportes_count', condition_value: 1,
             earned: unlockedIds.includes(4), earned_at: unlockedIds.includes(4) ? new Date().toISOString() : null,
             progress_current: unlockedIds.includes(4) ? 1 : 0, progress_pct: unlockedIds.includes(4) ? 100 : 0
+          },
+          {
+            id: 5, name: 'Sabio del Reciclaje', description: 'Aprobaste un quiz de conocimiento sobre reciclaje en Guías',
+            icon: '🧪', category: 'RECICLAJE', points_reward: 50, xp_reward: 50, points_required: 0,
+            condition_key: 'quiz_count', condition_value: 1,
+            earned: unlockedIds.includes(5), earned_at: unlockedIds.includes(5) ? new Date().toISOString() : null,
+            progress_current: unlockedIds.includes(5) ? 1 : 0, progress_pct: unlockedIds.includes(5) ? 100 : 0
           }
         ];
         return of(mockAch);
@@ -303,8 +310,8 @@ export class GamificationService {
         // Fallback para modo offline / desarrollo
         const pts = actionType === 'jugar_juego' 
           ? Math.max(10, Math.floor((payload?.score || 0) / 10)) 
-          : (actionType === 'reportar_punto_mapa' ? 30 : 15);
-        const xp = pts + 5;
+          : (actionType === 'aprobar_quiz_guia' ? 50 : (actionType === 'reportar_punto_mapa' ? 30 : 15));
+        const xp = actionType === 'aprobar_quiz_guia' ? 50 : (pts + 5);
         
         const local = this.getLocalData();
         local.points += pts;
@@ -314,6 +321,7 @@ export class GamificationService {
         let desc = 'Acción realizada';
         if (actionType === 'jugar_juego') desc = `Puntos ganados en Memoria Reciclable (+${pts} pts)`;
         else if (actionType === 'leer_guia') desc = `Lectura de guía de reciclaje (+${pts} pts)`;
+        else if (actionType === 'aprobar_quiz_guia') desc = `Quiz de guía de reciclaje aprobado (+${pts} pts)`;
         else if (actionType === 'reportar_punto_mapa') desc = `Reporte en punto de acopio (+${pts} pts)`;
 
         const tx: PointTransaction = {
@@ -330,6 +338,7 @@ export class GamificationService {
         if (actionType === 'jugar_juego' && !local.achievements_unlocked.includes(2)) local.achievements_unlocked.push(2);
         if (actionType === 'leer_guia' && !local.achievements_unlocked.includes(3)) local.achievements_unlocked.push(3);
         if (actionType === 'reportar_punto_mapa' && !local.achievements_unlocked.includes(4)) local.achievements_unlocked.push(4);
+        if (actionType === 'aprobar_quiz_guia' && !local.achievements_unlocked.includes(5)) local.achievements_unlocked.push(5);
 
         this.saveLocalData(local);
         this.updateAuthPoints(local.points);
