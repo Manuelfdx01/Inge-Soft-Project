@@ -74,9 +74,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
       badge: 0
     },
     {
-      icon: '📝',
-      label: 'Reportar',
-      route: '/reciclador/reportar'
+      icon: '🌐',
+      label: 'Comunidad',
+      route: '/reciclador/comunidad'
     },
   ];
 

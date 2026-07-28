@@ -6,160 +6,209 @@
   <div class="page-hero">
     <div class="hero-text">
       <span class="eyebrow">Panel de reciclador</span>
-      <h1>Alertas de traslado</h1>
-      <p>Acepta y gestiona las alertas que requieren recolección.</p>
+      <h1>Alertas</h1>
+      <p>Gestiona traslados y consulta los avisos de los centros de acopio.</p>
     </div>
 
-    <button class="btn btn-outline" (click)="loadAlerts()">
+    <button class="btn btn-outline" (click)="loadAlerts(); loadCentroAlertas()">
       🔄 Actualizar
     </button>
   </div>
 
   <!-- ════════════════════════
-       DISPONIBILIDAD
+       TABS
   ════════════════════════ -->
-  <div class="availability-banner" [class.is-on]="isAvailable">
-    <div class="avail-content">
-      <div class="avail-dot-wrap">
-        <span class="avail-dot-ring" [class.active]="isAvailable"></span>
-        <span class="avail-dot" [class.active]="isAvailable"></span>
-      </div>
-      <div>
-        <div class="avail-title">Disponibilidad</div>
-        <div class="avail-sub">
-          {{ isAvailable
-            ? 'Estás recibiendo nuevas solicitudes de traslado.'
-            : 'No recibirás nuevas solicitudes mientras estés inactivo.' }}
-        </div>
-      </div>
-    </div>
-    <div class="toggle-wrap">
-      <span class="toggle-label" [class.active]="isAvailable">
-        {{ isAvailable ? 'Activo' : 'Inactivo' }}
-      </span>
-      <button
-        class="toggle-btn"
-        [class.on]="isAvailable"
-        (click)="toggleDisponibilidad()">
-      </button>
-    </div>
-  </div>
-
-  <!-- ════════════════════════
-       FILTROS
-  ════════════════════════ -->
-  <div class="filter-bar">
+  <div class="tab-bar">
     <button
-      *ngFor="let f of filters"
-      class="filter-chip"
-      [class.active]="activeFilter === f.value"
-      (click)="setFilter(f.value)">
-      {{ f.label }}
-      <span class="chip-count" *ngIf="f.value !== 'TODOS' && activeAlerts.length > 0">
-        {{ countByStatus(f.value) }}
-      </span>
+      class="tab-btn"
+      [class.active]="activeTab === 'traslados'"
+      (click)="activeTab = 'traslados'">
+      🚛 Alertas de Traslado
+      <span class="tab-count" *ngIf="activeAlerts.length > 0">{{ activeAlerts.length }}</span>
     </button>
-    <span class="total-count">{{ filteredAlerts.length }} resultados</span>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'centros'"
+      (click)="activeTab = 'centros'">
+      🏭 Avisos de Centros
+      <span class="tab-count new" *ngIf="centroAlertas.length > 0">{{ centroAlertas.length }}</span>
+    </button>
   </div>
 
   <!-- ════════════════════════
-       LOADING
+       TAB: TRASLADOS
   ════════════════════════ -->
-  <div class="state-card loading-state" *ngIf="loading">
-    <div class="spinner"></div>
-    <span>Cargando alertas...</span>
-  </div>
+  <ng-container *ngIf="activeTab === 'traslados'">
 
-  <!-- ════════════════════════
-       EMPTY
-  ════════════════════════ -->
-  <div class="state-card empty-state" *ngIf="!loading && filteredAlerts.length === 0">
-    <div class="empty-icon">📭</div>
-    <h3>Sin alertas{{ activeFilter !== 'TODOS' ? ' en este filtro' : '' }}</h3>
-    <p>No hay puntos que requieran traslado en este momento.</p>
-  </div>
-
-  <!-- ════════════════════════
-       GRID DE ALERTAS
-  ════════════════════════ -->
-  <div class="alerts-grid" *ngIf="!loading && filteredAlerts.length > 0">
-
-    <div
-      *ngFor="let alert of filteredAlerts"
-      class="alert-card"
-      [ngClass]="priorityClass(alert.priority)">
-
-      <!-- Priority & Time strip -->
-      <div class="card-strip">
-        <span class="priority-pill" [ngClass]="priorityClass(alert.priority)">
-          {{ priorityLabel(alert.priority) }} prioridad
-        </span>
-        <span class="card-time">{{ timeAgo(alert.created_at) }}</span>
-      </div>
-
-      <!-- Card header -->
-      <div class="card-header">
-        <h3 class="origin-name">{{ alert.origin_point.name }}</h3>
-        <span class="status-badge" [ngClass]="statusClass(alert.status)">
-          {{ statusLabel(alert.status) }}
-        </span>
-      </div>
-
-      <!-- Waste & capacity chips -->
-      <div class="chips-row">
-        <span class="chip waste-chip">♻️ {{ alert.waste_type }}</span>
-        <span class="chip cap-chip">
-          {{ alert.origin_point.capacity_pct }}% lleno
-        </span>
-      </div>
-
-      <!-- Capacity bar -->
-      <div class="cap-bar-track">
-        <div
-          class="cap-bar-fill"
-          [style.width.%]="alert.origin_point.capacity_pct"
-          [style.background]="alert.origin_point.capacity_pct >= 86 ? '#EF5350' : alert.origin_point.capacity_pct >= 61 ? '#FFA726' : '#2E7D32'">
+    <!-- Disponibilidad -->
+    <div class="availability-banner" [class.is-on]="isAvailable">
+      <div class="avail-content">
+        <div class="avail-dot-wrap">
+          <span class="avail-dot-ring" [class.active]="isAvailable"></span>
+          <span class="avail-dot" [class.active]="isAvailable"></span>
+        </div>
+        <div>
+          <div class="avail-title">Disponibilidad</div>
+          <div class="avail-sub">
+            {{ isAvailable
+              ? 'Estás recibiendo nuevas solicitudes de traslado.'
+              : 'No recibirás nuevas solicitudes mientras estés inactivo.' }}
+          </div>
         </div>
       </div>
-
-      <!-- Route -->
-      <div class="route-block">
-        <div class="route-item">
-          <span class="route-icon origin-icon">📍</span>
-          <span class="route-addr">{{ alert.origin_point.address }}</span>
-        </div>
-        <div class="route-arrow">↓ {{ alert.distance_km }} km</div>
-        <div class="route-item">
-          <span class="route-icon dest-icon">🏁</span>
-          <span class="route-addr">{{ alert.target_point.address }}</span>
-        </div>
-      </div>
-
-      <!-- Actions -->
-      <div class="card-actions">
-        <button class="btn btn-outline btn-sm" (click)="openOSM(alert)">
-          🗺️ Ver mapa
-        </button>
-
+      <div class="toggle-wrap">
+        <span class="toggle-label" [class.active]="isAvailable">
+          {{ isAvailable ? 'Activo' : 'Inactivo' }}
+        </span>
         <button
-          *ngIf="alert.status === 'PENDIENTE'"
-          class="btn btn-primary btn-sm"
-          [disabled]="actionLoading === alert.id"
-          (click)="aceptar(alert)">
-          {{ actionLoading === alert.id ? 'Aceptando...' : 'Aceptar traslado' }}
-        </button>
-
-        <button
-          *ngIf="alert.status === 'ACEPTADA' || alert.status === 'EN_PROCESO'"
-          class="btn btn-success btn-sm"
-          [disabled]="actionLoading === alert.id"
-          (click)="completar(alert)">
-          {{ actionLoading === alert.id ? 'Completando...' : '✅ Completar' }}
+          class="toggle-btn"
+          [class.on]="isAvailable"
+          (click)="toggleDisponibilidad()">
         </button>
       </div>
-
     </div>
 
-  </div>
+    <!-- Filtros -->
+    <div class="filter-bar">
+      <button
+        *ngFor="let f of filters"
+        class="filter-chip"
+        [class.active]="activeFilter === f.value"
+        (click)="setFilter(f.value)">
+        {{ f.label }}
+        <span class="chip-count" *ngIf="f.value !== 'TODOS' && activeAlerts.length > 0">
+          {{ countByStatus(f.value) }}
+        </span>
+      </button>
+      <span class="total-count">{{ filteredAlerts.length }} resultados</span>
+    </div>
+
+    <!-- Loading -->
+    <div class="state-card loading-state" *ngIf="loading">
+      <div class="spinner"></div>
+      <span>Cargando alertas...</span>
+    </div>
+
+    <!-- Empty -->
+    <div class="state-card empty-state" *ngIf="!loading && filteredAlerts.length === 0">
+      <div class="empty-icon">📭</div>
+      <h3>Sin alertas{{ activeFilter !== 'TODOS' ? ' en este filtro' : '' }}</h3>
+      <p>No hay puntos que requieran traslado en este momento.</p>
+    </div>
+
+    <!-- Grid -->
+    <div class="alerts-grid" *ngIf="!loading && filteredAlerts.length > 0">
+      <div
+        *ngFor="let alert of filteredAlerts"
+        class="alert-card"
+        [ngClass]="priorityClass(alert.priority)">
+
+        <div class="card-strip">
+          <span class="priority-pill" [ngClass]="priorityClass(alert.priority)">
+            {{ priorityLabel(alert.priority) }} prioridad
+          </span>
+          <span class="card-time">{{ timeAgo(alert.created_at) }}</span>
+        </div>
+
+        <div class="card-header">
+          <h3 class="origin-name">{{ alert.origin_point.name }}</h3>
+          <span class="status-badge" [ngClass]="statusClass(alert.status)">
+            {{ statusLabel(alert.status) }}
+          </span>
+        </div>
+
+        <div class="chips-row">
+          <span class="chip waste-chip">♻️ {{ alert.waste_type }}</span>
+          <span class="chip cap-chip">
+            {{ alert.origin_point.capacity_pct }}% lleno
+          </span>
+        </div>
+
+        <div class="cap-bar-track">
+          <div
+            class="cap-bar-fill"
+            [style.width.%]="alert.origin_point.capacity_pct"
+            [style.background]="alert.origin_point.capacity_pct >= 86 ? '#EF5350' : alert.origin_point.capacity_pct >= 61 ? '#FFA726' : '#2E7D32'">
+          </div>
+        </div>
+
+        <div class="route-block">
+          <div class="route-item">
+            <span class="route-icon origin-icon">📍</span>
+            <span class="route-addr">{{ alert.origin_point.address }}</span>
+          </div>
+          <div class="route-arrow">↓ {{ alert.distance_km }} km</div>
+          <div class="route-item">
+            <span class="route-icon dest-icon">🏁</span>
+            <span class="route-addr">{{ alert.target_point.address }}</span>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn btn-outline btn-sm" (click)="openOSM(alert)">
+            🗺️ Ver mapa
+          </button>
+
+          <button
+            *ngIf="alert.status === 'PENDIENTE'"
+            class="btn btn-primary btn-sm"
+            [disabled]="actionLoading === alert.id"
+            (click)="aceptar(alert)">
+            {{ actionLoading === alert.id ? 'Aceptando...' : 'Aceptar traslado' }}
+          </button>
+
+          <button
+            *ngIf="alert.status === 'ACEPTADA' || alert.status === 'EN_PROCESO'"
+            class="btn btn-success btn-sm"
+            [disabled]="actionLoading === alert.id"
+            (click)="completar(alert)">
+            {{ actionLoading === alert.id ? 'Completando...' : '✅ Completar' }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </ng-container>
+
+  <!-- ════════════════════════
+       TAB: AVISOS DE CENTROS
+  ════════════════════════ -->
+  <ng-container *ngIf="activeTab === 'centros'">
+
+    <!-- Loading -->
+    <div class="state-card loading-state" *ngIf="loadingCentros">
+      <div class="spinner"></div>
+      <span>Cargando avisos de centros...</span>
+    </div>
+
+    <!-- Empty -->
+    <div class="state-card empty-state" *ngIf="!loadingCentros && centroAlertas.length === 0">
+      <div class="empty-icon">🏭</div>
+      <h3>Sin avisos de centros</h3>
+      <p>Los centros de acopio aún no han publicado avisos para ti.</p>
+    </div>
+
+    <!-- Lista de avisos -->
+    <div class="centro-lista" *ngIf="!loadingCentros && centroAlertas.length > 0">
+      <div
+        *ngFor="let av of centroAlertas"
+        class="centro-item"
+        [class.unread]="!av.is_read"
+        [ngClass]="centroAlertaClass(av.message)"
+        (click)="markCentroRead(av)">
+
+        <div class="ca-icon">{{ centroAlertaIcon(av.message) }}</div>
+
+        <div class="ca-body">
+          <p class="ca-message">{{ av.message }}</p>
+          <span class="ca-time">{{ timeAgo(av.created_at) }}</span>
+        </div>
+
+        <span class="ca-unread-dot" *ngIf="!av.is_read" title="No leído"></span>
+      </div>
+    </div>
+
+  </ng-container>
 
 </div>

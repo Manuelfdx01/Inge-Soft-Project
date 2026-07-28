@@ -124,10 +124,10 @@ export const routes: Routes = [
       },
 
       {
-        path: 'reportar',
+        path: 'comunidad',
         loadComponent: () =>
-          import('./recycler/report/report.component')
-            .then(c => c.ReportComponent)
+          import('./recycler/comunidad/comunidad.component')
+            .then(c => c.ComunidadComponent)
       },
 
     ]

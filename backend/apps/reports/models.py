@@ -100,3 +100,57 @@ class Report(models.Model):
 
     def __str__(self):
         return f'{self.type} en {self.point.name} ({self.status})'
+
+
+class CommunityPost(models.Model):
+
+    TAGS_CHOICES = [
+        ('Trabajo',   'Trabajo'),
+        ('Dudas',     'Dudas'),
+        ('Residuos',  'Residuos'),
+        ('Trueque',   'Trueque'),
+        ('Negocio',   'Negocio'),
+        ('Noticias',  'Noticias'),
+        ('General',   'General'),
+    ]
+
+    author     = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='community_posts',
+    )
+    content    = models.TextField()
+    tags       = models.JSONField(default=list, blank=True)  # lista de strings
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Publicación de comunidad'
+        verbose_name_plural = 'Publicaciones de comunidad'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.author.username}: {self.content[:50]}'
+
+
+class PostComment(models.Model):
+    post       = models.ForeignKey(
+        CommunityPost,
+        on_delete=models.CASCADE,
+        related_name='comments',
+    )
+    author     = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='post_comments',
+    )
+    content    = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Comentario'
+        verbose_name_plural = 'Comentarios'
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f'{self.author.username} → post {self.post_id}'

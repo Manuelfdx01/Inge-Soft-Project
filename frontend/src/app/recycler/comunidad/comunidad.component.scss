@@ -1,0 +1,413 @@
+@use 'sass:color';
+
+$green:  #2E7D32;
+$teal:   #0F6E56;
+$amber:  #F9A825;
+$red:    #C62828;
+$blue:   #1565C0;
+$bg:     #F4F6F8;
+$card:   #ffffff;
+$radius: 14px;
+$shadow: 0 2px 12px rgba(0,0,0,.07);
+
+/* ─── page ─── */
+.comunidad-page {
+  padding: 28px 32px 40px;
+  background: $bg;
+  min-height: calc(100vh - 64px);
+}
+
+/* ─── hero ─── */
+.page-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 24px;
+
+  .hero-text {
+    .eyebrow {
+      display: inline-block;
+      font-size: .72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: $teal;
+      background: #E8F5EE;
+      padding: 3px 10px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+    }
+    h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 4px; color: #1a1a1a; }
+    p  { color: #666; font-size: .88rem; margin: 0; }
+  }
+}
+
+/* ─── new post card ─── */
+.new-post-card {
+  background: $card;
+  border-radius: $radius;
+  padding: 24px;
+  box-shadow: $shadow;
+  margin-bottom: 24px;
+  border-top: 4px solid $teal;
+
+  h3 { margin: 0 0 14px; font-size: 1rem; font-weight: 700; color: #1a1a1a; }
+
+  textarea {
+    width: 100%;
+    border: 1.5px solid #E0E0E0;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: .9rem;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color .2s;
+    box-sizing: border-box;
+
+    &:focus { outline: none; border-color: $teal; }
+  }
+}
+
+.tag-selector {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+
+  .tag-label { font-size: .78rem; font-weight: 600; color: #888; }
+}
+
+.tag-btn {
+  padding: 5px 12px;
+  border: 1.5px solid #D0D5DD;
+  border-radius: 20px;
+  background: transparent;
+  font-size: .78rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #444;
+  transition: all .15s;
+
+  &:hover { border-color: $teal; color: $teal; }
+
+  &.selected {
+    background: $teal;
+    color: #fff;
+    border-color: $teal;
+    box-shadow: 0 2px 8px rgba($teal, .3);
+  }
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+
+  .char-count { font-size: .75rem; color: #aaa; margin-right: auto; }
+  .error-msg  { font-size: .8rem; color: $red; }
+}
+
+/* ─── filter bar ─── */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border: 1.5px solid #E0E0E0;
+  border-radius: 20px;
+  background: $card;
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+  color: #444;
+
+  &:hover { border-color: $teal; color: $teal; }
+
+  &.active {
+    background: $teal;
+    color: #fff;
+    border-color: $teal;
+    box-shadow: 0 2px 8px rgba($teal, .25);
+  }
+}
+
+/* ─── state cards ─── */
+.state-card {
+  text-align: center;
+  padding: 48px 24px;
+  background: $card;
+  border-radius: $radius;
+  box-shadow: $shadow;
+  margin-bottom: 24px;
+
+  .spinner {
+    width: 36px; height: 36px;
+    margin: 0 auto 12px;
+    border: 3px solid #E0E0E0;
+    border-top-color: $teal;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+
+  h3 { margin: 8px 0 6px; font-size: 1.1rem; color: #1a1a1a; }
+  p  { color: #888; font-size: .85rem; margin: 0 0 16px; }
+}
+
+.empty-icon { font-size: 2.5rem; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── posts feed ─── */
+.posts-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ─── post card ─── */
+.post-card {
+  background: $card;
+  border-radius: $radius;
+  padding: 22px;
+  box-shadow: $shadow;
+  transition: box-shadow .2s;
+
+  &:hover { box-shadow: 0 6px 22px rgba(0,0,0,.10); }
+}
+
+.post-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.author-avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.author-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  .author-name { font-weight: 700; font-size: .92rem; color: #1a1a1a; }
+  .author-meta { font-size: .75rem; color: #888; }
+}
+
+.post-time {
+  font-size: .75rem;
+  color: #aaa;
+  white-space: nowrap;
+}
+
+.delete-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  opacity: .5;
+  transition: opacity .15s;
+  padding: 4px;
+  &:hover { opacity: 1; }
+}
+
+.post-content {
+  font-size: .92rem;
+  line-height: 1.55;
+  color: #222;
+  margin: 0 0 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ─── tags ─── */
+.post-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.post-tag {
+  padding: 3px 10px;
+  background: #E8F5EE;
+  color: $teal;
+  font-size: .72rem;
+  font-weight: 700;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+
+/* ─── post footer ─── */
+.post-footer {
+  padding-top: 12px;
+  border-top: 1px solid #F0F0F0;
+}
+
+.comment-toggle {
+  background: transparent;
+  border: none;
+  font-size: .82rem;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background .15s, color .15s;
+
+  &:hover { background: #F0F0F0; color: $teal; }
+}
+
+/* ─── comments section ─── */
+.comments-section {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #F5F5F5;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.comment-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.comment-avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $teal, $green);
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.comment-body {
+  background: #F8FAFB;
+  border-radius: 10px;
+  padding: 8px 12px;
+  flex: 1;
+
+  .comment-author { font-size: .78rem; font-weight: 700; color: #333; display: block; margin-bottom: 3px; }
+  .comment-text   { font-size: .85rem; color: #444; margin: 0 0 4px; white-space: pre-wrap; }
+  .comment-time   { font-size: .7rem; color: #aaa; }
+}
+
+.no-comments {
+  font-size: .82rem;
+  color: #aaa;
+  text-align: center;
+  padding: 8px 0;
+}
+
+/* ─── new comment row ─── */
+.new-comment-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.nc-avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0F6E56, #2E7D32);
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.nc-input {
+  flex: 1;
+  border: 1.5px solid #E0E0E0;
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-size: .84rem;
+  font-family: inherit;
+  transition: border-color .2s;
+
+  &:focus { outline: none; border-color: $teal; }
+}
+
+.nc-send {
+  background: $teal;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 34px; height: 34px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background .15s, transform .1s;
+  display: flex; align-items: center; justify-content: center;
+
+  &:hover:not(:disabled) { background: color.adjust($teal, $lightness: -8%); }
+  &:active { transform: scale(.93); }
+  &:disabled { opacity: .45; cursor: not-allowed; }
+}
+
+/* ─── buttons ─── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background .2s, transform .1s;
+  font-size: .84rem;
+  gap: 6px;
+  padding: 9px 18px;
+
+  &:active { transform: scale(.97); }
+  &:disabled { opacity: .55; cursor: not-allowed; }
+}
+
+.btn-primary {
+  background: $teal;
+  color: #fff;
+  &:hover:not(:disabled) { background: color.adjust($teal, $lightness: -8%); }
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1.5px solid #D0D5DD;
+  color: #333;
+  &:hover:not(:disabled) { background: #F5F5F5; }
+}
+
+/* ─── responsive ─── */
+@media (max-width: 768px) {
+  .comunidad-page { padding: 20px 16px; }
+  .page-hero { flex-direction: column; align-items: flex-start; gap: 12px; }
+}

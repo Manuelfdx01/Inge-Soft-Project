@@ -12,6 +12,13 @@ export interface Notification {
   created_at: string;
 }
 
+export interface CentroAlertaNotif {
+  id: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -80,5 +87,10 @@ export class NotificationsService implements OnDestroy {
       .pipe(
         tap(() => this.unreadCount.next(0))
       );
+  }
+
+  /** Alertas de Centros de Acopio recibidas por el reciclador */
+  getAlertasCentro(): Observable<CentroAlertaNotif[]> {
+    return this.http.get<CentroAlertaNotif[]>(`${this.apiUrl}/alertas-centro/`);
   }
 }

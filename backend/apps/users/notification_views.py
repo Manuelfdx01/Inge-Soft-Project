@@ -48,3 +48,22 @@ class NotificationViewSet(ModelViewSet):
             user=request.user, is_read=False
         ).count()
         return Response({'unread_count': count})
+
+    @action(detail=False, methods=['get'], url_path='alertas-centro')
+    def alertas_centro(self, request):
+        """Devuelve las alertas publicadas por Centros de Acopio al reciclador autenticado."""
+        qs = Notification.objects.filter(
+            user=request.user,
+            type=Notification.Type.GENERAL,
+            message__startswith='[',
+        ).order_by('-created_at')
+        data = [
+            {
+                'id': n.id,
+                'message': n.message,
+                'is_read': n.is_read,
+                'created_at': n.created_at,
+            }
+            for n in qs
+        ]
+        return Response(data)

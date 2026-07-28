@@ -1,0 +1,175 @@
+<div class="comunidad-page">
+
+  <!-- ══════════════════════
+       HEADER
+  ══════════════════════ -->
+  <div class="page-hero">
+    <div class="hero-text">
+      <span class="eyebrow">Panel de reciclador</span>
+      <h1>♻️ Comunidad de Recicladores</h1>
+      <p>Comparte experiencias, dudas y oportunidades con otros recicladores.</p>
+    </div>
+    <button class="btn btn-primary" (click)="toggleForm()">
+      {{ showForm ? '✕ Cancelar' : '✏️ Nueva publicación' }}
+    </button>
+  </div>
+
+  <!-- ══════════════════════
+       FORM: NUEVA PUBLICACIÓN
+  ══════════════════════ -->
+  <div class="new-post-card" *ngIf="showForm">
+    <h3>Nueva publicación</h3>
+
+    <textarea
+      id="new-post-content"
+      rows="4"
+      [(ngModel)]="newContent"
+      placeholder="Comparte algo con la comunidad de recicladores...">
+    </textarea>
+
+    <div class="tag-selector">
+      <span class="tag-label">Etiquetas:</span>
+      <button
+        *ngFor="let t of tags.slice(1)"
+        class="tag-btn"
+        [class.selected]="isTagSelected(t)"
+        (click)="toggleTag(t)">
+        {{ t }}
+      </button>
+    </div>
+
+    <div class="form-actions">
+      <span class="char-count">{{ newContent.length }} / 1000</span>
+      <div class="error-msg" *ngIf="submitError">⚠️ {{ submitError }}</div>
+      <button
+        class="btn btn-primary"
+        [disabled]="submitting || !newContent.trim()"
+        (click)="submitPost()">
+        {{ submitting ? 'Publicando...' : '🚀 Publicar' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════
+       FILTROS POR ETIQUETA
+  ══════════════════════ -->
+  <div class="filter-bar">
+    <button
+      *ngFor="let t of tags"
+      class="filter-chip"
+      [class.active]="activeTag === t"
+      (click)="setFilter(t)">
+      {{ t }}
+    </button>
+  </div>
+
+  <!-- ══════════════════════
+       LOADING / EMPTY
+  ══════════════════════ -->
+  <div class="state-card" *ngIf="loading">
+    <div class="spinner"></div>
+    <span>Cargando publicaciones...</span>
+  </div>
+
+  <div class="state-card empty-state" *ngIf="!loading && posts.length === 0 && !error">
+    <div class="empty-icon">🌱</div>
+    <h3>¡Sé el primero en publicar!</h3>
+    <p>Aún no hay publicaciones{{ activeTag !== 'Todos' ? ' con la etiqueta "' + activeTag + '"' : '' }}.
+      Comparte algo con la comunidad.</p>
+  </div>
+
+  <div class="state-card error-state" *ngIf="error">
+    <div class="empty-icon">⚠️</div>
+    <h3>Error al cargar</h3>
+    <p>{{ error }}</p>
+    <button class="btn btn-outline" (click)="loadPosts()">Reintentar</button>
+  </div>
+
+  <!-- ══════════════════════
+       FEED DE PUBLICACIONES
+  ══════════════════════ -->
+  <div class="posts-feed" *ngIf="!loading && posts.length > 0">
+
+    <article *ngFor="let post of posts" class="post-card">
+
+      <!-- Cabecera del autor -->
+      <div class="post-header">
+        <div class="author-avatar" [style.background]="'linear-gradient(135deg, #0F6E56, #2E7D32)'">
+          {{ post.username.charAt(0).toUpperCase() }}
+        </div>
+        <div class="author-info">
+          <span class="author-name">{{ post.username }}</span>
+          <span class="author-meta">
+            {{ levelIcon(post.level) }} Nv.{{ post.level }} &nbsp;·&nbsp; {{ post.xp }} XP
+          </span>
+        </div>
+        <span class="post-time">{{ timeAgo(post.created_at) }}</span>
+        <button
+          *ngIf="isOwner(post)"
+          class="delete-btn"
+          title="Eliminar publicación"
+          (click)="deletePost(post)">
+          🗑️
+        </button>
+      </div>
+
+      <!-- Contenido -->
+      <p class="post-content">{{ post.content }}</p>
+
+      <!-- Etiquetas -->
+      <div class="post-tags" *ngIf="post.tags && post.tags.length > 0">
+        <span *ngFor="let tag of post.tags" class="post-tag">{{ tag }}</span>
+      </div>
+
+      <!-- Acciones: comentarios -->
+      <div class="post-footer">
+        <button class="comment-toggle" (click)="toggleComments(post.id)">
+          💬 {{ post.comment_count }} comentario{{ post.comment_count !== 1 ? 's' : '' }}
+          {{ isCommentsOpen(post.id) ? '▲' : '▼' }}
+        </button>
+      </div>
+
+      <!-- Sección de comentarios -->
+      <div class="comments-section" *ngIf="isCommentsOpen(post.id)">
+
+        <!-- Lista de comentarios existentes -->
+        <div class="comments-list" *ngIf="post.comments.length > 0">
+          <div class="comment-item" *ngFor="let c of post.comments">
+            <div class="comment-avatar">{{ c.username.charAt(0).toUpperCase() }}</div>
+            <div class="comment-body">
+              <span class="comment-author">{{ c.username }}</span>
+              <p class="comment-text">{{ c.content }}</p>
+              <span class="comment-time">{{ timeAgo(c.created_at) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="no-comments" *ngIf="post.comments.length === 0">
+          <span>Sé el primero en comentar.</span>
+        </div>
+
+        <!-- Input de nuevo comentario -->
+        <div class="new-comment-row">
+          <div class="nc-avatar">{{ currentUser?.username?.charAt(0)?.toUpperCase() }}</div>
+          <input
+            type="text"
+            class="nc-input"
+            [id]="'comment-' + post.id"
+            placeholder="Escribe un comentario..."
+            [(ngModel)]="commentInputs[post.id]"
+            (keyup.enter)="submitComment(post)">
+          <button
+            class="nc-send"
+            [disabled]="!commentInputs[post.id]?.trim() || submittingComment === post.id"
+            (click)="submitComment(post)">
+            {{ submittingComment === post.id ? '...' : '➤' }}
+          </button>
+        </div>
+
+      </div>
+
+    </article>
+
+  </div>
+
+</div>

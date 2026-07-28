@@ -2,10 +2,11 @@ import logging
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Review, Proposal, Report
+from .models import Review, Proposal, Report, CommunityPost, PostComment
 from .serializers import (
     ReviewSerializer, ProposalSerializer,
     ProposalStatusSerializer, ReportSerializer,
+    CommunityPostSerializer, PostCommentSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -14,6 +15,11 @@ logger = logging.getLogger(__name__)
 class IsCentroAcopio(permissions.BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.role == 'CENTRO_ACOPIO'
+
+
+class IsReciclador(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role == 'RECICLADOR'
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -151,3 +157,37 @@ class ReportViewSet(viewsets.ModelViewSet):
 
         logger.info(f'Reporte {pk} cambió a {new_status}')
         return Response(ReportSerializer(report).data)
+
+
+class CommunityPostViewSet(viewsets.ModelViewSet):
+    """Feed de comunidad exclusivo para recicladores."""
+    serializer_class = CommunityPostSerializer
+    permission_classes = [IsReciclador]
+    http_method_names = ['get', 'post', 'delete', 'head', 'options']
+
+    def get_queryset(self):
+        qs = CommunityPost.objects.select_related('author').prefetch_related('comments__author')
+        tag = self.request.query_params.get('tag')
+        if tag and tag != 'Todos':
+            qs = qs.filter(tags__contains=tag)
+        return qs
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+        logger.info(f'Nueva publicación de comunidad por {self.request.user.username}')
+
+    def perform_destroy(self, instance):
+        # Solo el propio autor puede eliminar
+        if instance.author != self.request.user:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied('Solo el autor puede eliminar esta publicación.')
+        instance.delete()
+
+    @action(detail=True, methods=['post'], url_path='comentar')
+    def comentar(self, request, pk=None):
+        post = self.get_object()
+        content = request.data.get('content', '').strip()
+        if not content:
+            return Response({'error': 'El comentario no puede estar vacío.'}, status=status.HTTP_400_BAD_REQUEST)
+        comment = PostComment.objects.create(post=post, author=request.user, content=content)
+        return Response(PostCommentSerializer(comment, context={'request': request}).data, status=status.HTTP_201_CREATED)

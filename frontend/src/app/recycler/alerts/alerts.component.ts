@@ -5,6 +5,12 @@ import {
   LogisticsService,
   LogisticsAlert
 } from '../../core/services/logistics.service';
+import {
+  NotificationsService,
+  CentroAlertaNotif
+} from '../../core/services/notifications.service';
+
+type AlertTab = 'traslados' | 'centros';
 
 @Component({
   selector: 'app-alerts',
@@ -15,6 +21,10 @@ import {
 })
 export class AlertsComponent implements OnInit {
 
+  /* ── tabs ── */
+  activeTab: AlertTab = 'traslados';
+
+  /* ── traslados (logistics) ── */
   loading = true;
   activeAlerts: LogisticsAlert[] = [];
   isAvailable = false;
@@ -28,12 +38,22 @@ export class AlertsComponent implements OnInit {
     { label: 'En proceso', value: 'EN_PROCESO' },
   ] as const;
 
-  constructor(private logistics: LogisticsService) {}
+  /* ── alertas de centros de acopio ── */
+  loadingCentros = false;
+  centroAlertas: CentroAlertaNotif[] = [];
+
+  constructor(
+    private logistics: LogisticsService,
+    private notificationsService: NotificationsService
+  ) {}
 
   ngOnInit(): void {
     this.loadAvailability();
     this.loadAlerts();
+    this.loadCentroAlertas();
   }
+
+  /* ─── TRASLADOS ─── */
 
   loadAlerts(): void {
     this.loading = true;
@@ -126,6 +146,48 @@ export class AlertsComponent implements OnInit {
       EN_PROCESO: 'badge-blue', COMPLETADA: 'badge-green'
     }[s] ?? 'badge-gray';
   }
+
+  /* ─── CENTROS DE ACOPIO ─── */
+
+  loadCentroAlertas(): void {
+    this.loadingCentros = true;
+    this.notificationsService.getAlertasCentro().subscribe({
+      next: (data) => {
+        this.centroAlertas = data;
+        this.loadingCentros = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.loadingCentros = false;
+      }
+    });
+  }
+
+  markCentroRead(alerta: CentroAlertaNotif): void {
+    if (alerta.is_read) return;
+    this.notificationsService.markAsRead(alerta.id).subscribe({
+      next: () => { alerta.is_read = true; this.notificationsService.getUnreadCount(); },
+      error: (err) => console.error(err)
+    });
+  }
+
+  centroAlertaIcon(msg: string): string {
+    if (msg.includes('💰')) return '💰';
+    if (msg.includes('🕒')) return '🕒';
+    if (msg.includes('🔴')) return '🔴';
+    if (msg.includes('🟢')) return '🟢';
+    return '📢';
+  }
+
+  centroAlertaClass(msg: string): string {
+    if (msg.includes('🔴') || msg.includes('Cierre') || msg.includes('mantenimiento')) return 'tipo-cierre';
+    if (msg.includes('💰') || msg.includes('precio')) return 'tipo-precio';
+    if (msg.includes('🕒') || msg.includes('horario')) return 'tipo-horario';
+    if (msg.includes('🟢') || msg.includes('disponible')) return 'tipo-disponible';
+    return 'tipo-aviso';
+  }
+
+  /* ─── SHARED ─── */
 
   timeAgo(date: string): string {
     const diff = Math.floor((Date.now() - new Date(date).getTime()) / 1000);

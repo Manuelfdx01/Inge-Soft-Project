@@ -1,11 +1,12 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import ReviewViewSet, ProposalViewSet, ReportViewSet
+from .views import ReviewViewSet, ProposalViewSet, ReportViewSet, CommunityPostViewSet
 
-# Router principal: propuestas y reportes de incidencia
+# Router principal: propuestas, reportes de incidencia y comunidad
 router = DefaultRouter()
 router.register(r'proposals', ProposalViewSet, basename='proposals')
 router.register(r'reports', ReportViewSet, basename='reports')
+router.register(r'community', CommunityPostViewSet, basename='community')
 
 # Router anidado para calificaciones: se monta bajo collection-points/<point_pk>/
 reviews_router = DefaultRouter()
