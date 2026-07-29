@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, signal, computed } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, Output, EventEmitter, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 
@@ -7,6 +7,7 @@ import {
   NotificationsService
 } from '../../../core/services/notifications.service';
 import { AuthService, User } from '../../../core/services/auth.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { ProfileModalComponent } from '../profile-modal/profile-modal.component';
 
 @Component({
@@ -22,6 +23,7 @@ import { ProfileModalComponent } from '../profile-modal/profile-modal.component'
 export class TopbarComponent implements OnInit, OnDestroy {
 
   @Input() title = '';
+  @Output() menuToggle = new EventEmitter<void>();
 
   readonly user = signal<User | null>(null);
   readonly notifications = signal<Notification[]>([]);
@@ -45,7 +47,8 @@ export class TopbarComponent implements OnInit, OnDestroy {
 
   constructor(
     private notificationsService: NotificationsService,
-    private authService: AuthService
+    private authService: AuthService,
+    public theme: ThemeService
   ) {}
 
   ngOnInit(): void {

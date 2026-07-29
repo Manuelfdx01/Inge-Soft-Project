@@ -7,6 +7,9 @@
   flex-direction: column;
   justify-content: space-between;
   box-shadow: 3px 0 12px rgba(0, 0, 0, .12);
+  flex-shrink: 0;
+  transition: background 0.25s;
+  z-index: 200;
 }
 
 .sidebar-header {
@@ -25,9 +28,11 @@
   justify-content: center;
   align-items: center;
   font-size: 30px;
+  flex-shrink: 0;
 }
 
 .brand {
+  flex: 1;
   h2{
     margin:0;
     font-size:24px;
@@ -39,6 +44,24 @@
     font-size:13px;
     color:rgba(255,255,255,.8);
   }
+}
+
+.sidebar-close-btn {
+  display: none;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: white;
+  font-size: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s;
+
+  &:hover { background: rgba(255,255,255,0.2); }
 }
 
 hr{
@@ -53,6 +76,7 @@ hr{
   flex-direction:column;
   padding:22px 14px;
   gap:8px;
+  overflow-y: auto;
 }
 
 .menu-item{
@@ -137,6 +161,7 @@ hr{
   font-size:20px;
   font-weight:bold;
   overflow: hidden;
+  flex-shrink: 0;
 
   .avatar-img {
     width: 100%;
@@ -147,11 +172,15 @@ hr{
 
 .user-data{
   flex:1;
+  min-width: 0;
 }
 
 .username{
   font-size:16px;
   font-weight:600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .role{
@@ -188,4 +217,42 @@ hr{
 .logout-btn:hover{
   transform:translateY(-2px);
   box-shadow:0 6px 18px rgba(0,0,0,.18);
+}
+
+/* ==========================
+   RESPONSIVE — MOBILE
+========================== */
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s;
+  }
+
+  /* Shell adds .sidebar-open class when hamburger is clicked */
+  :host.sidebar-open .sidebar {
+    transform: translateX(0);
+  }
+
+  .sidebar-close-btn {
+    display: flex;
+  }
+
+  .sidebar-header {
+    padding: 20px 16px 14px;
+  }
+
+  .logo {
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+  }
+
+  .brand h2 {
+    font-size: 20px;
+  }
 }

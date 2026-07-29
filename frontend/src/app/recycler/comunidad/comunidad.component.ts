@@ -8,6 +8,7 @@ import {
   COMMUNITY_TAGS
 } from '../../core/services/community.service';
 import { AuthService, User } from '../../core/services/auth.service';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-comunidad',
@@ -42,7 +43,8 @@ export class ComunidadComponent implements OnInit {
 
   constructor(
     private community: CommunityService,
-    private auth: AuthService
+    private auth: AuthService,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -95,16 +97,24 @@ export class ComunidadComponent implements OnInit {
         this.selectedTags = [];
         this.showForm = false;
         this.submitting = false;
+        this.toast.success('¡Publicación creada con éxito!');
       },
-      error: () => { this.submitError = 'Error al publicar. Inténtalo de nuevo.'; this.submitting = false; }
+      error: () => {
+        this.submitError = 'Error al publicar. Inténtalo de nuevo.';
+        this.submitting = false;
+        this.toast.error('Error al publicar. Inténtalo de nuevo.');
+      }
     });
   }
 
   deletePost(post: CommunityPost): void {
     if (!confirm('¿Eliminar esta publicación?')) return;
     this.community.deletePost(post.id).subscribe({
-      next: () => { this.posts = this.posts.filter(p => p.id !== post.id); },
-      error: () => alert('No se pudo eliminar la publicación.')
+      next: () => {
+        this.posts = this.posts.filter(p => p.id !== post.id);
+        this.toast.success('Publicación eliminada.');
+      },
+      error: () => this.toast.error('No se pudo eliminar la publicación.')
     });
   }
 
@@ -132,8 +142,12 @@ export class ComunidadComponent implements OnInit {
         post.comment_count++;
         this.commentInputs[post.id] = '';
         this.submittingComment = null;
+        this.toast.success('Comentario enviado.');
       },
-      error: () => { this.submittingComment = null; alert('Error al enviar el comentario.'); }
+      error: () => {
+        this.submittingComment = null;
+        this.toast.error('Error al enviar el comentario.');
+      }
     });
   }
 

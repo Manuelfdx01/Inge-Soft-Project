@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-register',
@@ -32,6 +33,7 @@ export class RegisterComponent {
     private fb: FormBuilder,
     private http: HttpClient,
     private router: Router,
+    private toast: ToastService,
   ) {
     this.form = this.fb.group({
       username: ['', Validators.required],
@@ -52,6 +54,7 @@ export class RegisterComponent {
         next: () => {
           this.loading = false;
           this.successMsg = '¡Cuenta creada! Inicia sesión.';
+          this.toast.success('¡Cuenta creada con éxito! Redirigiendo al login...');
           setTimeout(() => this.router.navigate(['/login']), 1500);
         },
         error: (err) => {
@@ -62,6 +65,7 @@ export class RegisterComponent {
             errors?.role?.[0] ??
             errors?.username?.[0] ??
             'Error al registrarse.';
+          this.toast.error(this.errorMsg);
         },
       });
   }

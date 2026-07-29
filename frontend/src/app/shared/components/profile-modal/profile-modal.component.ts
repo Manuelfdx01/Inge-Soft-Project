@@ -2,6 +2,7 @@ import { Component, EventEmitter, OnInit, Output, signal, computed } from '@angu
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService, User } from '../../../core/services/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-profile-modal',
@@ -53,7 +54,10 @@ export class ProfileModalComponent implements OnInit {
     return roles[u.role] || u.role;
   });
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private toast: ToastService
+  ) {}
 
   ngOnInit(): void {
     this.fetchProfile();
@@ -167,6 +171,7 @@ export class ProfileModalComponent implements OnInit {
         if (updatedUser.avatar) {
           this.previewUrl.set(this.authService.getAvatarUrl(updatedUser.avatar));
         }
+        this.toast.success('¡Perfil actualizado con éxito!');
       },
       error: (err) => {
         console.error('Error guardando perfil:', err);
@@ -182,9 +187,12 @@ export class ProfileModalComponent implements OnInit {
               messages.push(fieldError);
             }
           }
-          this.errorMessage.set(messages.length > 0 ? messages.join(' | ') : 'Error al guardar los datos.');
+          const msg = messages.length > 0 ? messages.join(' | ') : 'Error al guardar los datos.';
+          this.errorMessage.set(msg);
+          this.toast.error(msg);
         } else {
           this.errorMessage.set('Ocurrió un error al actualizar el perfil. Intenta nuevamente.');
+          this.toast.error('Ocurrió un error al actualizar el perfil.');
         }
       }
     });

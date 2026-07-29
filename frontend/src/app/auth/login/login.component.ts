@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -24,6 +25,7 @@ export class LoginComponent {
     private fb: FormBuilder,
     private auth: AuthService,
     private router: Router,
+    private toast: ToastService,
   ) {
     this.form = this.fb.group({
       username: ['', Validators.required],
@@ -48,6 +50,7 @@ export class LoginComponent {
       error: () => {
         this.loading = false;
         this.errorMsg = 'Usuario o contraseña incorrectos.';
+        this.toast.error('Usuario o contraseña incorrectos.');
       },
     });
   }

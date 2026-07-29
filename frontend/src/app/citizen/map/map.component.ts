@@ -10,6 +10,7 @@ import {
   CollectionPoint
 } from '../../core/services/collection-points.service';
 import { GamificationService } from '../../core/services/gamification.service';
+import { ToastService } from '../../core/services/toast.service';
 
 // Fix de íconos de Leaflet cuando se usa con Webpack/Angular
 const iconRetinaUrl = 'assets/marker-icon-2x.png';
@@ -100,7 +101,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   constructor(
     private pointsService: CollectionPointsService,
-    private gamificationService: GamificationService
+    private gamificationService: GamificationService,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -249,7 +251,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getCurrentLocation(): void {
     if (!navigator.geolocation) {
-      alert('Tu navegador no soporta geolocalización.');
+      this.toast.error('Tu navegador no soporta geolocalización.');
       return;
     }
 
@@ -262,10 +264,11 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         this.centerMapOn(this.userLocation.lat, this.userLocation.lng, 15);
         this.renderUserMarker();
         this.loadData();
+        this.toast.success('Ubicación obtenida con éxito.');
       },
       (error) => {
         console.warn('Geolocalización denegada o con error:', error);
-        alert('No se pudo acceder a tu ubicación. Verifica los permisos de tu navegador.');
+        this.toast.error('No se pudo acceder a tu ubicación. Verifica los permisos de tu navegador.');
       }
     );
   }

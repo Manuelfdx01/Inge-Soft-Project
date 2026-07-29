@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, signal, computed } from '@angular/core';
+import { Component, OnDestroy, OnInit, Output, EventEmitter, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -23,6 +23,8 @@ interface NavItem {
   styleUrl: './sidebar.component.scss'
 })
 export class SidebarComponent implements OnInit, OnDestroy {
+
+  @Output() sidebarClose = new EventEmitter<void>();
 
   readonly user = signal<User | null>(null);
   readonly navItems = signal<NavItem[]>([]);
@@ -103,6 +105,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   logout(): void {
     this.auth.logout();
+  }
+
+  onNavClick(): void {
+    // Close sidebar on mobile after navigation
+    this.sidebarClose.emit();
   }
 
 }

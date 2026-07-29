@@ -9,6 +9,7 @@ import {
   NotificationsService,
   CentroAlertaNotif
 } from '../../core/services/notifications.service';
+import { ToastService } from '../../core/services/toast.service';
 
 type AlertTab = 'traslados' | 'centros';
 
@@ -44,7 +45,8 @@ export class AlertsComponent implements OnInit {
 
   constructor(
     private logistics: LogisticsService,
-    private notificationsService: NotificationsService
+    private notificationsService: NotificationsService,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -67,6 +69,7 @@ export class AlertsComponent implements OnInit {
       error: (err) => {
         console.error(err);
         this.loading = false;
+        this.toast.error('Error al cargar alertas de traslado.');
       }
     });
   }
@@ -82,10 +85,14 @@ export class AlertsComponent implements OnInit {
     const newVal = !this.isAvailable;
     this.isAvailable = newVal;
     this.logistics.setAvailability(newVal).subscribe({
-      next: (res) => { this.isAvailable = res.is_available; },
+      next: (res) => {
+        this.isAvailable = res.is_available;
+        this.toast.info(res.is_available ? 'Ahora estás DISPONIBLE para traslados.' : 'Estado cambiado a NO DISPONIBLE.');
+      },
       error: (err) => {
         console.error(err);
         this.isAvailable = !newVal;
+        this.toast.error('Error al cambiar la disponibilidad.');
       }
     });
   }
@@ -107,16 +114,32 @@ export class AlertsComponent implements OnInit {
   aceptar(alert: LogisticsAlert): void {
     this.actionLoading = alert.id;
     this.logistics.aceptarTraslado(alert.id).subscribe({
-      next: () => { this.actionLoading = null; this.loadAlerts(); },
-      error: (err) => { console.error(err); this.actionLoading = null; }
+      next: () => {
+        this.actionLoading = null;
+        this.toast.success('Traslado aceptado correctamente.');
+        this.loadAlerts();
+      },
+      error: (err) => {
+        console.error(err);
+        this.actionLoading = null;
+        this.toast.error('Error al aceptar el traslado.');
+      }
     });
   }
 
   completar(alert: LogisticsAlert): void {
     this.actionLoading = alert.id;
     this.logistics.completarTraslado(alert.id).subscribe({
-      next: () => { this.actionLoading = null; this.loadAlerts(); },
-      error: (err) => { console.error(err); this.actionLoading = null; }
+      next: () => {
+        this.actionLoading = null;
+        this.toast.success('Traslado completado con éxito.');
+        this.loadAlerts();
+      },
+      error: (err) => {
+        console.error(err);
+        this.actionLoading = null;
+        this.toast.error('Error al completar el traslado.');
+      }
     });
   }
 

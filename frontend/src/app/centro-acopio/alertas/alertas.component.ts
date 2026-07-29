@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CentroAcopioService, CentroAlerta } from '../../core/services/centro-acopio.service';
 import { NotificationsService } from '../../core/services/notifications.service';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-centro-alertas',
@@ -16,7 +17,6 @@ export class CentroAlertasComponent implements OnInit {
   readonly loading = signal(true);
   readonly publishing = signal(false);
   readonly errorMsg = signal('');
-  readonly successMsg = signal('');
 
   tipoSeleccionado = 'AVISO';
   mensajeAlerta = '';
@@ -30,7 +30,8 @@ export class CentroAlertasComponent implements OnInit {
 
   constructor(
     private centroService: CentroAcopioService,
-    private notifService: NotificationsService
+    private notifService: NotificationsService,
+    private toast: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -44,9 +45,10 @@ export class CentroAlertasComponent implements OnInit {
         this.alertas.set(data);
         this.loading.set(false);
       },
-      error: (err: any) => {
+      error: () => {
         this.errorMsg.set('No se pudieron cargar los avisos.');
         this.loading.set(false);
+        this.toast.error('No se pudieron cargar los avisos.');
       }
     });
   }
@@ -54,24 +56,26 @@ export class CentroAlertasComponent implements OnInit {
   publicar(): void {
     if (!this.mensajeAlerta.trim()) {
       this.errorMsg.set('Por favor escribe el mensaje de la alerta.');
+      this.toast.warning('Por favor escribe el mensaje de la alerta.');
       return;
     }
 
     this.publishing.set(true);
     this.errorMsg.set('');
-    this.successMsg.set('');
 
     this.centroService.publicarAlerta(this.tipoSeleccionado, this.mensajeAlerta.trim()).subscribe({
-      next: (res: any) => {
-        this.successMsg.set('Alerta publicada correctamente y enviada a los recicladores.');
+      next: () => {
         this.mensajeAlerta = '';
         this.publishing.set(false);
         this.cargarAlertas();
         this.notifService.getUnreadCount();
+        this.toast.success('Alerta publicada y enviada a los recicladores.');
       },
       error: (err: any) => {
-        this.errorMsg.set(err.error?.error || 'Error al publicar la alerta.');
+        const msg = err.error?.error || 'Error al publicar la alerta.';
+        this.errorMsg.set(msg);
         this.publishing.set(false);
+        this.toast.error(msg);
       }
     });
   }

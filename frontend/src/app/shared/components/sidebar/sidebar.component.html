@@ -9,6 +9,9 @@
       <h2>GOMI</h2>
       <span>Reciclaje Inteligente</span>
     </div>
+
+    <!-- Mobile close button -->
+    <button class="sidebar-close-btn" (click)="sidebarClose.emit()" aria-label="Cerrar menú">✕</button>
   </div>
 
   <hr>
@@ -19,7 +22,8 @@
       *ngFor="let item of navItems()"
       [routerLink]="item.route"
       routerLinkActive="active"
-      class="menu-item">
+      class="menu-item"
+      (click)="onNavClick()">
 
       <span class="icon">
         {{ item.icon }}
