@@ -155,42 +155,6 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       maxZoom: 19,
     }).addTo(this.map);
 
-    // Event listener para acciones dentro de popups de Leaflet
-    this.map.on('popupopen', (e: L.PopupEvent) => {
-      const popupEl = e.popup.getElement();
-      if (!popupEl) return;
-
-      const osmBtn = popupEl.querySelector('.popup-btn-osm');
-      if (osmBtn) {
-        osmBtn.addEventListener('click', (ev) => {
-          ev.preventDefault();
-          const pId = osmBtn.getAttribute('data-point-id');
-          const point = this.points.find(p => p.id.toString() === pId?.toString());
-          if (point) this.openInOSM(point);
-        });
-      }
-
-      const reportBtn = popupEl.querySelector('.popup-btn-report');
-      if (reportBtn) {
-        reportBtn.addEventListener('click', (ev) => {
-          ev.preventDefault();
-          const pId = reportBtn.getAttribute('data-point-id');
-          const point = this.points.find(p => p.id.toString() === pId?.toString());
-          if (point) this.openReportModal(point);
-        });
-      }
-
-      const reviewBtn = popupEl.querySelector('.popup-btn-review');
-      if (reviewBtn) {
-        reviewBtn.addEventListener('click', (ev) => {
-          ev.preventDefault();
-          const pId = reviewBtn.getAttribute('data-point-id');
-          const point = this.points.find(p => p.id.toString() === pId?.toString());
-          if (point) this.openReviewModal(point);
-        });
-      }
-    });
-
     // Renderizar markers cuando la vista esté lista
     this.map.whenReady(() => {
       this.renderMarkers();
@@ -231,63 +195,13 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         popupAnchor: [0, -56],
       });
 
-      const wasteTagsHtml = point.waste_types?.map(w =>
-        `<span class="popup-tag" style="background: ${(w.color || '#2E7D32')}22; color: ${w.color || '#2E7D32'}">
-          ${w.icon || '♻️'} ${w.name}
-        </span>`
-      ).join('') || '';
-
-      const distanceHtml = point.distance_km != null
-        ? `<div class="popup-distance">📏 <strong>${point.distance_km} km</strong> de tu ubicación</div>`
-        : '';
-
-      let pricesHtml = '';
-      if (point.precio_kg && Object.keys(point.precio_kg).length > 0) {
-        const pList = Object.entries(point.precio_kg)
-          .map(([mat, price]) => `<span><strong>${mat}:</strong> $${price}/kg</span>`)
-          .join(', ');
-        pricesHtml = `<div class="popup-prices">💰 <strong>Precios:</strong> ${pList}</div>`;
-      }
-
-      const popupHtml = `
-        <div class="leaflet-custom-popup">
-          <div class="popup-header">
-            <span class="popup-status-badge" style="background:${color}">${point.status}</span>
-            <h4 class="popup-title">${point.name}</h4>
-          </div>
-          <p class="popup-address">📍 ${point.address}</p>
-          ${distanceHtml}
-          ${pricesHtml}
-          <div class="popup-capacity">
-            <div class="popup-capacity-label">
-              <span>Nivel de ocupación (${point.capacity_current}/${point.capacity_max} kg)</span>
-              <strong style="color: ${this.getBarColor(point.capacity_pct)}">${point.capacity_pct}%</strong>
-            </div>
-            <div class="popup-progress-bar">
-              <div class="popup-progress-fill" style="width: ${point.capacity_pct}%; background: ${this.getBarColor(point.capacity_pct)}"></div>
-            </div>
-          </div>
-          <div class="popup-waste-tags">${wasteTagsHtml}</div>
-          <div class="popup-actions">
-            <button class="popup-btn popup-btn-osm" data-point-id="${point.id}">🗺️ Cómo llegar</button>
-            <button class="popup-btn popup-btn-review" data-point-id="${point.id}">⭐ Calificar</button>
-            <button class="popup-btn popup-btn-report" data-point-id="${point.id}">📢 Reportar</button>
-          </div>
-        </div>
-      `;
-
       const marker = L.marker(
         [Number(point.latitude), Number(point.longitude)],
         { icon: svgIcon }
       );
 
-      marker.bindPopup(popupHtml, {
-        maxWidth: 300,
-        className: 'gomi-leaflet-popup'
-      });
-
       marker.on('click', () => {
-        this.selectPoint(point, false);
+        this.selectPoint(point);
       });
 
       marker.addTo(this.map);
@@ -384,27 +298,13 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   // SELECCIÓN DE PUNTO
   // ════════════════════════════════════════
 
-  selectPoint(point: CollectionPoint, openPopup = true): void {
+  selectPoint(point: CollectionPoint): void {
     this.selectedPoint = point;
     this.centerMapOn(Number(point.latitude), Number(point.longitude), 15);
-
-    if (openPopup) {
-      const targetMarker = this.markers.find(m => {
-        const latLng = m.getLatLng();
-        return Math.abs(latLng.lat - Number(point.latitude)) < 0.0001 &&
-               Math.abs(latLng.lng - Number(point.longitude)) < 0.0001;
-      });
-      if (targetMarker) {
-        targetMarker.openPopup();
-      }
-    }
   }
 
   closePopup(): void {
     this.selectedPoint = null;
-    if (this.map) {
-      this.map.closePopup();
-    }
   }
 
   openInOSM(point: CollectionPoint): void {
