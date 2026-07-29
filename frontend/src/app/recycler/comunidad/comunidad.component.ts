@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -44,7 +44,8 @@ export class ComunidadComponent implements OnInit {
   constructor(
     private community: CommunityService,
     private auth: AuthService,
-    private toast: ToastService
+    private toast: ToastService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -58,8 +59,8 @@ export class ComunidadComponent implements OnInit {
     this.loading = true;
     this.error = '';
     this.community.getPosts(this.activeTag === 'Todos' ? undefined : this.activeTag).subscribe({
-      next: (data) => { this.posts = data; this.loading = false; },
-      error: () => { this.error = 'No se pudieron cargar las publicaciones.'; this.loading = false; }
+      next: (data) => { this.posts = data; this.loading = false; this.cdr.markForCheck(); },
+      error: () => { this.error = 'No se pudieron cargar las publicaciones.'; this.loading = false; this.cdr.markForCheck(); }
     });
   }
 
@@ -98,11 +99,13 @@ export class ComunidadComponent implements OnInit {
         this.showForm = false;
         this.submitting = false;
         this.toast.success('¡Publicación creada con éxito!');
+        this.cdr.markForCheck();
       },
       error: () => {
         this.submitError = 'Error al publicar. Inténtalo de nuevo.';
         this.submitting = false;
         this.toast.error('Error al publicar. Inténtalo de nuevo.');
+        this.cdr.markForCheck();
       }
     });
   }
@@ -113,6 +116,7 @@ export class ComunidadComponent implements OnInit {
       next: () => {
         this.posts = this.posts.filter(p => p.id !== post.id);
         this.toast.success('Publicación eliminada.');
+        this.cdr.markForCheck();
       },
       error: () => this.toast.error('No se pudo eliminar la publicación.')
     });
@@ -143,10 +147,12 @@ export class ComunidadComponent implements OnInit {
         this.commentInputs[post.id] = '';
         this.submittingComment = null;
         this.toast.success('Comentario enviado.');
+        this.cdr.markForCheck();
       },
       error: () => {
         this.submittingComment = null;
         this.toast.error('Error al enviar el comentario.');
+        this.cdr.markForCheck();
       }
     });
   }

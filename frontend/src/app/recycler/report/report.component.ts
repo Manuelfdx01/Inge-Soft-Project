@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -38,7 +38,10 @@ export class ReportComponent implements OnInit {
     { value: 'OTRO',           label: '📋 Otro' },
   ];
 
-  constructor(private pointsService: CollectionPointsService) {}
+  constructor(
+    private pointsService: CollectionPointsService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.loadPoints();
@@ -51,9 +54,11 @@ export class ReportComponent implements OnInit {
         if (data.length) {
           this.report.point = data[0].id;
         }
+        this.cdr.markForCheck();
       },
       error: () => {
         this.error = 'No fue posible cargar los centros de reciclaje.';
+        this.cdr.markForCheck();
       }
     });
   }
@@ -81,10 +86,12 @@ export class ReportComponent implements OnInit {
         this.loading = false;
         this.success = true;
         this.report.description = '';
+        this.cdr.markForCheck();
       },
       error: (err: any) => {
         this.loading = false;
         this.error = err.error?.error || 'No fue posible enviar el reporte.';
+        this.cdr.markForCheck();
       }
     });
   }

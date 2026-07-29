@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import {
@@ -25,7 +25,8 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private logistics: LogisticsService,
-    public auth: AuthService
+    public auth: AuthService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -39,11 +40,13 @@ export class DashboardComponent implements OnInit {
       next: (data) => {
         this.dashboard = data;
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: (err: any) => {
         console.error('Error cargando dashboard:', err);
         this.error = err.error?.error || err.message || 'No fue posible cargar el dashboard.';
         this.loading = false;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -60,6 +63,7 @@ export class DashboardComponent implements OnInit {
           this.dashboard.is_available = res.is_available;
         }
         this.togglingAvailability = false;
+        this.cdr.markForCheck();
       },
       error: (err: any) => {
         console.error('Error actualizando disponibilidad:', err);
@@ -67,26 +71,35 @@ export class DashboardComponent implements OnInit {
           this.dashboard.is_available = !newValue;
         }
         this.togglingAvailability = false;
+        this.cdr.markForCheck();
       }
     });
   }
 
   acceptTransfer(id: number): void {
     this.logistics.aceptarTraslado(id).subscribe({
-      next: () => this.loadDashboard(),
+      next: () => {
+        this.loadDashboard();
+        this.cdr.markForCheck();
+      },
       error: (err: any) => {
         console.error('Error aceptando traslado:', err);
         this.error = err.error?.error || 'No se pudo aceptar el traslado.';
+        this.cdr.markForCheck();
       }
     });
   }
 
   completeTransfer(id: number): void {
     this.logistics.completarTraslado(id).subscribe({
-      next: () => this.loadDashboard(),
+      next: () => {
+        this.loadDashboard();
+        this.cdr.markForCheck();
+      },
       error: (err: any) => {
         console.error('Error completando traslado:', err);
         this.error = err.error?.error || 'No se pudo completar el traslado.';
+        this.cdr.markForCheck();
       }
     });
   }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -26,6 +26,7 @@ export class LoginComponent {
     private auth: AuthService,
     private router: Router,
     private toast: ToastService,
+    private cdr: ChangeDetectorRef,
   ) {
     this.form = this.fb.group({
       username: ['', Validators.required],
@@ -46,11 +47,13 @@ export class LoginComponent {
         if (role === 'CIUDADANO')      this.router.navigate(['/ciudadano/mapa']);
         if (role === 'RECICLADOR')     this.router.navigate(['/reciclador/mapa']);
         if (role === 'CENTRO_ACOPIO') this.router.navigate(['/centro-acopio/dashboard']);
+        this.cdr.markForCheck();
       },
       error: () => {
         this.loading = false;
         this.errorMsg = 'Usuario o contraseña incorrectos.';
         this.toast.error('Usuario o contraseña incorrectos.');
+        this.cdr.markForCheck();
       },
     });
   }

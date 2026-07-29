@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -55,14 +55,15 @@ export class GuidesComponent implements OnInit, OnDestroy {
 
   constructor(
     private guidesService: GuidesService,
-    private gamificationService: GamificationService
+    private gamificationService: GamificationService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     // Debounced client-side search — no extra HTTP call
     this.searchInput$
       .pipe(debounceTime(250), distinctUntilChanged(), takeUntil(this.destroy$))
-      .subscribe(() => this.applyFilters());
+      .subscribe(() => { this.applyFilters(); this.cdr.markForCheck(); });
 
     this.loadAll();
   }
@@ -86,10 +87,12 @@ export class GuidesComponent implements OnInit, OnDestroy {
           this.allGuides = data;
           this.applyFilters();
           this.loading = false;
+          this.cdr.markForCheck();
         },
         error: () => {
           this.error = true;
           this.loading = false;
+          this.cdr.markForCheck();
         },
       });
   }

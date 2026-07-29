@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import {
@@ -19,7 +19,10 @@ export class TransfersComponent implements OnInit {
   error = '';
   transfers: LogisticsAlert[] = [];
 
-  constructor(private logistics: LogisticsService) {}
+  constructor(
+    private logistics: LogisticsService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.loadTransfers();
@@ -32,11 +35,13 @@ export class TransfersComponent implements OnInit {
       next: (alerts) => {
         this.transfers = alerts || [];
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Error cargando traslados:', err);
         this.error = err.error?.error || err.message || 'No fue posible cargar los traslados.';
         this.loading = false;
+        this.cdr.markForCheck();
       }
     });
   }

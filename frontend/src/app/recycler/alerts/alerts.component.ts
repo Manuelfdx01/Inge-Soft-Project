@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import {
@@ -46,7 +46,8 @@ export class AlertsComponent implements OnInit {
   constructor(
     private logistics: LogisticsService,
     private notificationsService: NotificationsService,
-    private toast: ToastService
+    private toast: ToastService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -65,18 +66,20 @@ export class AlertsComponent implements OnInit {
           a.status === 'PENDIENTE' || a.status === 'ACEPTADA' || a.status === 'EN_PROCESO'
         );
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error(err);
         this.loading = false;
         this.toast.error('Error al cargar alertas de traslado.');
+        this.cdr.markForCheck();
       }
     });
   }
 
   loadAvailability(): void {
     this.logistics.getAvailability().subscribe({
-      next: (res) => { this.isAvailable = res.is_available; },
+      next: (res) => { this.isAvailable = res.is_available; this.cdr.markForCheck(); },
       error: (err) => console.error(err)
     });
   }
@@ -88,11 +91,13 @@ export class AlertsComponent implements OnInit {
       next: (res) => {
         this.isAvailable = res.is_available;
         this.toast.info(res.is_available ? 'Ahora estás DISPONIBLE para traslados.' : 'Estado cambiado a NO DISPONIBLE.');
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error(err);
         this.isAvailable = !newVal;
         this.toast.error('Error al cambiar la disponibilidad.');
+        this.cdr.markForCheck();
       }
     });
   }
@@ -118,11 +123,13 @@ export class AlertsComponent implements OnInit {
         this.actionLoading = null;
         this.toast.success('Traslado aceptado correctamente.');
         this.loadAlerts();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error(err);
         this.actionLoading = null;
         this.toast.error('Error al aceptar el traslado.');
+        this.cdr.markForCheck();
       }
     });
   }
@@ -134,11 +141,13 @@ export class AlertsComponent implements OnInit {
         this.actionLoading = null;
         this.toast.success('Traslado completado con éxito.');
         this.loadAlerts();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error(err);
         this.actionLoading = null;
         this.toast.error('Error al completar el traslado.');
+        this.cdr.markForCheck();
       }
     });
   }
@@ -178,10 +187,12 @@ export class AlertsComponent implements OnInit {
       next: (data) => {
         this.centroAlertas = data;
         this.loadingCentros = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error(err);
         this.loadingCentros = false;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -189,7 +200,7 @@ export class AlertsComponent implements OnInit {
   markCentroRead(alerta: CentroAlertaNotif): void {
     if (alerta.is_read) return;
     this.notificationsService.markAsRead(alerta.id).subscribe({
-      next: () => { alerta.is_read = true; this.notificationsService.getUnreadCount(); },
+      next: () => { alerta.is_read = true; this.notificationsService.getUnreadCount(); this.cdr.markForCheck(); },
       error: (err) => console.error(err)
     });
   }

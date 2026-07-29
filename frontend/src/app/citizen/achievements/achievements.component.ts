@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -43,7 +43,8 @@ export class AchievementsComponent implements OnInit {
 
   constructor(
     private gamificationService: GamificationService,
-    public auth: AuthService
+    public auth: AuthService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -57,16 +58,19 @@ export class AchievementsComponent implements OnInit {
       next: (summaryData) => {
         this.summary = summaryData;
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Error al cargar resumen de gamificación:', err);
         this.loading = false;
+        this.cdr.markForCheck();
       }
     });
 
     this.gamificationService.getAchievements().subscribe({
       next: (achData) => {
         this.achievements = achData;
+        this.cdr.markForCheck();
       },
       error: (err) => console.error('Error al cargar logros:', err)
     });
@@ -74,6 +78,7 @@ export class AchievementsComponent implements OnInit {
     this.gamificationService.getRewards().subscribe({
       next: (rewData) => {
         this.rewards = rewData;
+        this.cdr.markForCheck();
       },
       error: (err) => console.error('Error al cargar recompensas:', err)
     });
@@ -81,6 +86,7 @@ export class AchievementsComponent implements OnInit {
     this.gamificationService.getRanking().subscribe({
       next: (rankData) => {
         this.ranking = rankData;
+        this.cdr.markForCheck();
       },
       error: (err) => console.error('Error al cargar ranking:', err)
     });
@@ -126,12 +132,14 @@ export class AchievementsComponent implements OnInit {
       next: (res) => {
         this.redeemingId = null;
         this.redeemMessage = { text: res.message, success: true };
+        this.cdr.markForCheck();
         this.loadAllData();
       },
       error: (err) => {
         this.redeemingId = null;
         const msg = err.error?.error || 'No se pudo realizar el canje.';
         this.redeemMessage = { text: msg, success: false };
+        this.cdr.markForCheck();
       }
     });
   }

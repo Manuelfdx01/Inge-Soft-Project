@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -34,6 +34,7 @@ export class RegisterComponent {
     private http: HttpClient,
     private router: Router,
     private toast: ToastService,
+    private cdr: ChangeDetectorRef,
   ) {
     this.form = this.fb.group({
       username: ['', Validators.required],
@@ -55,6 +56,7 @@ export class RegisterComponent {
           this.loading = false;
           this.successMsg = '¡Cuenta creada! Inicia sesión.';
           this.toast.success('¡Cuenta creada con éxito! Redirigiendo al login...');
+          this.cdr.markForCheck();
           setTimeout(() => this.router.navigate(['/login']), 1500);
         },
         error: (err) => {
@@ -66,6 +68,7 @@ export class RegisterComponent {
             errors?.username?.[0] ??
             'Error al registrarse.';
           this.toast.error(this.errorMsg);
+          this.cdr.markForCheck();
         },
       });
   }

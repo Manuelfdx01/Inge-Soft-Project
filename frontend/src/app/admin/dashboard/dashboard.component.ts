@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AdminService } from '../../core/services/admin.service';
 
@@ -15,16 +15,21 @@ export class DashboardComponent implements OnInit {
   metrics: any = null;
   loading = true;
 
-  constructor(private admin: AdminService) {}
+  constructor(
+    private admin: AdminService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.admin.getMetrics().subscribe({
       next: (data) => {
         this.metrics = data;
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.loading = false;
+        this.cdr.markForCheck();
       },
     });
   }

@@ -1,6 +1,6 @@
 import {
   Component, OnInit, OnDestroy,
-  ElementRef, ViewChild, AfterViewInit
+  ElementRef, ViewChild, AfterViewInit, ChangeDetectorRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -102,7 +102,8 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private pointsService: CollectionPointsService,
     private gamificationService: GamificationService,
-    private toast: ToastService
+    private toast: ToastService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -237,10 +238,12 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
         this.filteredPoints = data;
         this.loading        = false;
         this.renderMarkers();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Error al cargar puntos de recolección desde backend Django:', err);
         this.loading = false;
+        this.cdr.markForCheck();
       },
     });
   }
@@ -395,6 +398,7 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       next: () => {
         this.reporting     = false;
         this.reportSuccess = true;
+        this.cdr.markForCheck();
 
         this.gamificationService.recordAction('reportar_punto_mapa').subscribe({
           next: () => {},
@@ -403,11 +407,13 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
 
         setTimeout(() => {
           this.closeReportModal();
+          this.cdr.markForCheck();
         }, 1500);
       },
       error: (err) => {
         console.error('Error al enviar reporte:', err);
         this.reporting = false;
+        this.cdr.markForCheck();
       },
     });
   }
@@ -432,8 +438,12 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       next: (data) => {
         this.pointReviews   = data;
         this.loadingReviews = false;
+        this.cdr.markForCheck();
       },
-      error: () => { this.loadingReviews = false; }
+      error: () => {
+        this.loadingReviews = false;
+        this.cdr.markForCheck();
+      }
     });
   }
 
@@ -449,12 +459,17 @@ export class MapComponent implements OnInit, AfterViewInit, OnDestroy {
       next: () => {
         this.submittingReview = false;
         this.reviewSuccess    = true;
+        this.cdr.markForCheck();
         this.loadReviews(this.selectedPoint!.id);
-        setTimeout(() => { this.closeReviewModal(); }, 1500);
+        setTimeout(() => {
+          this.closeReviewModal();
+          this.cdr.markForCheck();
+        }, 1500);
       },
       error: (err) => {
         console.error('Error enviando calificación:', err);
         this.submittingReview = false;
+        this.cdr.markForCheck();
       }
     });
   }

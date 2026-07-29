@@ -5,7 +5,8 @@ import {
   AfterViewInit,
   ViewChild,
   ElementRef,
-  HostListener
+  HostListener,
+  ChangeDetectorRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -40,7 +41,10 @@ export class MyZoneComponent implements OnInit, AfterViewInit, OnDestroy {
   private markersLayer = L.layerGroup();
   private markerMap = new Map<number, L.Marker>();
 
-  constructor(private logistics: LogisticsService) {}
+  constructor(
+    private logistics: LogisticsService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.loadPoints();
@@ -71,10 +75,12 @@ export class MyZoneComponent implements OnInit, AfterViewInit, OnDestroy {
         }));
         this.applyFilters();
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Error cargando puntos de mi zona:', err);
         this.loading = false;
+        this.cdr.markForCheck();
       }
     });
   }

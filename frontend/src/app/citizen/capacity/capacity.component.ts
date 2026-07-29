@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import {
@@ -23,7 +23,8 @@ export class CapacityComponent implements OnInit {
   points: CollectionPoint[] = [];
 
   constructor(
-    private collectionPointsService: CollectionPointsService
+    private collectionPointsService: CollectionPointsService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -38,11 +39,13 @@ export class CapacityComponent implements OnInit {
       next: (points) => {
         this.points = points;
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error(err);
         this.error = 'No fue posible cargar los puntos de reciclaje.';
         this.loading = false;
+        this.cdr.markForCheck();
       }
     });
   }
