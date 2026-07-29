@@ -27,6 +27,7 @@
   background: rgba(0, 0, 0, 0.45);
   z-index: 199;
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.25s;
 }
 
@@ -41,5 +42,6 @@
 
   .sidebar-overlay.visible {
     opacity: 1;
+    pointer-events: auto;
   }
 }
