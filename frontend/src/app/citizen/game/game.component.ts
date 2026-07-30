@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, OnDestroy, inject } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, ViewEncapsulation, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { GamificationService } from '../../core/services/gamification.service';
 
@@ -8,6 +8,7 @@ import { GamificationService } from '../../core/services/gamification.service';
   imports: [CommonModule],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
+  encapsulation: ViewEncapsulation.None,
 })
 export class GameComponent implements AfterViewInit, OnDestroy {
   private gamificationService = inject(GamificationService);
@@ -349,6 +350,7 @@ function initMemoriaReciclable(gamificationService: GamificationService): () => 
      7. FASE DE JUEGO — CINTA
      ================================================================== */
 
+  const gameWrapper = (el('app').closest('.game-wrapper') as HTMLElement) || el('app');
   const conveyorTrack    = el('conveyor-track');
   const feedbackToast    = el('feedback-toast');
   const revealStage      = el('reveal-stage');
@@ -420,7 +422,7 @@ function initMemoriaReciclable(gamificationService: GamificationService): () => 
     pkg.style.height = rect.height + 'px';
     pkg.style.left   = rect.left + 'px';
     pkg.style.top    = rect.top + 'px';
-    document.body.appendChild(pkg);
+    gameWrapper.appendChild(pkg);
 
     onDocPointerMove   = handleDragMove;
     onDocPointerUp     = (evt: PointerEvent) => finishDrag(evt, false);
