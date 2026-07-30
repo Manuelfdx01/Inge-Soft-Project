@@ -355,7 +355,7 @@
   .mr-package--pending { opacity: 0.55; filter: grayscale(0.4); cursor: default; }
   .mr-package--used    { opacity: 0; transform: scale(0.6); pointer-events: none; }
   .mr-package--dragging {
-    position: fixed; z-index: 500; cursor: grabbing; pointer-events: none;
+    position: fixed; z-index: 500; cursor: grabbing;
     box-shadow: 0 14px 28px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(242,183,5,0.8);
   }
   .mr-package--falling {
